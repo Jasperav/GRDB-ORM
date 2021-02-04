@@ -1,0 +1,26 @@
+name: Parser
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install SwiftFormat
+        # Note: maybe use a fixed swiftformat
+        run: brew install swiftformat
+      - name: Build, test, fmt and clippy
+        run: |
+          cd ./Parser/
+          cargo build --verbose
+          cargo test --verbose -- --test-threads=1
+          cargo fmt --all -- --check
+          cargo clippy --all -- -D warnings

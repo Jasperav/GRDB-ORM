@@ -1,0 +1,23 @@
+name: GeneratedCode
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      # This is needed to clone the GRDB dependency
+      - uses: fusion-engineering/setup-git-credentials@v2
+        with:
+          credentials: ${{secrets.GIT_CREDENTIALS}}
+      - uses: actions/checkout@v2
+      - name: Build and test
+        # https://stackoverflow.com/questions/58125659/github-actions-xcodebuild-fails-due-to-server-fingerprint
+        run: |
+          cd ./GRDBPerformance/
+          for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
+          xcodebuild test -project GRDBPerformance.xcodeproj -scheme GRDBPerformanceTests -destination 'platform=iOS Simulator,name=iPhone 8,OS=14.3'

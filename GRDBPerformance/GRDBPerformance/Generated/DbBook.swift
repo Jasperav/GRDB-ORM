@@ -1,0 +1,127 @@
+// // This file is generated, do not edit
+
+import Foundation
+import GRDB
+
+// Mapped table to struct
+public struct DbBook: FetchableRecord, PersistableRecord, Codable {
+    // Static queries
+    public static let insert_unique_query = "insert into Book (bookUuid, userUuid, integerOptional) values (?, ?, ?)"
+    public static let update_unique_query = "update Book set userUuid = ?, integerOptional = ? where bookUuid = ?"
+
+    // Mapped columns to properties
+    public let bookUuid: UUID
+    public var userUuid: UUID?
+    public var integerOptional: Int?
+
+    // Default initializer
+    public init(bookUuid: UUID,
+                userUuid: UUID?,
+                integerOptional: Int?)
+    {
+        self.bookUuid = bookUuid
+        self.userUuid = userUuid
+        self.integerOptional = integerOptional
+    }
+
+    // Row initializer
+    public init(row: Row, startingIndex: Int) {
+        bookUuid = row[0 + startingIndex]
+        userUuid = row[1 + startingIndex]
+        integerOptional = row[2 + startingIndex]
+    }
+
+    // The initializer defined by the protocol
+    public init(row: Row) {
+        self.init(row: row, startingIndex: 0)
+    }
+
+    public func genInsert(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.insert_unique_query)
+        let values = [
+            bookUuid.uuidString.databaseValue,
+            userUuid?.uuidString.databaseValue ?? .null,
+            integerOptional?.databaseValue ?? .null,
+        ]
+
+        statement.setUncheckedArguments(StatementArguments(values: values))
+
+        try statement.execute()
+
+        // Only 1 row should be affected
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdate(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.update_unique_query)
+        let values = [
+            userUuid?.uuidString.databaseValue ?? .null,
+            integerOptional?.databaseValue ?? .null,
+            bookUuid.uuidString.databaseValue,
+        ]
+
+        statement.setUncheckedArguments(StatementArguments(values: values))
+
+        try statement.execute()
+
+        // Only 1 row should be affected
+        assert(db.changesCount == 1)
+    }
+}
+
+// Write the primary key struct, useful for selecting or deleting a unique row
+public struct DbBookPrimaryKey {
+    // Static queries
+    public static let select_query = "select * from Book where bookUuid = ?"
+    public static let delete_query = "delete from Book where bookUuid = ?"
+
+    // Mapped columns to properties
+    public let bookUuid: UUID
+
+    // Default initializer
+    public init(bookUuid: UUID) {
+        self.bookUuid = bookUuid
+    }
+
+    // Queries a unique row in the database, the row may or may not exist
+    public func genSelect(db: Database) throws -> DbBook? {
+        let statement = try db.cachedSelectStatement(sql: Self.select_query)
+
+        statement.setUncheckedArguments(StatementArguments(values: [
+            bookUuid.uuidString.databaseValue,
+        ]))
+
+        return try DbBook.fetchOne(statement)
+    }
+
+    // Same as function 'genSelectUnique', but throws an error when no record has been found
+    public func genSelectExpect(db: Database) throws -> DbBook {
+        if let instance = try genSelect(db: db) {
+            return instance
+        } else {
+            throw DatabaseError(message: "Didn't found a record for \(self)")
+        }
+    }
+
+    // Deletes a unique row, asserts that the row actually existed
+    public func genDelete(db: Database) throws {
+        let values = [
+            bookUuid.uuidString.databaseValue,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.delete_query)
+
+        statement.setUncheckedArguments(StatementArguments(values: values))
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+}
+
+// Easy way to get the PrimaryKey from the table
+public extension DbBook {
+    func primary_key() -> DbBookPrimaryKey {
+        .init(bookUuid: bookUuid)
+    }
+}

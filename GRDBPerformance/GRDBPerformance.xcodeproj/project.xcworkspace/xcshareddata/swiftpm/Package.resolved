@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "GRDB",
+        "repositoryURL": "https://github.com/Jasperav/GRDB.swift.git",
+        "state": {
+          "branch": "master",
+          "revision": "f8c3733208972d3cbfb9ec76157e0e4f6ecd6844",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

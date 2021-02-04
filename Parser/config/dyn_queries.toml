@@ -1,0 +1,37 @@
+# Below is an example of a dynamic query (checkout method spitout_example_toml in Parser/src/dynamic_queries/reader.rs
+# if you have trouble filling the values, or checkout Parser/src/test.rs for a complete example).
+#
+# []
+#   It starts with a mandatory comment, which looks like this: [my comment]
+#
+# [parameter_types]
+#   After that, the parameter can be supplied and are substituted for parameters.
+#   It is an array with 3 mandatory arguments as a tuple:
+#       ["User", "firstName", "firstName"]
+#   It can be read like this: take column (second argument) firstName from table (first argument) as parameter
+#   with name firstName (third argument)
+#
+#   Note: you can also used fixed types, like this:
+#       ["FIXED", "Int", "firstName"]
+#
+# [extension]
+#   The extension is the type to add the method to (extension User { myMethod() {...} })
+#
+# [func_name]
+#   The name of the Swift function
+#
+# [return_types]
+#   The types to return from the function
+#
+# [query]
+#   The actual query
+#
+# EXAMPLE
+#
+# [This is a query that finds a user by the users first name]
+# parameter_types = [["User", "firstName", "firstName"]]
+# extension = "User"
+# func_name = "findByUsername"
+# return_types = ["User"]
+# return_types_is_array = true
+# query = "select * from User where firstName = ?"
