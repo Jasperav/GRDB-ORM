@@ -5,6 +5,7 @@
 # /generated
 /src/properties.rs
 ./generatedfortest.sqlite3
+./Cargo.lock
 
 # This is created by a test
 ignoreme
