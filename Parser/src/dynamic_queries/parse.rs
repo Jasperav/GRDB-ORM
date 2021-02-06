@@ -5,7 +5,7 @@ use sqlite_parser::Metadata;
 
 use crate::configuration::Config;
 use crate::dynamic_queries::reader::DynamicQuery;
-use crate::dynamic_queries::return_type::{ReturnType, ReturnTypeParsed};
+use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::LineWriter;
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{
@@ -48,7 +48,11 @@ impl<'a> DynQueryParser<'a> {
 
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
-            test_query(&connection, &dynamic_query.query);
+            test_query(
+                &connection,
+                &dynamic_query.query,
+                dynamic_query.return_types.is_empty(),
+            );
 
             // The parameters to invoke the Swift functions for
             let mut parameters = vec![];
@@ -104,7 +108,7 @@ impl<'a> DynQueryParser<'a> {
             }
 
             // Find out the return type
-            let parsed = ReturnType {
+            let query = ReturnType {
                 return_types: &dynamic_query.return_types,
                 return_type_is_array: dynamic_query.return_types_is_array,
                 tables: self.tables,
@@ -113,8 +117,11 @@ impl<'a> DynQueryParser<'a> {
             .parse();
 
             self.write_extension(&dynamic_query);
+            let capitalized_func_name =
+                some_kind_of_uppercase_first_letter(&dynamic_query.func_name);
 
-            let capitalized_func_name = self.write_type_alias(&dynamic_query, &parsed);
+            query.write_type_alias(&mut self, &capitalized_func_name);
+
             let mut parameters_main = parameters.clone();
 
             // The db is always the first parameter
@@ -122,62 +129,45 @@ impl<'a> DynQueryParser<'a> {
 
             self.new_line();
 
+            let func_return_type = query.return_type();
+
             // Write the method declaration
             self.add_line(format!(
-                "static func {}({}) throws -> {} {{",
+                "static func {}({}) throws {} {{",
                 dynamic_query.func_name,
                 separate_by_colon(&parameters_main),
-                parsed.return_type
+                func_return_type
             ));
 
-            // Replace the optional type here, no need for it.
-            // This is needed for the type to map, this is always nonnull.
-            // Only do this when there is a single type and it isn't an array, else e.g. (DbUser, SomeType?) will be corrupted
-            let return_type = if !dynamic_query.return_types_is_array
-                && dynamic_query.return_types[0].contains('?')
-            {
-                parsed.return_type.replace("?", "")
-            } else {
-                parsed.return_type.clone()
-            };
+            self.write_body(&dynamic_query, database_values, &query);
 
-            self.write_body(
-                &dynamic_query,
-                database_values,
-                &return_type,
-                &parsed.decoding,
-            );
+            match query {
+                Query::Select { .. } => {
+                    self.write_easy_method(
+                        "read",
+                        &dynamic_query.func_name,
+                        &parameters,
+                        "DatabaseReader",
+                        &query.return_type(),
+                    );
+                }
+                Query::UpdateOrDelete => {
+                    self.write_easy_method(
+                        "write",
+                        &dynamic_query.func_name,
+                        &parameters,
+                        "DatabaseWriter",
+                        "",
+                    );
+                }
+            }
 
-            // Add a convenience read method
-            self.write_easy_read_method(
-                &dynamic_query.func_name,
-                &capitalized_func_name,
-                &parsed.return_type,
-                &parameters,
-            );
             self.add_closing_brackets();
         }
 
         self.line_writer.write_to_file("DynamicQueries");
 
         println!("Successfully processed all dynamic queries");
-    }
-
-    /// Writes a Swift type alias for the return type, which makes it easy for the user to reuse the type
-    fn write_type_alias(
-        &mut self,
-        dynamic_query: &&DynamicQuery,
-        parsed: &ReturnTypeParsed,
-    ) -> String {
-        let capitalized_func_name = some_kind_of_uppercase_first_letter(&dynamic_query.func_name);
-        let type_alias_name = format!("{}Type", capitalized_func_name);
-
-        self.add_line(format!(
-            "typealias {} = {}",
-            type_alias_name, parsed.return_type
-        ));
-
-        capitalized_func_name
     }
 
     /// Writes the extension to add the methods to
@@ -192,17 +182,20 @@ impl<'a> DynQueryParser<'a> {
         self.add_with_modifier(format!("extension {} {{", extension));
     }
 
-    /// Writes the 'easy' read method, the user doesn't have to write 'db.read {...}' for simple reads
     #[allow(clippy::ptr_arg)] // Code doesn't compile with this lint
-    fn write_easy_read_method(
+    fn write_easy_method(
         &mut self,
+        after_quick: &str,
         func_name: &str,
-        capitalized_func_name: &str,
-        return_type: &str,
         arguments: &Vec<(String, String)>,
+        generic_t: &str,
+        return_type: &str,
     ) {
-        // There is no customization on the name, it always starts with quickRead for now
-        let quick_read_func_name = format!("quickRead{}", capitalized_func_name);
+        let quick_func_name = format!(
+            "quick{}{}",
+            some_kind_of_uppercase_first_letter(after_quick),
+            some_kind_of_uppercase_first_letter(func_name)
+        );
         let mut arguments_with_db = arguments.clone();
 
         // Add a generic parameter constraint on DatabaseReader, to maximize support
@@ -220,16 +213,17 @@ impl<'a> DynQueryParser<'a> {
         }
 
         self.add_with_modifier(format!(
-            "static func {}<T: DatabaseReader>({}) throws -> {} {{",
-            quick_read_func_name,
+            "static func {}<T: {}>({}) throws{} {{",
+            quick_func_name,
+            generic_t,
             separate_by_colon(&arguments_with_db),
             return_type
         ));
         self.add_line(format!(
-            "try db.read {{ db in
+            "try db.{} {{ db in
             try Self.{}(db: db{})
         }}",
-            func_name, arguments_invocation
+            after_quick, func_name, arguments_invocation
         ));
         self.add_closing_brackets();
     }
@@ -239,12 +233,12 @@ impl<'a> DynQueryParser<'a> {
         &mut self,
         dynamic_query: &DynamicQuery,
         database_values: Vec<String>,
-        return_value: &str,
-        decoding: &str,
+        query: &Query,
     ) {
         // Add the query as multiline text
         self.add_line(format!(
-            "let selectStatement = try db.cachedSelectStatement(sql: \"\"\"\n{}\n\"\"\")",
+            "let statement = try db.cached{}Statement(sql: \"\"\"\n{}\n\"\"\")",
+            query.statement(),
             dynamic_query.query
         ));
 
@@ -253,55 +247,73 @@ impl<'a> DynQueryParser<'a> {
             let separated = database_values.join(", ");
 
             self.add_line(format!(
-                "selectStatement.setUncheckedArguments(StatementArguments(values: [{}]))",
+                "statement.setUncheckedArguments(StatementArguments(values: [{}]))",
                 separated
             ));
         }
 
-        // Remove the trailing and leading '[' and ']' and put that in return_value_closure
-        // This is because in the closure, rows are processed one by one, and there is no need
-        // that the return type is an array
-        // Oddly enough, add brackets and put that in type_fetch_all, because when the return type
-        // isn't an array, it will be validated though (makes no sense to 'just return the first one'
-        // regardless of the resultset. If the user wants it, fine, add 'limit 1' to the query.
-        let (return_value_closure, type_fetch_all) = if return_value.starts_with('[') {
-            (
-                &return_value[1..return_value.len() - 1],
-                return_value.to_string(),
-            )
-        } else {
-            (return_value, format!("[{}]", return_value))
-        };
-
-        // Add the converted property
-        self.add_line(format!(
-            "let converted: {} = try Row.fetchAll(selectStatement).map({{ row -> {} in",
-            type_fetch_all, return_value_closure
-        ));
-        self.add_line(decoding.to_string());
-        self.add_line("})".to_string());
-
-        if dynamic_query.return_types_is_array {
-            // if the return type is an array, it can be returned directly, no need for checking the resultset
-            self.add_line("return converted".to_string());
-        } else {
-            // it isn't an array and the return type len is 1, check if it's nullable
-            let suffix = if dynamic_query.return_types[0].contains('?') {
-                // It nullable, the result set len should be 0 or 1
-                self.add_line(
-                    "assert(converted.count <= 1, \"Expected 1 or zero rows\")".to_string(),
+        match &query {
+            Query::Select {
+                return_type: _return_type,
+                decoding,
+            } => {
+                let return_value = query.replace_optional_for_closure(
+                    dynamic_query.return_types_is_array,
+                    &dynamic_query.return_types,
                 );
 
-                ""
-            } else {
-                // If it's not nullable, than the result set len must be exactly 1
-                self.add_line("assert(converted.count == 1, \"Expected 1 row\")".to_string());
+                // Remove the trailing and leading '[' and ']' and put that in return_value_closure
+                // This is because in the closure, rows are processed one by one, and there is no need
+                // that the return type is an array
+                // Oddly enough, add brackets and put that in type_fetch_all, because when the return type
+                // isn't an array, it will be validated though (makes no sense to 'just return the first one'
+                // regardless of the resultset. If the user wants it, fine, add 'limit 1' to the query.
+                let (return_value_closure, type_fetch_all) = if return_value.starts_with('[') {
+                    (
+                        &return_value[1..return_value.len() - 1],
+                        return_value.to_string(),
+                    )
+                } else {
+                    (return_value.as_str(), format!("[{}]", return_value))
+                };
 
-                // Not optional return type, force unwrap
-                "!"
-            };
+                // Add the converted property
+                self.add_line(format!(
+                    "let converted: {} = try Row.fetchAll(statement).map({{ row -> {} in",
+                    type_fetch_all, return_value_closure
+                ));
+                self.add_line(decoding.to_string());
+                self.add_line("})".to_string());
 
-            self.add_line(format!("return converted.first{}", suffix));
+                if dynamic_query.return_types_is_array {
+                    // if the return type is an array, it can be returned directly, no need for checking the resultset
+                    self.add_line("return converted".to_string());
+                } else {
+                    // it isn't an array and the return type len is 1, check if it's nullable
+                    let suffix = if dynamic_query.return_types[0].contains('?') {
+                        // It nullable, the result set len should be 0 or 1
+                        self.add_line(
+                            "assert(converted.count <= 1, \"Expected 1 or zero rows\")".to_string(),
+                        );
+
+                        ""
+                    } else {
+                        // If it's not nullable, than the result set len must be exactly 1
+                        self.add_line(
+                            "assert(converted.count == 1, \"Expected 1 row\")".to_string(),
+                        );
+
+                        // Not optional return type, force unwrap
+                        "!"
+                    };
+
+                    self.add_line(format!("return converted.first{}", suffix));
+                }
+            }
+            Query::UpdateOrDelete => {
+                // This is easy, just execute it
+                self.add_line("try statement.execute()".to_string());
+            }
         }
 
         self.add_closing_brackets();
@@ -331,12 +343,29 @@ fn separate_by_colon(parameters: &[(String, String)]) -> String {
 }
 
 /// Tests a query
-fn test_query(connection: &Connection, query: &str) -> String {
+fn test_query(connection: &Connection, query: &str, return_types_is_empty: bool) -> String {
     // use 1 for parameters: https://github.com/ballista-compute/sqlparser-rs/issues/291
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query.replace(" ?", " 1");
 
     println!("Validating query '{}'", query_for_validation);
+
+    // Check if the query starts with select, delete or update. Insert and anything else are illegal
+    // This is because insert queries are already generated
+    let lowercased = query.to_lowercase();
+
+    if !lowercased.starts_with("update ")
+        && !lowercased.starts_with("select ")
+        && !lowercased.starts_with("delete from ")
+    {
+        panic!("Query should start with update, select or delete from");
+    }
+
+    if lowercased.starts_with("select ") {
+        assert!(!return_types_is_empty)
+    } else {
+        assert!(return_types_is_empty)
+    }
 
     if let Err(e) = connection.query_row(&query_for_validation, NO_PARAMS, |_| Ok(())) {
         match e {
@@ -359,6 +388,6 @@ mod tests {
     fn test_query_fail() {
         let connection = rusqlite::Connection::open("ignoreme").unwrap();
 
-        test_query(&connection, "select * from tablethatdoesnotexists");
+        test_query(&connection, "select * from tablethatdoesnotexists", false);
     }
 }
