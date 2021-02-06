@@ -99,7 +99,7 @@ and checkout [generate_generated_code.rs](/Parser/src/generate_generated_code.rs
 changes to an actual database.
 
 How to add a new compiled executable after code changes:
-$ cd /Parser/
+$ cd Parser/
 $ rm -rf ./compiled/
 $ cargo build --release
 $ cp -a target/release/. ./compiled

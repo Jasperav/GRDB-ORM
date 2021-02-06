@@ -21,14 +21,17 @@
 #   The name of the Swift function
 #
 # [return_types]
-#   The types to return from the function
+#   The types to return from the function. If you are deleting/updating a row, this must be empty.
+#
+# [return_types_is_array]
+#   Determines if the return type is an array. If you are deleting/updating a row, this value doesn't matter.
 #
 # [query]
 #   The actual query
 #
 # EXAMPLE
 #
-# [This is a query that finds a user by the users first name]
+# [This-is-a-query-that-finds-a-user-by-the-users-first-name]
 # parameter_types = [["User", "firstName", "firstName"]]
 # extension = "User"
 # func_name = "findByUsername"

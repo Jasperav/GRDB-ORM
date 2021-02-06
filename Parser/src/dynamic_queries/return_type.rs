@@ -4,6 +4,7 @@ use regex::Regex;
 use sqlite_parser::Metadata;
 
 use crate::configuration::Config;
+use crate::line_writer::LineWriter;
 use crate::swift_property::{
     create_swift_property, create_swift_type_name, decode_swift_property, is_build_in_type,
     SwiftPropertyDecoder,
@@ -17,16 +18,82 @@ pub struct ReturnType<'a> {
     pub config: &'a Config,
 }
 
-/// The result of calling `parse()` on [ReturnType]
-pub struct ReturnTypeParsed {
-    // The return type(s)
-    pub return_type: String,
-    // Information about how to decode the return_type(s)
-    pub decoding: String,
+pub enum Query {
+    Select {
+        return_type: String,
+        // Information about how to decode the return_type(s)
+        decoding: String,
+    },
+    // The query shouldn't start with 'insert', since that query is already generated
+    UpdateOrDelete,
+}
+
+impl Query {
+    /// Writes a Swift type alias for a select query return type, which makes it easy for the user to reuse the type
+    pub fn write_type_alias(&self, line_writer: &mut LineWriter, capitalized_func_name: &str) {
+        match &self {
+            Query::Select {
+                return_type,
+                decoding: _decoding,
+            } => {
+                let type_alias_name = format!("{}Type", capitalized_func_name);
+
+                line_writer.add_line(format!("typealias {} = {}", type_alias_name, &return_type));
+            }
+            Query::UpdateOrDelete => {
+                // Don't do anything
+            }
+        }
+    }
+
+    pub fn return_type(&self) -> String {
+        match &self {
+            Query::Select {
+                return_type,
+                decoding: _decoding,
+            } => format!("-> {}", return_type),
+            // This doesn't have a return type
+            Query::UpdateOrDelete => "".to_string(),
+        }
+    }
+
+    /// Replace the optional type here, no need for it.
+    /// This is needed for the type to map, this is always nonnull.
+    /// Only do this when there is a single type and it isn't an array, else e.g. (DbUser, SomeType?) will be corrupted
+    pub fn replace_optional_for_closure(
+        &self,
+        return_types_is_array: bool,
+        return_types: &[String],
+    ) -> String {
+        match &self {
+            Query::Select {
+                return_type,
+                decoding: _decoding,
+            } => {
+                if return_types_is_array || !return_types[0].contains('?') {
+                    return_type.clone()
+                } else {
+                    return_type.replace("?", "")
+                }
+            }
+            Query::UpdateOrDelete => panic!(),
+        }
+    }
+
+    pub fn statement(&self) -> &'static str {
+        match self {
+            Query::Select { .. } => "Select",
+            Query::UpdateOrDelete => "Update",
+        }
+    }
 }
 
 impl<'a> ReturnType<'a> {
-    pub fn parse(self) -> ReturnTypeParsed {
+    pub fn parse(self) -> Query {
+        if self.return_types.is_empty() {
+            return Query::UpdateOrDelete;
+        }
+
         // The regex to check if the return type is table.column
         let regex_table_column = Regex::new(r"(.*)\.(.*)").unwrap();
         // The index of the row which should start decoding the next return value
@@ -128,7 +195,7 @@ impl<'a> ReturnType<'a> {
             return_types_swift_struct[0].clone()
         };
 
-        ReturnTypeParsed {
+        Query::Select {
             return_type: return_value,
             decoding: format!("({})", decoding.join(", ")),
         }

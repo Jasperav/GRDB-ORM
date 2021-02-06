@@ -32,6 +32,7 @@ class DynamicQueryTest: XCTestCase {
         assertFindByUsername(db: db, find: user)
         assertAmountOfUsersAfterInsertion(db: db)
         assertAmountOfUsersAfterInsertion(db: db)
+        assertDeleteByUserUuid(db: db, user: user)
     }
 
     func assertFindByUsername(db: DatabasePool, find: DbUser) {
@@ -70,5 +71,13 @@ class DynamicQueryTest: XCTestCase {
 
         XCTAssertEqual(book1.integerOptional, secondRow.0.integerOptional)
         // No need to check more I guess
+    }
+    
+    func assertDeleteByUserUuid(db: DatabasePool, user: DbUser) {
+        try! db.write { db in
+            try! DbBook.deleteByUserUuid(db: db, userUuid: user.userUuid)
+            
+            XCTAssertEqual(2, db.changesCount)
+        }
     }
 }

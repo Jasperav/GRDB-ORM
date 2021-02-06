@@ -84,6 +84,18 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select count(*) from User".to_string(),
             },
+            DynamicQuery {
+                extension: "Book".to_string(),
+                func_name: "deleteByUserUuid".to_string(),
+                parameter_types: vec![(
+                    "Book".to_string(),
+                    "userUuid".to_string(),
+                    "userUuid".to_string(),
+                )],
+                return_types: vec![],
+                return_types_is_array: false,
+                query: "delete from Book where userUuid = ?".to_string(),
+            },
         ],
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",
