@@ -2,8 +2,8 @@ use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
 
-pub const SELECT_QUERY: &str = "select_query";
-pub const DELETE_QUERY: &str = "delete_query";
+pub const SELECT_QUERY: &str = "selectQuery";
+pub const DELETE_QUERY: &str = "deleteQuery";
 
 /// Writes the unique queries for the primary key
 pub struct QueryWriterPrimaryKey<'a> {
@@ -60,18 +60,20 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .add_comment("Queries a unique row in the database, the row may or may not exist");
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func genSelect(db: Database) throws -> {}? {{
+            let arguments: StatementArguments = try [
+                {}
+            ]
+
             let statement = try db.cachedSelectStatement(sql: Self.{})
 
-            statement.setUncheckedArguments(StatementArguments(values: [
-            {}
-            ]))
+            statement.setUncheckedArguments(arguments)
 
             return try {}.fetchOne(statement)
         }}
         ",
             self.table_meta_data.struct_name,
-            SELECT_QUERY,
             values,
+            SELECT_QUERY,
             self.table_meta_data.struct_name
         ))
     }
@@ -97,18 +99,20 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         let values =
             swift_properties_to_sqlite_database_values(self.table_meta_data.primary_keys());
 
+        assert!(!values.is_empty());
+
         self.table_meta_data
             .line_writer
             .add_comment("Deletes a unique row, asserts that the row actually existed");
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func genDelete(db: Database) throws {{
-            let values = [
+            let arguments: StatementArguments = try [
                 {}
             ]
 
             let statement = try db.cachedUpdateStatement(sql: Self.{})
 
-            statement.setUncheckedArguments(StatementArguments(values: values))
+            statement.setUncheckedArguments(arguments)
 
             try statement.execute()
 

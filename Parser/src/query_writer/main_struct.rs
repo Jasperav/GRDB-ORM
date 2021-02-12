@@ -2,8 +2,8 @@ use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
 
-pub const INSERT_UNIQUE_QUERY: &str = "insert_unique_query";
-pub const UPDATE_UNIQUE_QUERY: &str = "update_unique_query";
+pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
+pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
 
 /// Writes the static queries for the main struct
 pub struct QueryWriterMainStruct<'a> {
@@ -108,14 +108,16 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write(&mut self, method_name: &str, query: &str, values: &str) {
+        assert!(!values.is_empty());
+
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func gen{}(db: Database) throws {{
                 let statement = try db.cachedUpdateStatement(sql: Self.{})
-                let values = [
+                let arguments: StatementArguments = try [
                     {}
                 ]
 
-                statement.setUncheckedArguments(StatementArguments(values: values))
+                statement.setUncheckedArguments(arguments)
 
                 try statement.execute()
 

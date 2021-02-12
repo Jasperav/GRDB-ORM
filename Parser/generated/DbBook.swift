@@ -6,8 +6,8 @@ import GRDB
 // Mapped table to struct
 public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     // Static queries
-    public static let insert_unique_query = "insert into Book (bookUuid, userUuid, integerOptional) values (?, ?, ?)"
-    public static let update_unique_query = "update Book set userUuid = ?, integerOptional = ? where bookUuid = ?"
+    public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional) values (?, ?, ?)"
+    public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ? where bookUuid = ?"
 
     // Mapped columns to properties
     public let bookUuid: UUID
@@ -37,14 +37,14 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     }
 
     public func genInsert(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.insert_unique_query)
-        let values = [
-            bookUuid.uuidString.databaseValue,
-            userUuid?.uuidString.databaseValue ?? .null,
-            integerOptional?.databaseValue ?? .null,
+        let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid?.uuidString,
+            integerOptional,
         ]
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 
@@ -53,14 +53,14 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     }
 
     public func genUpdate(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.update_unique_query)
-        let values = [
-            userUuid?.uuidString.databaseValue ?? .null,
-            integerOptional?.databaseValue ?? .null,
-            bookUuid.uuidString.databaseValue,
+        let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
+        let arguments: StatementArguments = try [
+            userUuid?.uuidString,
+            integerOptional,
+            bookUuid.uuidString,
         ]
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 
@@ -72,8 +72,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
 // Write the primary key struct, useful for selecting or deleting a unique row
 public struct DbBookPrimaryKey {
     // Static queries
-    public static let select_query = "select * from Book where bookUuid = ?"
-    public static let delete_query = "delete from Book where bookUuid = ?"
+    public static let selectQuery = "select * from Book where bookUuid = ?"
+    public static let deleteQuery = "delete from Book where bookUuid = ?"
 
     // Mapped columns to properties
     public let bookUuid: UUID
@@ -85,11 +85,13 @@ public struct DbBookPrimaryKey {
 
     // Queries a unique row in the database, the row may or may not exist
     public func genSelect(db: Database) throws -> DbBook? {
-        let statement = try db.cachedSelectStatement(sql: Self.select_query)
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+        ]
 
-        statement.setUncheckedArguments(StatementArguments(values: [
-            bookUuid.uuidString.databaseValue,
-        ]))
+        let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
+
+        statement.setUncheckedArguments(arguments)
 
         return try DbBook.fetchOne(statement)
     }
@@ -105,13 +107,13 @@ public struct DbBookPrimaryKey {
 
     // Deletes a unique row, asserts that the row actually existed
     public func genDelete(db: Database) throws {
-        let values = [
-            bookUuid.uuidString.databaseValue,
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.delete_query)
+        let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 

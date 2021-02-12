@@ -66,10 +66,10 @@ _These results are not comparable to [GRDB performance tests](https://github.com
 <!-- https://www.tablesgenerator.com/markdown_tables -->
 |        	| GRDB  	| GRDB-ORM 	|
 |--------	|-------	|------------------	|
-| Insert 	| 0.749 	| 0.333            	|
-| Select 	| 2.175 	| 0.577            	|
-| Update 	| 1.106 	| 0.533            	|
-| Delete 	| 0.917 	| 0.325            	|
+| Insert 	| 0.749 	| 0.418            	|
+| Select 	| 2.175 	| 0.692            	|
+| Update 	| 1.106 	| 0.599            	|
+| Delete 	| 0.917 	| 0.369            	|
 
 ## Tips
 - Place the generated files in a separate Swift Package and add a dependency on that package in your main project.

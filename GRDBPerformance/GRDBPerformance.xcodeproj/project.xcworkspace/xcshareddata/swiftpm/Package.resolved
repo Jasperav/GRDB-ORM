@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "GRDB",
-        "repositoryURL": "https://github.com/Jasperav/GRDB.swift.git",
+        "repositoryURL": "https://github.com/groue/GRDB.swift.git",
         "state": {
-          "branch": "master",
-          "revision": "f8c3733208972d3cbfb9ec76157e0e4f6ecd6844",
-          "version": null
+          "branch": null,
+          "revision": "7be7e1caded0f787e513d8f4311b20bcee97f262",
+          "version": "5.3.0"
         }
       }
     ]

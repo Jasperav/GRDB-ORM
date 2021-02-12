@@ -68,7 +68,7 @@ impl<'a> DynQueryParser<'a> {
                     parameters.push((param_name.to_string(), column.to_string()));
 
                     // The assumption is that '.databaseValue' can be called on the parameter
-                    database_values.push(format!("{}.databaseValue", param_name));
+                    database_values.push(param_name.clone());
                 } else {
                     // If the table does not equal FIXED, it must be a table property
                     let table = self.tables.table(table).unwrap();
@@ -247,7 +247,11 @@ impl<'a> DynQueryParser<'a> {
             let separated = database_values.join(", ");
 
             self.add_line(format!(
-                "statement.setUncheckedArguments(StatementArguments(values: [{}]))",
+                "let arguments: StatementArguments = try [
+                    {}
+                ]
+
+                statement.setUncheckedArguments(arguments)",
                 separated
             ));
         }

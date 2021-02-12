@@ -12,7 +12,11 @@ public extension DbBook {
                             join User on User.userUuid = Book.userUuid
                             where User.userUuid = ?
         """)
-        statement.setUncheckedArguments(StatementArguments(values: [userUuid.uuidString.databaseValue]))
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+        ]
+
+        statement.setUncheckedArguments(arguments)
         let converted: [(DbBook, Int, [JsonType]?, Int)] = try Row.fetchAll(statement).map { row -> (DbBook, Int, [JsonType]?, Int) in
             (DbBook(row: row, startingIndex: 0), row[3], {
                 if row.hasNull(atIndex: 4) {
@@ -39,7 +43,11 @@ public extension DbUser {
         let statement = try db.cachedSelectStatement(sql: """
         select * from User where firstName = ?
         """)
-        statement.setUncheckedArguments(StatementArguments(values: [firstName.databaseValue]))
+        let arguments: StatementArguments = try [
+            firstName,
+        ]
+
+        statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
             DbUser(row: row, startingIndex: 0)
         }
@@ -61,7 +69,11 @@ public extension DbUser {
         let statement = try db.cachedSelectStatement(sql: """
         select userUuid from User where firstName = ?
         """)
-        statement.setUncheckedArguments(StatementArguments(values: [firstName.databaseValue]))
+        let arguments: StatementArguments = try [
+            firstName,
+        ]
+
+        statement.setUncheckedArguments(arguments)
         let converted: [UUID] = try Row.fetchAll(statement).map { row -> UUID in
             row[0]
         }
@@ -102,7 +114,11 @@ public extension DbBook {
         let statement = try db.cachedUpdateStatement(sql: """
         delete from Book where userUuid = ?
         """)
-        statement.setUncheckedArguments(StatementArguments(values: [userUuid.uuidString.databaseValue]))
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+        ]
+
+        statement.setUncheckedArguments(arguments)
         try statement.execute()
     }
 

@@ -6,8 +6,8 @@ import GRDB
 // Mapped table to struct
 public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     // Static queries
-    public static let insert_unique_query = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
-    public static let update_unique_query = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ? where userUuid = ?"
+    public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
+    public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ? where userUuid = ?"
 
     // Mapped columns to properties
     public let userUuid: UUID
@@ -65,46 +65,34 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     }
 
     public func genInsert(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.insert_unique_query)
-        let values = [
-            userUuid.uuidString.databaseValue,
-            firstName?.databaseValue ?? .null,
-            try {
+        let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
-                let string = String(data: data, encoding: .utf8)!
-
-                return string.databaseValue
+                return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                if let jsonStructOptional = jsonStructOptional {
-                    let data = try Shared.jsonEncoder.encode(jsonStructOptional)
-                    let string = String(data: data, encoding: .utf8)!
-
-                    return string.databaseValue
-                } else {
-                    return DatabaseValue.null
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
                 }
             }(),
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
-                let string = String(data: data, encoding: .utf8)!
-
-                return string.databaseValue
+                return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                if let jsonStructArrayOptional = jsonStructArrayOptional {
-                    let data = try Shared.jsonEncoder.encode(jsonStructArrayOptional)
-                    let string = String(data: data, encoding: .utf8)!
-
-                    return string.databaseValue
-                } else {
-                    return DatabaseValue.null
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
                 }
             }(),
-            integer.databaseValue,
+            integer,
         ]
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 
@@ -113,46 +101,34 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     }
 
     public func genUpdate(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.update_unique_query)
-        let values = [
-            firstName?.databaseValue ?? .null,
-            try {
+        let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
+        let arguments: StatementArguments = try [
+            firstName,
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
-                let string = String(data: data, encoding: .utf8)!
-
-                return string.databaseValue
+                return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                if let jsonStructOptional = jsonStructOptional {
-                    let data = try Shared.jsonEncoder.encode(jsonStructOptional)
-                    let string = String(data: data, encoding: .utf8)!
-
-                    return string.databaseValue
-                } else {
-                    return DatabaseValue.null
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
                 }
             }(),
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
-                let string = String(data: data, encoding: .utf8)!
-
-                return string.databaseValue
+                return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                if let jsonStructArrayOptional = jsonStructArrayOptional {
-                    let data = try Shared.jsonEncoder.encode(jsonStructArrayOptional)
-                    let string = String(data: data, encoding: .utf8)!
-
-                    return string.databaseValue
-                } else {
-                    return DatabaseValue.null
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
                 }
             }(),
-            integer.databaseValue,
-            userUuid.uuidString.databaseValue,
+            integer,
+            userUuid.uuidString,
         ]
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 
@@ -164,8 +140,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
 // Write the primary key struct, useful for selecting or deleting a unique row
 public struct DbUserPrimaryKey {
     // Static queries
-    public static let select_query = "select * from User where userUuid = ?"
-    public static let delete_query = "delete from User where userUuid = ?"
+    public static let selectQuery = "select * from User where userUuid = ?"
+    public static let deleteQuery = "delete from User where userUuid = ?"
 
     // Mapped columns to properties
     public let userUuid: UUID
@@ -177,11 +153,13 @@ public struct DbUserPrimaryKey {
 
     // Queries a unique row in the database, the row may or may not exist
     public func genSelect(db: Database) throws -> DbUser? {
-        let statement = try db.cachedSelectStatement(sql: Self.select_query)
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+        ]
 
-        statement.setUncheckedArguments(StatementArguments(values: [
-            userUuid.uuidString.databaseValue,
-        ]))
+        let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
+
+        statement.setUncheckedArguments(arguments)
 
         return try DbUser.fetchOne(statement)
     }
@@ -197,13 +175,13 @@ public struct DbUserPrimaryKey {
 
     // Deletes a unique row, asserts that the row actually existed
     public func genDelete(db: Database) throws {
-        let values = [
-            userUuid.uuidString.databaseValue,
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.delete_query)
+        let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
 
-        statement.setUncheckedArguments(StatementArguments(values: values))
+        statement.setUncheckedArguments(arguments)
 
         try statement.execute()
 

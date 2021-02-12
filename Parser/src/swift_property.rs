@@ -194,49 +194,39 @@ pub fn swift_properties_to_sqlite_database_values(swift_properties: Vec<&SwiftPr
                 SwiftType::NoJson => {
                     let database_value = if removed_optional == "UUID" {
                         // Currently always the uuid string property is used, no data
-                        "uuidString."
+                        ".uuidString"
                     } else {
                         ""
                     };
 
-                    // This is easy, just append the databaseValue to make it one
-                    let database_value = database_value.to_string() + "databaseValue";
-                    let db_value = property.swift_property_name.clone() + "." + &database_value;
+                    let db_value = property.swift_property_name.clone() + database_value;
 
                     if is_optional {
                         // Only remove the first dot, because else optional uuid's will result in compile errors
-                        let db_value = db_value.replacen('.', "?.", 1);
-
-                        db_value + " ?? .null"
+                        db_value.replacen('.', "?.", 1)
                     } else {
                         db_value
                     }
                 }
                 SwiftType::Json => {
                     // This is a bit ugly, since optionals needs to be handled as well
-                    let (head, tail) = if is_optional {
-                        let head = format!(
-                            "if let {} = {} {{",
-                            property.swift_property_name, property.swift_property_name
-                        );
-                        let tail = "\n} else {
-                                return DatabaseValue.null
-                             }";
+                    let (head, tail, variable_name) = if is_optional {
+                        let head = format!("try {}.map {{", property.swift_property_name);
+                        let tail = "}";
 
-                        (head, tail)
+                        (head, tail, "$0".to_string())
                     } else {
-                        ("".to_string(), "")
+                        // Both empty, maybe some cleaner way to do this would be nice
+                        ("".to_string(), "", property.swift_property_name.clone())
                     };
 
                     format!(
-                        "try {{
-                                {}
+                        "{{
+                            {}
                                 let data = try Shared.jsonEncoder.encode({})
-                                let string = String(data: data, encoding: .utf8)!
-
-                                return string.databaseValue{}
+                                return String(data: data, encoding: .utf8)!{}
                             }}()",
-                        head, property.swift_property_name, tail
+                        head, variable_name, tail
                     )
                 }
             }
