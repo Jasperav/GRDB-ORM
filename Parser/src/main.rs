@@ -76,7 +76,8 @@ fn main() {
 
     assert!(
         Path::new(sqlite_location).exists(),
-        "Didn't found a SQLite database at {}", sqlite_location
+        "Didn't found a SQLite database at {}",
+        sqlite_location
     );
 
     let tables = sqlite_parser::parse_no_parser(sqlite_location);
