@@ -113,7 +113,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func gen{}(db: Database) throws {{
                 let statement = try db.cachedUpdateStatement(sql: Self.{})
-                let arguments: StatementArguments = try [
+                let arguments: StatementArguments = [
                     {}
                 ]
 

@@ -60,7 +60,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .add_comment("Queries a unique row in the database, the row may or may not exist");
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func genSelect(db: Database) throws -> {}? {{
-            let arguments: StatementArguments = try [
+            let arguments: StatementArguments = [
                 {}
             ]
 
@@ -106,7 +106,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .add_comment("Deletes a unique row, asserts that the row actually existed");
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func genDelete(db: Database) throws {{
-            let arguments: StatementArguments = try [
+            let arguments: StatementArguments = [
                 {}
             ]
 

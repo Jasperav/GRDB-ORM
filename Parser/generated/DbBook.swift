@@ -38,7 +38,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
 
     public func genInsert(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             bookUuid.uuidString,
             userUuid?.uuidString,
             integerOptional,
@@ -54,7 +54,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
 
     public func genUpdate(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             userUuid?.uuidString,
             integerOptional,
             bookUuid.uuidString,
@@ -85,7 +85,7 @@ public struct DbBookPrimaryKey {
 
     // Queries a unique row in the database, the row may or may not exist
     public func genSelect(db: Database) throws -> DbBook? {
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             bookUuid.uuidString,
         ]
 
@@ -107,7 +107,7 @@ public struct DbBookPrimaryKey {
 
     // Deletes a unique row, asserts that the row actually existed
     public func genDelete(db: Database) throws {
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             bookUuid.uuidString,
         ]
 

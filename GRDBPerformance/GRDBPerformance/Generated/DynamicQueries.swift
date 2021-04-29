@@ -12,7 +12,7 @@ public extension DbBook {
                             join User on User.userUuid = Book.userUuid
                             where User.userUuid = ?
         """)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             userUuid.uuidString,
         ]
 
@@ -43,7 +43,7 @@ public extension DbUser {
         let statement = try db.cachedSelectStatement(sql: """
         select * from User where firstName = ?
         """)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             firstName,
         ]
 
@@ -69,7 +69,7 @@ public extension DbUser {
         let statement = try db.cachedSelectStatement(sql: """
         select userUuid from User where firstName = ?
         """)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             firstName,
         ]
 
@@ -114,7 +114,7 @@ public extension DbBook {
         let statement = try db.cachedUpdateStatement(sql: """
         delete from Book where userUuid = ?
         """)
-        let arguments: StatementArguments = try [
+        let arguments: StatementArguments = [
             userUuid.uuidString,
         ]
 
