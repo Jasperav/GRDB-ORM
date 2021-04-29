@@ -66,7 +66,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
 
     public func genInsert(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
-        let arguments: StatementArguments = [
+        let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
             {
@@ -102,7 +102,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
 
     public func genUpdate(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
-        let arguments: StatementArguments = [
+        let arguments: StatementArguments = try [
             firstName,
             {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
@@ -153,7 +153,7 @@ public struct DbUserPrimaryKey {
 
     // Queries a unique row in the database, the row may or may not exist
     public func genSelect(db: Database) throws -> DbUser? {
-        let arguments: StatementArguments = [
+        let arguments: StatementArguments = try [
             userUuid.uuidString,
         ]
 
@@ -175,7 +175,7 @@ public struct DbUserPrimaryKey {
 
     // Deletes a unique row, asserts that the row actually existed
     public func genDelete(db: Database) throws {
-        let arguments: StatementArguments = [
+        let arguments: StatementArguments = try [
             userUuid.uuidString,
         ]
 

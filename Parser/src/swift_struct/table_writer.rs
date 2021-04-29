@@ -19,7 +19,6 @@ pub struct TableWriter<'a> {
 
 impl<'a> TableWriter<'a> {
     // This is needed else a compile warning turns up but that is a false positive
-    #[allow(unused_braces)]
     pub fn write(self) {
         println!("Preparing to process the tables");
 

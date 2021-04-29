@@ -1,6 +1,6 @@
 use configuration::{Config, Visibility};
 use std::env::current_exe;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::Duration;
 
 /// Easy way to read a file to a string and call a `transform` method
@@ -100,7 +100,7 @@ fn main() {
     println!("Successfully generated Swift structs and queries!");
 }
 
-fn read_file_log(file: &PathBuf) {
+fn read_file_log(file: &Path) {
     let file_name = file.file_name().unwrap().to_str().unwrap();
 
     println!("Reading file: {}", file_name);

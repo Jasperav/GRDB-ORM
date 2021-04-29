@@ -247,7 +247,7 @@ impl<'a> DynQueryParser<'a> {
             let separated = database_values.join(", ");
 
             self.add_line(format!(
-                "let arguments: StatementArguments = [
+                "let arguments: StatementArguments = try [
                     {}
                 ]
 
