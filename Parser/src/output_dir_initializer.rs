@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Initializes the output dir
-pub fn initialize(output_dir: &PathBuf) -> PathBuf {
+pub fn initialize(output_dir: &Path) -> PathBuf {
     println!("Initializing output dir");
     // Append 'generated' as suffix to make deletion of dir more safe
     let safe_output_dir = create_safe_dir(output_dir);
@@ -15,6 +15,6 @@ pub fn initialize(output_dir: &PathBuf) -> PathBuf {
     safe_output_dir
 }
 
-pub fn create_safe_dir(path: &PathBuf) -> PathBuf {
+pub fn create_safe_dir(path: &Path) -> PathBuf {
     path.join("generated")
 }

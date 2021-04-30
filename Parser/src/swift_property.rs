@@ -47,7 +47,7 @@ impl SwiftType {
 pub fn create_swift_property(column: &Column, custom_mapping: &[CustomMapping]) -> SwiftProperty {
     // This is the type at the beginning
     // It can be changes by the custom_mapping
-    let mut inferred_type = sqlite_type_to_swift_type(&column.the_type).to_string();
+    let mut inferred_type = sqlite_type_to_swift_type(column.the_type).to_string();
 
     // Check if the user wants to do a custom transformation
     for mapping in custom_mapping {
@@ -174,7 +174,7 @@ pub fn create_swift_type_name(from: &str, config: &Config) -> String {
 }
 
 /// Translates a SQLite type to a Swift type
-fn sqlite_type_to_swift_type(t: &Type) -> &'static str {
+fn sqlite_type_to_swift_type(t: Type) -> &'static str {
     match t {
         Type::Text | Type::String | Type::Real => "String",
         Type::Integer => "Int",
