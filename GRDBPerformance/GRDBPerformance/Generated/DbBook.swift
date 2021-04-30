@@ -57,6 +57,12 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
         assert(db.changesCount == 1)
     }
 
+    public func genInsert(pool: DatabasePool) throws {
+        try pool.write { database in
+            try genInsert(db: database)
+        }
+    }
+
     public func genUpdate(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
         let arguments: StatementArguments = try [
@@ -72,6 +78,12 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
 
         // Only 1 row should be affected
         assert(db.changesCount == 1)
+    }
+
+    public func genUpdate(pool: DatabasePool) throws {
+        try pool.write { database in
+            try genUpdate(db: database)
+        }
     }
 }
 
@@ -102,12 +114,24 @@ public struct DbBookPrimaryKey {
         return try DbBook.fetchOne(statement)
     }
 
+    public func genSelect(pool: DatabasePool) throws -> DbBook? {
+        try pool.read { database in
+            try genSelect(db: database)
+        }
+    }
+
     // Same as function 'genSelectUnique', but throws an error when no record has been found
     public func genSelectExpect(db: Database) throws -> DbBook {
         if let instance = try genSelect(db: db) {
             return instance
         } else {
             throw DatabaseError(message: "Didn't found a record for \(self)")
+        }
+    }
+
+    public func genSelectExpect(pool: DatabasePool) throws -> DbBook {
+        try pool.read { database in
+            try genSelectExpect(db: database)
         }
     }
 
@@ -124,6 +148,12 @@ public struct DbBookPrimaryKey {
         try statement.execute()
 
         assert(db.changesCount == 1)
+    }
+
+    public func genDelete(pool: DatabasePool) throws {
+        try pool.write { database in
+            try genDelete(db: database)
+        }
     }
 }
 

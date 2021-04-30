@@ -1,3 +1,4 @@
+use crate::line_writer::WriteRead;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
@@ -127,5 +128,9 @@ impl<'a> QueryWriterMainStruct<'a> {
         ",
             method_name, query, values
         ));
+
+        self.table_meta_data
+            .line_writer
+            .add_wrapper_pool(method_name, "", WriteRead::Write);
     }
 }
