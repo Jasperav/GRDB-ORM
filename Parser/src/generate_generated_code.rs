@@ -30,6 +30,10 @@ fn update_generated_code() {
                 the_type: "UUID".to_string(),
                 regexes: vec![Regex::new(".*Uuid").unwrap()],
             },
+            CustomMapping {
+                the_type: "Int64".to_string(),
+                regexes: vec![Regex::new("tsCreated").unwrap()],
+            },
         ],
         dynamic_queries: vec![
             DynamicQuery {
@@ -140,6 +144,7 @@ pub fn create_db() -> (Metadata, String) {
                 bookUuid TEXT PRIMARY KEY NOT NULL,
                 userUuid TEXT,
                 integerOptional INTEGER,
+                tsCreated INTEGER NOT NULL,
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
             );",
         NO_PARAMS,

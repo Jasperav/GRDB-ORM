@@ -6,22 +6,25 @@ import GRDB
 // Mapped table to struct
 public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     // Static queries
-    public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional) values (?, ?, ?)"
-    public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ? where bookUuid = ?"
+    public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
+    public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
 
     // Mapped columns to properties
     public let bookUuid: UUID
     public var userUuid: UUID?
     public var integerOptional: Int?
+    public var tsCreated: Int64
 
     // Default initializer
     public init(bookUuid: UUID,
                 userUuid: UUID?,
-                integerOptional: Int?)
+                integerOptional: Int?,
+                tsCreated: Int64)
     {
         self.bookUuid = bookUuid
         self.userUuid = userUuid
         self.integerOptional = integerOptional
+        self.tsCreated = tsCreated
     }
 
     // Row initializer
@@ -29,6 +32,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
         bookUuid = row[0 + startingIndex]
         userUuid = row[1 + startingIndex]
         integerOptional = row[2 + startingIndex]
+        tsCreated = row[3 + startingIndex]
     }
 
     // The initializer defined by the protocol
@@ -42,6 +46,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
             bookUuid.uuidString,
             userUuid?.uuidString,
             integerOptional,
+            tsCreated,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -57,6 +62,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
         let arguments: StatementArguments = try [
             userUuid?.uuidString,
             integerOptional,
+            tsCreated,
             bookUuid.uuidString,
         ]
 
