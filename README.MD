@@ -103,6 +103,9 @@ $ cd Parser/
 $ rm -rf ./compiled/
 $ cargo build --release
 $ cp -a target/release/. ./compiled
+$ cargo test --package sqlite_parser_swift_grdb --bin sqlite_parser_swift_grdb generate_generated_code::update_generated_code -- --exact
+$ rm -rf ../GRDBPerformance/GRDBPerformance/Generated
+$ cp -a generated/. ../GRDBPerformance/GRDBPerformance/Generated
 
 ## Why is this written in Rust and not in Swift?
 - I wrote the `SQLiteParser` dependency also in Rust

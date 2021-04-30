@@ -18,13 +18,13 @@ public extension DbBook {
 
         statement.setUncheckedArguments(arguments)
         let converted: [(DbBook, Int, [JsonType]?, Int)] = try Row.fetchAll(statement).map { row -> (DbBook, Int, [JsonType]?, Int) in
-            (DbBook(row: row, startingIndex: 0), row[3], {
-                if row.hasNull(atIndex: 4) {
+            (DbBook(row: row, startingIndex: 0), row[4], {
+                if row.hasNull(atIndex: 5) {
                     return nil
                 } else {
-                    return try! Shared.jsonDecoder.decode([JsonType].self, from: row[4])
+                    return try! Shared.jsonDecoder.decode([JsonType].self, from: row[5])
                 }
-            }(), row[5])
+            }(), row[6])
         }
         return converted
     }
