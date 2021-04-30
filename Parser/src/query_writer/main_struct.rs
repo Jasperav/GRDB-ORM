@@ -1,7 +1,7 @@
+use crate::line_writer::WriteRead;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
-use crate::line_writer::WriteRead;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
@@ -129,6 +129,8 @@ impl<'a> QueryWriterMainStruct<'a> {
             method_name, query, values
         ));
 
-        self.table_meta_data.line_writer.add_wrapper_pool(method_name, "", WriteRead::Write);
+        self.table_meta_data
+            .line_writer
+            .add_wrapper_pool(method_name, "", WriteRead::Write);
     }
 }

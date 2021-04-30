@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 pub enum WriteRead {
     Write,
-    Read
+    Read,
 }
 
 /// Wrapper around a Vec<String>
@@ -51,12 +51,29 @@ impl LineWriter {
         self.lines.push(format!("{} {}", self.modifier, t));
     }
 
-    pub fn add_wrapper_pool(&mut self, original_method: &str, return_type: &str, write_read: WriteRead) {
-        self.lines.push(format!("{} func gen{}(pool: DatabasePool) throws {}{{\n", self.modifier, original_method, return_type));
-        self.lines.push(format!("try pool.{} {{ database in\ntry gen{}(db: database)\n}}\n}}", match write_read {
-            WriteRead::Write => "write",
-            WriteRead::Read => "read"
-        }, original_method));
+    pub fn add_wrapper_pool(
+        &mut self,
+        original_method: &str,
+        return_type: &str,
+        write_read: WriteRead,
+    ) {
+        let return_type = if return_type.is_empty() {
+            "".to_string()
+        } else {
+            format!("-> {} ", return_type)
+        };
+        self.lines.push(format!(
+            "{} func gen{}(pool: DatabasePool) throws {}{{\n",
+            self.modifier, original_method, return_type
+        ));
+        self.lines.push(format!(
+            "try pool.{} {{ database in\ntry gen{}(db: database)\n}}\n}}",
+            match write_read {
+                WriteRead::Write => "write",
+                WriteRead::Read => "read",
+            },
+            original_method
+        ));
     }
 
     pub fn write_to_file(self, file_name: &str) {

@@ -114,7 +114,7 @@ public struct DbBookPrimaryKey {
         return try DbBook.fetchOne(statement)
     }
 
-    public func genSelect(pool: DatabasePool) throws DbBook? {
+    public func genSelect(pool: DatabasePool) throws -> DbBook? {
         try pool.read { database in
             try genSelect(db: database)
         }
@@ -129,7 +129,7 @@ public struct DbBookPrimaryKey {
         }
     }
 
-    public func genSelectExpect(pool: DatabasePool) throws DbBook {
+    public func genSelectExpect(pool: DatabasePool) throws -> DbBook {
         try pool.read { database in
             try genSelectExpect(db: database)
         }

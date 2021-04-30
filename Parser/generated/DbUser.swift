@@ -176,7 +176,7 @@ public struct DbUserPrimaryKey {
         return try DbUser.fetchOne(statement)
     }
 
-    public func genSelect(pool: DatabasePool) throws DbUser? {
+    public func genSelect(pool: DatabasePool) throws -> DbUser? {
         try pool.read { database in
             try genSelect(db: database)
         }
@@ -191,7 +191,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genSelectExpect(pool: DatabasePool) throws DbUser {
+    public func genSelectExpect(pool: DatabasePool) throws -> DbUser {
         try pool.read { database in
             try genSelectExpect(db: database)
         }
