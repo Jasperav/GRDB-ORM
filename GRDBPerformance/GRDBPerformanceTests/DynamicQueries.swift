@@ -19,8 +19,8 @@ class DynamicQueryTest: XCTestCase {
                     JsonType(age: 3)
                 ],
                 integer: 2)
-        let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0)
-        let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil)
+        let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
+        let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 
         try! db.write { db in
             try! user.genInsert(db: db)

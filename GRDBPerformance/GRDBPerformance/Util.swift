@@ -29,6 +29,7 @@ public func setupPool() -> DatabasePool {
                 bookUuid TEXT PRIMARY KEY NOT NULL,
                 userUuid TEXT,
                 integerOptional INTEGER,
+                tsCreated INTEGER NOT NULL,
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
             );
         """)
