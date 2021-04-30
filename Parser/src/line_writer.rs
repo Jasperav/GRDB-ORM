@@ -2,6 +2,11 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+pub enum WriteRead {
+    Write,
+    Read
+}
+
 /// Wrapper around a Vec<String>
 /// Eventually all strings inside the vec will be written to a file, separated by a newline
 #[derive(Debug)]
@@ -44,6 +49,14 @@ impl LineWriter {
 
     pub fn add_with_modifier(&mut self, t: String) {
         self.lines.push(format!("{} {}", self.modifier, t));
+    }
+
+    pub fn add_wrapper_pool(&mut self, original_method: &str, return_type: &str, write_read: WriteRead) {
+        self.lines.push(format!("{} func gen{}(pool: DatabasePool) throws {}{{\n", self.modifier, original_method, return_type));
+        self.lines.push(format!("try pool.{} {{ database in\ntry gen{}(db: database)\n}}\n}}", match write_read {
+            WriteRead::Write => "write",
+            WriteRead::Read => "read"
+        }, original_method));
     }
 
     pub fn write_to_file(self, file_name: &str) {

@@ -1,6 +1,7 @@
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
+use crate::line_writer::WriteRead;
 
 pub const SELECT_QUERY: &str = "selectQuery";
 pub const DELETE_QUERY: &str = "deleteQuery";
@@ -75,7 +76,11 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             values,
             SELECT_QUERY,
             self.table_meta_data.struct_name
-        ))
+        ));
+        self.table_meta_data.line_writer.add_wrapper_pool(
+            "Select",
+            &format!("{}?", self.table_meta_data.struct_name),
+        WriteRead::Read);
     }
 
     fn write_select_query_expect(&mut self) {
@@ -92,7 +97,9 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         }}
         ",
             self.table_meta_data.struct_name
-        ))
+        ));
+
+        self.table_meta_data.line_writer.add_wrapper_pool("SelectExpect", self.table_meta_data.struct_name, WriteRead::Read);
     }
 
     fn write_delete_query(&mut self) {
@@ -120,6 +127,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         }}
         ",
             values, DELETE_QUERY
-        ))
+        ));
+        self.table_meta_data.line_writer.add_wrapper_pool("Delete", "", WriteRead::Write);
     }
 }
