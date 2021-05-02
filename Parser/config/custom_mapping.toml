@@ -1,3 +1,5 @@
 # Add your own transformation here with the use of Regex, like this:
 # UUID=[".*[U]uid"]
 # Any column name matching that value, will have the type UUID.
+UUID=[".*[U]uid"]
+Int64=["tsCreated"]

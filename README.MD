@@ -98,14 +98,7 @@ how various configurations generate different output. If you want to do so, inst
 and checkout [generate_generated_code.rs](/Parser/src/generate_generated_code.rs). You can easily change configuration there without the need of making
 changes to an actual database.
 
-How to add a new compiled executable after code changes:
-$ cd Parser/
-$ rm -rf ./compiled/
-$ cargo build --release
-$ cp -a target/release/. ./compiled
-$ cargo test --package sqlite_parser_swift_grdb --bin sqlite_parser_swift_grdb generate_generated_code::update_generated_code -- --exact
-$ rm -rf ../GRDBPerformance/GRDBPerformance/Generated
-$ cp -a generated/. ../GRDBPerformance/GRDBPerformance/Generated
+Run executable 'new_version' to generate a new version
 
 ## Why is this written in Rust and not in Swift?
 - I wrote the `SQLiteParser` dependency also in Rust

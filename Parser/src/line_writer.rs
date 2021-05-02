@@ -7,6 +7,29 @@ pub enum WriteRead {
     Read,
 }
 
+impl WriteRead {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            WriteRead::Write => "write",
+            WriteRead::Read => "read",
+        }
+    }
+
+    pub fn database_reader_or_writer(&self) -> &'static str {
+        match self {
+            WriteRead::Write => "dbWriter",
+            WriteRead::Read => "dbReader",
+        }
+    }
+
+    pub fn generic_type(&self) -> &'static str {
+        match self {
+            WriteRead::Write => "DatabaseWriter",
+            WriteRead::Read => "DatabaseReader",
+        }
+    }
+}
+
 /// Wrapper around a Vec<String>
 /// Eventually all strings inside the vec will be written to a file, separated by a newline
 #[derive(Debug)]
@@ -63,15 +86,17 @@ impl LineWriter {
             format!("-> {} ", return_type)
         };
         self.lines.push(format!(
-            "{} func gen{}(pool: DatabasePool) throws {}{{\n",
-            self.modifier, original_method, return_type
+            "{} func gen{}<T: {}>({}: T) throws {}{{\n",
+            self.modifier,
+            original_method,
+            write_read.generic_type(),
+            write_read.database_reader_or_writer(),
+            return_type
         ));
         self.lines.push(format!(
-            "try pool.{} {{ database in\ntry gen{}(db: database)\n}}\n}}",
-            match write_read {
-                WriteRead::Write => "write",
-                WriteRead::Read => "read",
-            },
+            "try {}.{} {{ database in\ntry gen{}(db: database)\n}}\n}}",
+            write_read.database_reader_or_writer(),
+            write_read.to_str(),
             original_method
         ));
     }

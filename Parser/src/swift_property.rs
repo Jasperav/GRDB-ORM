@@ -153,7 +153,12 @@ pub fn decode_swift_property<T: SwiftPropertyDecoder>(
 
 /// A type is 'build-in' when the type is standard Swift type
 pub fn is_build_in_type(check: &str) -> bool {
-    check == "String" || check == "Int" || check == "UUID" || check == "Int64" || check == "Int32"
+    check == "String"
+        || check == "Int"
+        || check == "UUID"
+        || check == "Int64"
+        || check == "Int32"
+        || check == "Bool"
 }
 
 /// Creates a Swift type from a [&str]

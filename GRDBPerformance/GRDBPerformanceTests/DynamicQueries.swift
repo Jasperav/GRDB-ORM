@@ -36,25 +36,25 @@ class DynamicQueryTest: XCTestCase {
     }
 
     func assertFindByUsername(db: DatabasePool, find: DbUser) {
-        XCTAssert(try! DbUser.quickReadFindByUsername(db: db, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.quickReadFindByUsername(db: db, firstName: find.firstName!)!.userUuid)
+        XCTAssert(try! DbUser.findByUsername(dbReader: db, firstName: "doesnotexists") == nil)
+        XCTAssertEqual(find.userUuid, try! DbUser.findByUsername(dbReader: db, firstName: find.firstName!)!.userUuid)
     }
     
     func assertFindUserUuidByUsername(db: DatabasePool, find: DbUser) {
-        XCTAssert(try! DbUser.quickReadFindUserUuidByUsername(db: db, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.quickReadFindUserUuidByUsername(db: db, firstName: find.firstName!)!)
+        XCTAssert(try! DbUser.findUserUuidByUsername(dbReader: db, firstName: "doesnotexists") == nil)
+        XCTAssertEqual(find.userUuid, try! DbUser.findUserUuidByUsername(dbReader: db, firstName: find.firstName!)!)
     }
 
     func assertAmountOfUsersAfterInsertion(db: DatabasePool) {
-        XCTAssertEqual(1, try! DbUser.quickReadAmountOfUsers(db: db))
+        XCTAssertEqual(1, try! DbUser.amountOfUsers(dbReader: db))
     }
     
     func assertAmountOfUsersBeforeInsertion(db: DatabasePool) {
-        XCTAssertEqual(0, try! DbUser.quickReadAmountOfUsers(db: db))
+        XCTAssertEqual(0, try! DbUser.amountOfUsers(dbReader: db))
     }
     
     func assertBooksForUserWithSpecificUuid(db: DatabasePool, user: DbUser, book0: DbBook, book1: DbBook) {
-        let result = try! DbBook.quickReadBooksForUserWithSpecificUuid(db: db, userUuid: user.userUuid)
+        let result = try! DbBook.booksForUserWithSpecificUuid(dbReader: db, userUuid: user.userUuid)
 
         XCTAssertEqual(2, result.count)
 
@@ -79,5 +79,15 @@ class DynamicQueryTest: XCTestCase {
             
             XCTAssertEqual(2, db.changesCount)
         }
+    }
+    
+    func testBoolReturnType() {
+        let db = setupPool()
+        
+        XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
+        
+        try! DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: 0, tsCreated: 0).genInsert(dbWriter: db)
+        
+        XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(dbReader: db))
     }
 }
