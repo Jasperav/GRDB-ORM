@@ -6,7 +6,7 @@ use sqlite_parser::Metadata;
 use crate::configuration::Config;
 use crate::dynamic_queries::reader::DynamicQuery;
 use crate::dynamic_queries::return_type::{Query, ReturnType};
-use crate::line_writer::LineWriter;
+use crate::line_writer::{LineWriter, WriteRead};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{
     create_swift_properties, create_swift_type_name, swift_properties_to_sqlite_database_values,
@@ -144,19 +144,17 @@ impl<'a> DynQueryParser<'a> {
             match query {
                 Query::Select { .. } => {
                     self.write_easy_method(
-                        "read",
+                        WriteRead::Read,
                         &dynamic_query.func_name,
                         &parameters,
-                        "DatabaseReader",
                         &query.return_type(),
                     );
                 }
                 Query::UpdateOrDelete => {
                     self.write_easy_method(
-                        "write",
+                        WriteRead::Write,
                         &dynamic_query.func_name,
                         &parameters,
-                        "DatabaseWriter",
                         "",
                     );
                 }
@@ -185,21 +183,21 @@ impl<'a> DynQueryParser<'a> {
     #[allow(clippy::ptr_arg)] // Code doesn't compile with this lint
     fn write_easy_method(
         &mut self,
-        after_quick: &str,
+        write_read: WriteRead,
         func_name: &str,
         arguments: &Vec<(String, String)>,
-        generic_t: &str,
         return_type: &str,
     ) {
-        let quick_func_name = format!(
-            "quick{}{}",
-            some_kind_of_uppercase_first_letter(after_quick),
-            some_kind_of_uppercase_first_letter(func_name)
-        );
         let mut arguments_with_db = arguments.clone();
 
         // Add a generic parameter constraint on DatabaseReader, to maximize support
-        arguments_with_db.insert(0, ("db".to_string(), "T".to_string()));
+        arguments_with_db.insert(
+            0,
+            (
+                write_read.database_reader_or_writer().to_string(),
+                "T".to_string(),
+            ),
+        );
 
         let mut arguments_invocation = arguments
             .iter()
@@ -214,16 +212,19 @@ impl<'a> DynQueryParser<'a> {
 
         self.add_with_modifier(format!(
             "static func {}<T: {}>({}) throws{} {{",
-            quick_func_name,
-            generic_t,
+            func_name,
+            write_read.generic_type(),
             separate_by_colon(&arguments_with_db),
             return_type
         ));
         self.add_line(format!(
-            "try db.{} {{ db in
+            "try {}.{} {{ db in
             try Self.{}(db: db{})
         }}",
-            after_quick, func_name, arguments_invocation
+            write_read.database_reader_or_writer(),
+            write_read.to_str(),
+            func_name,
+            arguments_invocation
         ));
         self.add_closing_brackets();
     }

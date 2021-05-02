@@ -29,8 +29,8 @@ public extension DbBook {
         return converted
     }
 
-    static func quickReadBooksForUserWithSpecificUuid<T: DatabaseReader>(db: T, userUuid: UUID) throws -> [(DbBook, Int, [JsonType]?, Int)] {
-        try db.read { db in
+    static func booksForUserWithSpecificUuid<T: DatabaseReader>(dbReader: T, userUuid: UUID) throws -> [(DbBook, Int, [JsonType]?, Int)] {
+        try dbReader.read { db in
             try Self.booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
         }
     }
@@ -55,8 +55,8 @@ public extension DbUser {
         return converted.first
     }
 
-    static func quickReadFindByUsername<T: DatabaseReader>(db: T, firstName: String) throws -> DbUser? {
-        try db.read { db in
+    static func findByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> DbUser? {
+        try dbReader.read { db in
             try Self.findByUsername(db: db, firstName: firstName)
         }
     }
@@ -81,8 +81,8 @@ public extension DbUser {
         return converted.first
     }
 
-    static func quickReadFindUserUuidByUsername<T: DatabaseReader>(db: T, firstName: String) throws -> UUID? {
-        try db.read { db in
+    static func findUserUuidByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> UUID? {
+        try dbReader.read { db in
             try Self.findUserUuidByUsername(db: db, firstName: firstName)
         }
     }
@@ -102,8 +102,8 @@ public extension DbUser {
         return converted.first!
     }
 
-    static func quickReadAmountOfUsers<T: DatabaseReader>(db: T) throws -> Int {
-        try db.read { db in
+    static func amountOfUsers<T: DatabaseReader>(dbReader: T) throws -> Int {
+        try dbReader.read { db in
             try Self.amountOfUsers(db: db)
         }
     }
@@ -122,9 +122,30 @@ public extension DbBook {
         try statement.execute()
     }
 
-    static func quickWriteDeleteByUserUuid<T: DatabaseWriter>(db: T, userUuid: UUID) throws {
-        try db.write { db in
+    static func deleteByUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
+        try dbWriter.write { db in
             try Self.deleteByUserUuid(db: db, userUuid: userUuid)
+        }
+    }
+}
+
+public extension DbBook {
+    typealias HasAtLeastOneBookType = Bool
+
+    static func hasAtLeastOneBook(db: Database) throws -> Bool {
+        let statement = try db.cachedSelectStatement(sql: """
+        select exists(select 1 from Book)
+        """)
+        let converted: [Bool] = try Row.fetchAll(statement).map { row -> Bool in
+            row[0]
+        }
+        assert(converted.count == 1, "Expected 1 row")
+        return converted.first!
+    }
+
+    static func hasAtLeastOneBook<T: DatabaseReader>(dbReader: T) throws -> Bool {
+        try dbReader.read { db in
+            try Self.hasAtLeastOneBook(db: db)
         }
     }
 }

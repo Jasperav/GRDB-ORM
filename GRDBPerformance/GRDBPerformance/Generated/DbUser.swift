@@ -100,8 +100,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
         assert(db.changesCount == 1)
     }
 
-    public func genInsert(pool: DatabasePool) throws {
-        try pool.write { database in
+    public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
             try genInsert(db: database)
         }
     }
@@ -142,8 +142,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
         assert(db.changesCount == 1)
     }
 
-    public func genUpdate(pool: DatabasePool) throws {
-        try pool.write { database in
+    public func genUpdate<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
             try genUpdate(db: database)
         }
     }
@@ -176,8 +176,8 @@ public struct DbUserPrimaryKey {
         return try DbUser.fetchOne(statement)
     }
 
-    public func genSelect(pool: DatabasePool) throws -> DbUser? {
-        try pool.read { database in
+    public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbUser? {
+        try dbReader.read { database in
             try genSelect(db: database)
         }
     }
@@ -191,8 +191,8 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genSelectExpect(pool: DatabasePool) throws -> DbUser {
-        try pool.read { database in
+    public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbUser {
+        try dbReader.read { database in
             try genSelectExpect(db: database)
         }
     }
@@ -212,8 +212,8 @@ public struct DbUserPrimaryKey {
         assert(db.changesCount == 1)
     }
 
-    public func genDelete(pool: DatabasePool) throws {
-        try pool.write { database in
+    public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
             try genDelete(db: database)
         }
     }
