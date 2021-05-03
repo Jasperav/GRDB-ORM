@@ -80,14 +80,18 @@ class DynamicQueryTest: XCTestCase {
             XCTAssertEqual(2, db.changesCount)
         }
     }
-    
+
     func testBoolReturnType() {
         let db = setupPool()
-        
+
         XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
-        
+
         try! DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: 0, tsCreated: 0).genInsert(dbWriter: db)
-        
+
         XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(dbReader: db))
+
+        try! DbBook.genDeleteAll(dbWriter: db)
+
+        XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
     }
 }
