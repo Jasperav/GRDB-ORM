@@ -41,6 +41,21 @@ pub struct LineWriter {
     output_dir: PathBuf,
 }
 
+#[derive(Copy, Clone)]
+pub enum StaticInstance {
+    Static,
+    Instance,
+}
+
+impl StaticInstance {
+    pub fn modifier(&self) -> &'static str {
+        match self {
+            StaticInstance::Static => "static ",
+            StaticInstance::Instance => "",
+        }
+    }
+}
+
 impl LineWriter {
     pub fn new(modifier: &'static str, output_dir: PathBuf) -> Self {
         let mut s = Self {
@@ -76,6 +91,7 @@ impl LineWriter {
 
     pub fn add_wrapper_pool(
         &mut self,
+        static_instance: StaticInstance,
         original_method: &str,
         return_type: &str,
         write_read: WriteRead,
@@ -86,8 +102,9 @@ impl LineWriter {
             format!("-> {} ", return_type)
         };
         self.lines.push(format!(
-            "{} func gen{}<T: {}>({}: T) throws {}{{\n",
+            "{} {}func gen{}<T: {}>({}: T) throws {}{{\n",
             self.modifier,
+            static_instance.modifier(),
             original_method,
             write_read.generic_type(),
             write_read.database_reader_or_writer(),

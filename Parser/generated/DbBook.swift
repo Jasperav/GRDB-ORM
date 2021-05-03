@@ -7,6 +7,7 @@ import GRDB
 public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     // Static queries
     public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
+    public static let deleteAllQuery = "delete from Book"
     public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
 
     // Mapped columns to properties
@@ -42,6 +43,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
 
     public func genInsert(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
+
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
             userUuid?.uuidString,
@@ -63,8 +65,21 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
         }
     }
 
+    public static func genDeleteAll(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.deleteAllQuery)
+
+        try statement.execute()
+    }
+
+    public static func genDeleteAll<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
+            try genDeleteAll(db: database)
+        }
+    }
+
     public func genUpdate(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
+
         let arguments: StatementArguments = try [
             userUuid?.uuidString,
             integerOptional,

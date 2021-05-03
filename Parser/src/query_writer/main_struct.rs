@@ -1,9 +1,10 @@
-use crate::line_writer::WriteRead;
+use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
+pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
 
 /// Writes the static queries for the main struct
@@ -29,13 +30,23 @@ impl<'a> QueryWriterMainStruct<'a> {
 // Static queries
 impl<'a> QueryWriterMainStruct<'a> {
     pub(crate) fn write_static_queries(mut self) {
-        let mut static_queries = vec![self.static_unique_insert_query()];
+        let mut static_queries = vec![
+            self.static_unique_insert_query(),
+            self.static_delete_all_query(),
+        ];
 
         if !self.non_pk.is_empty() {
             static_queries.push(self.static_unique_update_query())
         }
 
         write_static_queries(&mut self.table_meta_data.line_writer, static_queries);
+    }
+
+    fn static_delete_all_query(&mut self) -> WriteResult {
+        (
+            DELETE_ALL_QUERY,
+            format!("delete from {}", self.table_meta_data.table_name),
+        )
     }
 
     fn static_unique_insert_query(&mut self) -> WriteResult {
@@ -79,6 +90,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 impl<'a> QueryWriterMainStruct<'a> {
     pub(crate) fn write_method(mut self) {
         self.write_insert();
+        self.write_delete();
         self.write_update();
 
         self.table_meta_data.line_writer.add_closing_brackets();
@@ -90,6 +102,10 @@ impl<'a> QueryWriterMainStruct<'a> {
         );
 
         self.write("Insert", INSERT_UNIQUE_QUERY, &db_values);
+    }
+
+    fn write_delete(&mut self) {
+        self.write("DeleteAll", DELETE_ALL_QUERY, &"");
     }
 
     fn write_update(&mut self) {
@@ -109,28 +125,46 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write(&mut self, method_name: &str, query: &str, values: &str) {
-        assert!(!values.is_empty());
-
-        self.table_meta_data.line_writer.add_with_modifier(format!(
-            "func gen{}(db: Database) throws {{
-                let statement = try db.cachedUpdateStatement(sql: Self.{})
-                let arguments: StatementArguments = try [
+        let (static_instance, args, check) = if values.is_empty() {
+            (StaticInstance::Static, "".to_string(), "".to_string())
+        } else {
+            let args = format!(
+                "let arguments: StatementArguments = try [
                     {}
                 ]
 
-                statement.setUncheckedArguments(arguments)
+                statement.setUncheckedArguments(arguments)",
+                values
+            );
+            let check = "// Only 1 row should be affected
+                assert(db.changesCount == 1)";
+
+            (StaticInstance::Instance, args, check.to_string())
+        };
+
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "{}func gen{}(db: Database) throws {{
+                let statement = try db.cachedUpdateStatement(sql: Self.{})
+
+                {}
 
                 try statement.execute()
 
-                // Only 1 row should be affected
-                assert(db.changesCount == 1)
+                {}
             }}
         ",
-            method_name, query, values
+            static_instance.modifier(),
+            method_name,
+            query,
+            args,
+            check
         ));
 
-        self.table_meta_data
-            .line_writer
-            .add_wrapper_pool(method_name, "", WriteRead::Write);
+        self.table_meta_data.line_writer.add_wrapper_pool(
+            static_instance,
+            method_name,
+            "",
+            WriteRead::Write,
+        );
     }
 }
