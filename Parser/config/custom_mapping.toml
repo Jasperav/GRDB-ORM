@@ -2,4 +2,4 @@
 # UUID=[".*[U]uid"]
 # Any column name matching that value, will have the type UUID.
 UUID=[".*[U]uid"]
-Int64=["tsCreated"]
+Int64=["tsCreated", "karma"]
