@@ -36,6 +36,11 @@
                BlueprintName = "GRDBPerformanceTests"
                ReferencedContainer = "container:GRDBPerformance.xcodeproj">
             </BuildableReference>
+            <SelectedTests>
+               <Test
+                  Identifier = "SelectPerformanceTest">
+               </Test>
+            </SelectedTests>
          </TestableReference>
       </Testables>
    </TestAction>

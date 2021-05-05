@@ -27,3 +27,36 @@ class InsertPerformanceTest: XCTestCase {
         }
     }
 }
+
+class ReplaceTest: XCTestCase {
+    func testReplace() throws {
+        let db = setupPool()
+        let checkCount: (Int) -> () = {
+            let current = try! db.read { try! Int.fetchOne($0, sql: "select count(*) from user ")}!
+
+            XCTAssertEqual($0, current)
+        }
+
+        checkCount(0)
+
+        let createUser: () -> DbUser = {
+            DbUser(userUuid: UUID(), firstName: nil, jsonStruct: .init(age: 1), jsonStructOptional: nil, jsonStructArray: [], jsonStructArrayOptional: nil, integer: 1)
+        }
+
+        var user = createUser()
+
+        try! user.genInsert(dbWriter: db)
+
+        checkCount(1)
+
+        user.firstName = "new"
+
+        try! user.genReplace(dbWriter: db)
+
+        checkCount(1)
+
+        try! createUser().genInsert(dbWriter: db)
+
+        checkCount(2)
+    }
+}

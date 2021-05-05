@@ -7,6 +7,7 @@ import GRDB
 public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     // Static queries
     public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
+    public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from User"
     public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ? where userUuid = ?"
 
@@ -105,6 +106,49 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
         try dbWriter.write { database in
             try genInsert(db: database)
+        }
+    }
+
+    public func genReplace(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        // Only 1 row should be affected
+        assert(db.changesCount == 1)
+    }
+
+    public func genReplace<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
+            try genReplace(db: database)
         }
     }
 

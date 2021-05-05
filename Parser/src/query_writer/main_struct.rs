@@ -4,6 +4,7 @@ use crate::swift_property::swift_properties_to_sqlite_database_values;
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
+pub const REPLACE_UNIQUE_QUERY: &str = "replaceUniqueQuery";
 pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
 
@@ -32,6 +33,7 @@ impl<'a> QueryWriterMainStruct<'a> {
     pub(crate) fn write_static_queries(mut self) {
         let mut static_queries = vec![
             self.static_unique_insert_query(),
+            self.static_unique_replace_query(),
             self.static_delete_all_query(),
         ];
 
@@ -49,7 +51,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         )
     }
 
-    fn static_unique_insert_query(&mut self) -> WriteResult {
+    fn columns_question_marks(&self, query: &'static str, prefix: &str) -> WriteResult {
         let separated_columns = self
             .table_meta_data
             .swift_properties
@@ -63,14 +65,23 @@ impl<'a> QueryWriterMainStruct<'a> {
             .join(", ");
 
         (
-            INSERT_UNIQUE_QUERY,
+            query,
             format!(
-                "insert into {} ({}) values ({})",
+                "{} into {} ({}) values ({})",
+                prefix,
                 self.table_meta_data.table_name,
                 separated_columns.join(", "),
                 question_marks
             ),
         )
+    }
+
+    fn static_unique_insert_query(&mut self) -> WriteResult {
+        self.columns_question_marks(INSERT_UNIQUE_QUERY, "insert")
+    }
+
+    fn static_unique_replace_query(&mut self) -> WriteResult {
+        self.columns_question_marks(REPLACE_UNIQUE_QUERY, "replace")
     }
 
     fn static_unique_update_query(&mut self) -> WriteResult {
@@ -102,6 +113,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         );
 
         self.write("Insert", INSERT_UNIQUE_QUERY, &db_values);
+        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values);
     }
 
     fn write_delete(&mut self) {

@@ -25,16 +25,6 @@ fn main() {
     run!("rm", ["-rf", "./compiled/"]);
     run!("cargo", ["build", "--release"]);
     run!("cp", ["-a", "target/release/.", "./compiled"]);
-    run!("cargo", [
-        "test",
-        "--package",
-        "sqlite_parser_swift_grdb",
-        "--bin",
-        "sqlite_parser_swift_grdb",
-        "generate_generated_code::update_generated_code",
-        "--",
-        "--exact"
-    ]);
     run!("rm", ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]);
     run!("cp", ["-a", "generated/.", "../GRDBPerformance/GRDBPerformance/Generated"]);
     run!("cargo", ["fmt"]);

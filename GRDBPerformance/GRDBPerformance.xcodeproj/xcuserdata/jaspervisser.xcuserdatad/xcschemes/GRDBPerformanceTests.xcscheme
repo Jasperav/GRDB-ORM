@@ -56,6 +56,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "8EDB24704243153F5C3387F7"
+            BuildableName = "GRDBPerformanceTests.xctest"
+            BlueprintName = "GRDBPerformanceTests"
+            ReferencedContainer = "container:GRDBPerformance.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
