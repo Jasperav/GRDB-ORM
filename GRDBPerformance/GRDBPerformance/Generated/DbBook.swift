@@ -7,6 +7,7 @@ import GRDB
 public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     // Static queries
     public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
+    public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from Book"
     public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
 
@@ -62,6 +63,30 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
         try dbWriter.write { database in
             try genInsert(db: database)
+        }
+    }
+
+    public func genReplace(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
+
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid?.uuidString,
+            integerOptional,
+            tsCreated,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        // Only 1 row should be affected
+        assert(db.changesCount == 1)
+    }
+
+    public func genReplace<T: DatabaseWriter>(dbWriter: T) throws {
+        try dbWriter.write { database in
+            try genReplace(db: database)
         }
     }
 
