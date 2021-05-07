@@ -216,8 +216,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
-            let values =
-                swift_properties_to_sqlite_database_values(values.iter().collect());
+            let values = swift_properties_to_sqlite_database_values(values.iter().collect());
 
             self.execute_update_statement(
                 &format!(
