@@ -21,40 +21,20 @@
 #   The name of the Swift function
 #
 # [return_types]
-#   The types to return from the function
+#   The types to return from the function. If you are deleting/updating a row, this must be empty.
+#
+# [return_types_is_array]
+#   Determines if the return type is an array. If you are deleting/updating a row, this value doesn't matter.
 #
 # [query]
 #   The actual query
 #
 # EXAMPLE
 #
-# [This is a query that finds a user by the users first name]
+# [This-is-a-query-that-finds-a-user-by-the-users-first-name]
 # parameter_types = [["User", "firstName", "firstName"]]
 # extension = "User"
 # func_name = "findByUsername"
 # return_types = ["User"]
 # return_types_is_array = true
 # query = "select * from User where firstName = ?"
-[pr-by-ts-created-desc]
-parameter_types = []
-extension = "PersistentRequest"
-func_name = "findOrderByTsCreatedDesc"
-return_types = ["PersistentRequest"]
-return_types_is_array = true
-query = "select * from PersistentRequest order by tsCreated desc"
-
-[delete-pr-by-request-uuid]
-parameter_types = [["PersistentRequest", "requestUuid", "requestUuid"]]
-extension = "PersistentRequest"
-func_name = "deleteByRequestUuid"
-return_types = []
-return_types_is_array = false
-query = "delete from PersistentRequest where requestUuid = ?"
-
-[has-persistent-request]
-parameter_types = []
-extension = "PersistentRequest"
-func_name = "hasAtLeastOneRow"
-return_types = ["Bool"]
-return_types_is_array = false
-query = "select exists(select 1 from PersistentRequest)"
