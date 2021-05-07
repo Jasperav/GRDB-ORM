@@ -176,7 +176,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             static_instance,
             method_name,
             WriteRead::Write,
-            &vec![],
+            &[],
         );
     }
 }

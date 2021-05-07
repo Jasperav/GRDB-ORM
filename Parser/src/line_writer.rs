@@ -66,7 +66,7 @@ impl StaticInstance {
     }
 }
 
-pub fn parameter_types_separated_colon(pt: &Vec<&SwiftProperty>) -> String {
+pub fn parameter_types_separated_colon(pt: &[&SwiftProperty]) -> String {
     if pt.is_empty() {
         return "".to_string();
     }
@@ -79,7 +79,7 @@ pub fn parameter_types_separated_colon(pt: &Vec<&SwiftProperty>) -> String {
             .join(", ")
 }
 
-fn parameter_separated_colon(pt: &Vec<&SwiftProperty>) -> String {
+fn parameter_separated_colon(pt: &[&SwiftProperty]) -> String {
     if pt.is_empty() {
         return "".to_string();
     }
@@ -130,7 +130,7 @@ impl LineWriter {
         static_instance: StaticInstance,
         original_method: &str,
         write_read: WriteRead,
-        parameter_with_types: &Vec<&SwiftProperty>,
+        parameter_with_types: &[&SwiftProperty],
     ) {
         let colon_separated_parameter_types_separated =
             parameter_types_separated_colon(parameter_with_types);

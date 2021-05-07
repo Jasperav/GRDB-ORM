@@ -83,7 +83,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             StaticInstance::Instance,
             "Select",
             WriteRead::Read(format!("{}?", self.table_meta_data.struct_name)),
-            &vec![],
+            &[],
         );
     }
 
@@ -107,14 +107,14 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             StaticInstance::Instance,
             "SelectExpect",
             WriteRead::Read(self.table_meta_data.struct_name.to_string()),
-            &vec![],
+            &[],
         );
     }
 
     fn execute_update_statement(
         &mut self,
         fn_name: &str,
-        parameters: &Vec<&SwiftProperty>,
+        parameters: &[&SwiftProperty],
         values: &str,
         statement: &str,
     ) {
@@ -142,7 +142,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             StaticInstance::Instance,
             fn_name,
             WriteRead::Write,
-            parameters,
+            &parameters.to_vec(),
         );
     }
 
@@ -155,7 +155,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.table_meta_data
             .line_writer
             .add_comment("Deletes a unique row, asserts that the row actually existed");
-        self.execute_update_statement("Delete", &vec![], &values, DELETE_QUERY)
+        self.execute_update_statement("Delete", &[], &values, DELETE_QUERY)
     }
 
     fn write_updatable_columns(&mut self) {
@@ -164,7 +164,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .table_meta_data
             .non_primary_keys()
             .into_iter()
-            .map(|s| s.clone())
+            .cloned()
             .collect::<Vec<_>>();
 
         // The ref makes it easier to call other functions
@@ -211,20 +211,20 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 .table_meta_data
                 .primary_keys()
                 .into_iter()
-                .map(|t| t.clone())
+                .cloned()
                 .collect::<Vec<_>>();
 
-            values.insert(0, property.clone().clone());
+            values.insert(0, <&SwiftProperty>::clone(property).clone());
 
             let values =
-                swift_properties_to_sqlite_database_values(values.iter().map(|v| v).collect());
+                swift_properties_to_sqlite_database_values(values.iter().collect());
 
             self.execute_update_statement(
                 &format!(
                     "Update{}",
                     some_kind_of_uppercase_first_letter(&property.swift_property_name)
                 ),
-                &vec![property],
+                &[property],
                 &values,
                 &format!(
                     "UpdatableColumn.update{}Query",
