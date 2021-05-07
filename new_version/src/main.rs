@@ -22,16 +22,13 @@ fn main() {
         };
     }
 
+    run!("cargo", ["test", "--verbose", "--", "--test-threads=1"]);
     run!("rm", ["-rf", "./compiled/"]);
     run!("cargo", ["build", "--release"]);
     run!("cp", ["-a", "target/release/.", "./compiled"]);
     run!("rm", ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]);
     run!("cp", ["-a", "generated/.", "../GRDBPerformance/GRDBPerformance/Generated"]);
     run!("cargo", ["fmt"]);
-
-    println!("Running checks...");
-
-    run!("cargo", ["test", "--verbose", "--", "--test-threads=1"]);
     run!("cargo", ["fmt", "--all", "--", "--check"]);
 
     // For some reason this doesn't work for me locally

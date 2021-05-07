@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbBook: FetchableRecord, PersistableRecord, Codable {
+public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
     public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
@@ -40,6 +40,11 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable {
     // The initializer defined by the protocol
     public init(row: Row) {
         self.init(row: row, startingIndex: 0)
+    }
+
+    // Easy way to get the PrimaryKey from the table
+    public func primaryKey() -> DbBookPrimaryKey {
+        .init(bookUuid: bookUuid)
     }
 
     public func genInsert(db: Database) throws {
@@ -195,11 +200,75 @@ public struct DbBookPrimaryKey {
             try genDelete(db: database)
         }
     }
-}
 
-// Easy way to get the PrimaryKey from the table
-public extension DbBook {
-    func primary_key() -> DbBookPrimaryKey {
-        .init(bookUuid: bookUuid)
+    public enum UpdatableColumn {
+        case userUuid, integerOptional, tsCreated
+
+        public static let updateUserUuidQuery = "update Book set userUuid = ? where bookUuid = ?"
+        public static let updateIntegerOptionalQuery = "update Book set integerOptional = ? where bookUuid = ?"
+        public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
+    }
+
+    public func genUpdateUserUuid(db: Database, userUuid: UUID?) throws {
+        let arguments: StatementArguments = try [
+            userUuid?.uuidString,
+            bookUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateUserUuidQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID?) throws {
+        try dbWriter.write { database in
+            try genUpdateUserUuid(db: database, userUuid: userUuid)
+        }
+    }
+
+    public func genUpdateIntegerOptional(db: Database, integerOptional: Int?) throws {
+        let arguments: StatementArguments = try [
+            integerOptional,
+            bookUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateIntegerOptionalQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateIntegerOptional<T: DatabaseWriter>(dbWriter: T, integerOptional: Int?) throws {
+        try dbWriter.write { database in
+            try genUpdateIntegerOptional(db: database, integerOptional: integerOptional)
+        }
+    }
+
+    public func genUpdateTsCreated(db: Database, tsCreated: Int64) throws {
+        let arguments: StatementArguments = try [
+            tsCreated,
+            bookUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateTsCreatedQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateTsCreated<T: DatabaseWriter>(dbWriter: T, tsCreated: Int64) throws {
+        try dbWriter.write { database in
+            try genUpdateTsCreated(db: database, tsCreated: tsCreated)
+        }
     }
 }

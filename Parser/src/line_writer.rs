@@ -1,31 +1,41 @@
+use crate::swift_property::SwiftProperty;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+#[derive(Clone)]
 pub enum WriteRead {
     Write,
-    Read,
+    // Return type
+    Read(String),
 }
 
 impl WriteRead {
     pub fn to_str(&self) -> &'static str {
         match self {
             WriteRead::Write => "write",
-            WriteRead::Read => "read",
+            WriteRead::Read(_) => "read",
         }
     }
 
     pub fn database_reader_or_writer(&self) -> &'static str {
         match self {
             WriteRead::Write => "dbWriter",
-            WriteRead::Read => "dbReader",
+            WriteRead::Read(_) => "dbReader",
         }
     }
 
     pub fn generic_type(&self) -> &'static str {
         match self {
             WriteRead::Write => "DatabaseWriter",
-            WriteRead::Read => "DatabaseReader",
+            WriteRead::Read(_) => "DatabaseReader",
+        }
+    }
+
+    pub fn return_type(&self) -> String {
+        match &self {
+            WriteRead::Write => "".to_string(),
+            WriteRead::Read(rt) => format!("-> {}", rt),
         }
     }
 }
@@ -36,7 +46,7 @@ impl WriteRead {
 pub struct LineWriter {
     lines: Vec<String>,
     // The modifier to apply to Swift types/properties
-    modifier: &'static str,
+    pub modifier: &'static str,
     // The output dir to put the generated files into
     output_dir: PathBuf,
 }
@@ -54,6 +64,32 @@ impl StaticInstance {
             StaticInstance::Instance => "",
         }
     }
+}
+
+pub fn parameter_types_separated_colon(pt: &[&SwiftProperty]) -> String {
+    if pt.is_empty() {
+        return "".to_string();
+    }
+
+    ", ".to_string()
+        + &pt
+            .iter()
+            .map(|pt| format!("{}: {}", pt.swift_property_name, pt.swift_type.type_name))
+            .collect::<Vec<_>>()
+            .join(", ")
+}
+
+fn parameter_separated_colon(pt: &[&SwiftProperty]) -> String {
+    if pt.is_empty() {
+        return "".to_string();
+    }
+
+    ", ".to_string()
+        + &pt
+            .iter()
+            .map(|pt| format!("{}: {}", pt.swift_property_name, pt.swift_property_name))
+            .collect::<Vec<_>>()
+            .join(", ")
 }
 
 impl LineWriter {
@@ -93,28 +129,29 @@ impl LineWriter {
         &mut self,
         static_instance: StaticInstance,
         original_method: &str,
-        return_type: &str,
         write_read: WriteRead,
+        parameter_with_types: &[&SwiftProperty],
     ) {
-        let return_type = if return_type.is_empty() {
-            "".to_string()
-        } else {
-            format!("-> {} ", return_type)
-        };
+        let colon_separated_parameter_types_separated =
+            parameter_types_separated_colon(parameter_with_types);
+        let colon_separated_parameter_separated = parameter_separated_colon(parameter_with_types);
+
         self.lines.push(format!(
-            "{} {}func gen{}<T: {}>({}: T) throws {}{{\n",
+            "{} {}func gen{}<T: {}>({}: T{}) throws {}{{\n",
             self.modifier,
             static_instance.modifier(),
             original_method,
             write_read.generic_type(),
             write_read.database_reader_or_writer(),
-            return_type
+            colon_separated_parameter_types_separated,
+            write_read.return_type()
         ));
         self.lines.push(format!(
-            "try {}.{} {{ database in\ntry gen{}(db: database)\n}}\n}}",
+            "try {}.{} {{ database in\ntry gen{}(db: database{})\n}}\n}}",
             write_read.database_reader_or_writer(),
             write_read.to_str(),
-            original_method
+            original_method,
+            colon_separated_parameter_separated
         ));
     }
 

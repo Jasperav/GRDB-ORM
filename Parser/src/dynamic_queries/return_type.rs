@@ -51,7 +51,7 @@ impl Query {
             Query::Select {
                 return_type,
                 decoding: _decoding,
-            } => format!("-> {}", return_type),
+            } => return_type.clone(),
             // This doesn't have a return type
             Query::UpdateOrDelete => "".to_string(),
         }

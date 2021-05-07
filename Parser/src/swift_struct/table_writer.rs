@@ -5,7 +5,6 @@ use sqlite_parser::Metadata;
 use crate::configuration::Config;
 use crate::query_writer::{QueryWriterMainStruct, QueryWriterPrimaryKey};
 use crate::swift_property::{create_swift_properties, create_swift_type_name};
-use crate::swift_struct::main_struct_to_pk::write_main_struct_to_pk;
 use crate::swift_struct::property_writer::{Location, PropertyWriter};
 use crate::table_meta_data::TableMetaData;
 
@@ -46,7 +45,7 @@ impl<'a> TableWriter<'a> {
             // Start the actual writing
             line_writer.add_comment("Mapped table to struct");
             line_writer.add_with_modifier(format!(
-                "struct {}: FetchableRecord, PersistableRecord, Codable {{\n",
+                "struct {}: FetchableRecord, PersistableRecord, Codable, Equatable {{\n",
                 struct_name
             ));
 
@@ -90,7 +89,8 @@ impl<'a> TableWriter<'a> {
 
             // Start of by writing the 'main struct'
             qw!(flow = MainStruct, {
-                crate::swift_struct::initializer::write_initializer(&mut qw!())
+                crate::swift_struct::initializer::write_initializer(&mut qw!());
+                crate::swift_struct::main_struct_to_pk::write_main_struct_to_pk(&mut qw!())
             });
 
             // Now write the primary key struct
@@ -107,9 +107,6 @@ impl<'a> TableWriter<'a> {
             qw!(flow = PrimaryKeyStruct, {
                 crate::swift_struct::initializer::write_default_initializer(&mut line_writer, &pk)
             });
-
-            // Write conversation from MainStruct to PrimaryKey
-            write_main_struct_to_pk(&mut qw!());
 
             line_writer.write_to_file(&struct_name);
         }

@@ -129,7 +129,11 @@ impl<'a> DynQueryParser<'a> {
 
             self.new_line();
 
-            let func_return_type = query.return_type();
+            let func_return_type = if query.return_type().is_empty() {
+                "".to_string()
+            } else {
+                format!("-> {}", query.return_type())
+            };
 
             // Write the method declaration
             self.add_line(format!(
@@ -144,19 +148,13 @@ impl<'a> DynQueryParser<'a> {
             match query {
                 Query::Select { .. } => {
                     self.write_easy_method(
-                        WriteRead::Read,
+                        WriteRead::Read(query.return_type()),
                         &dynamic_query.func_name,
                         &parameters,
-                        &query.return_type(),
                     );
                 }
                 Query::UpdateOrDelete => {
-                    self.write_easy_method(
-                        WriteRead::Write,
-                        &dynamic_query.func_name,
-                        &parameters,
-                        "",
-                    );
+                    self.write_easy_method(WriteRead::Write, &dynamic_query.func_name, &parameters);
                 }
             }
 
@@ -186,7 +184,6 @@ impl<'a> DynQueryParser<'a> {
         write_read: WriteRead,
         func_name: &str,
         arguments: &Vec<(String, String)>,
-        return_type: &str,
     ) {
         let mut arguments_with_db = arguments.clone();
 
@@ -215,7 +212,7 @@ impl<'a> DynQueryParser<'a> {
             func_name,
             write_read.generic_type(),
             separate_by_colon(&arguments_with_db),
-            return_type
+            write_read.return_type(),
         ));
         self.add_line(format!(
             "try {}.{} {{ db in

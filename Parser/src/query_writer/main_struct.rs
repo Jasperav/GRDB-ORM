@@ -175,8 +175,8 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_wrapper_pool(
             static_instance,
             method_name,
-            "",
             WriteRead::Write,
+            &[],
         );
     }
 }

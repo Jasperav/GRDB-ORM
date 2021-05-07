@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		691DEB9F264566EC00B7271B /* DbBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9B264566EC00B7271B /* DbBook.swift */; };
+		691DEBA0264566EC00B7271B /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9C264566EC00B7271B /* DynamicQueries.swift */; };
+		691DEBA1264566EC00B7271B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9D264566EC00B7271B /* Shared.swift */; };
+		691DEBA2264566EC00B7271B /* DbUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9E264566EC00B7271B /* DbUser.swift */; };
 		69260EC825D68AE700647E4C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 69260EC725D68AE700647E4C /* GRDB */; };
 		69B541C025C565FB00EDE898 /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B541BF25C565FB00EDE898 /* Update.swift */; };
 		69B541CF25C5700500EDE898 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF468425C463B100BA57ED /* User.swift */; };
@@ -16,14 +20,10 @@
 		8EDB204981B3F63DC49CE2F5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2525B0672826188A3A8F /* Main.storyboard */; };
 		8EDB20C1D3F9B82F0BEF7149 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB209DA0136439BD16B44B /* AppDelegate.swift */; };
 		8EDB216D5C236DF0F4E7A9B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB211838BFB5EBA7AF75AD /* ViewController.swift */; };
-		8EDB2441D51DDFCDAE5BAB5C /* DbUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB23C04FB01D7C53E66CDC /* DbUser.swift */; };
 		8EDB24E7EA5EA20A7782DE10 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB27517F72CCF30214969A /* SceneDelegate.swift */; };
 		8EDB2514FAB767ABAE46899C /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB20700B42A291685AFCDA /* DynamicQueries.swift */; };
-		8EDB27249C6767927DACD9DB /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB27D352465E1E2732155A /* Shared.swift */; };
-		8EDB291F892AA3B68A34C931 /* DbBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB23E95CDC41EA54D7A880 /* DbBook.swift */; };
 		8EDB2958947EC267F3400DE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2228146EE3529FC7AE14 /* Assets.xcassets */; };
 		8EDB2A6EFEC2CA05239A53CA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2EA1B269369A06C0A189 /* LaunchScreen.storyboard */; };
-		8EDB2AFBBB5C95A4A8090C7A /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB250E6F0B64A6144CE040 /* DynamicQueries.swift */; };
 		8EDB2B9460A3CADF34315E80 /* Insert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB2A073F1F23BD634ADF13 /* Insert.swift */; };
 		8EDB2DD4A368132DE1F052A4 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB29D295E7BF625ED8E694 /* Util.swift */; };
 /* End PBXBuildFile section */
@@ -39,6 +39,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		691DEB9B264566EC00B7271B /* DbBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbBook.swift; sourceTree = "<group>"; };
+		691DEB9C264566EC00B7271B /* DynamicQueries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicQueries.swift; sourceTree = "<group>"; };
+		691DEB9D264566EC00B7271B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		691DEB9E264566EC00B7271B /* DbUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbUser.swift; sourceTree = "<group>"; };
 		69B541BF25C565FB00EDE898 /* Update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Update.swift; sourceTree = "<group>"; };
 		69DF467025C45F8D00BA57ED /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
 		69DF468425C463B100BA57ED /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -49,13 +53,9 @@
 		8EDB211838BFB5EBA7AF75AD /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		8EDB2228146EE3529FC7AE14 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8EDB22E7D75A647FA0419D02 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
-		8EDB23C04FB01D7C53E66CDC /* DbUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbUser.swift; sourceTree = "<group>"; };
 		8EDB23D3877E6B3FA177082A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
-		8EDB23E95CDC41EA54D7A880 /* DbBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbBook.swift; sourceTree = "<group>"; };
-		8EDB250E6F0B64A6144CE040 /* DynamicQueries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicQueries.swift; sourceTree = "<group>"; };
 		8EDB26890C6054582BDD1366 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8EDB27517F72CCF30214969A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		8EDB27D352465E1E2732155A /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 		8EDB28AD4770B2C4FD45F50C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8EDB298C51647EAF1585D54F /* GRDBPerformanceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GRDBPerformanceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EDB29D295E7BF625ED8E694 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
@@ -85,10 +85,10 @@
 		69DF467425C4619700BA57ED /* Generated */ = {
 			isa = PBXGroup;
 			children = (
-				8EDB23E95CDC41EA54D7A880 /* DbBook.swift */,
-				8EDB23C04FB01D7C53E66CDC /* DbUser.swift */,
-				8EDB250E6F0B64A6144CE040 /* DynamicQueries.swift */,
-				8EDB27D352465E1E2732155A /* Shared.swift */,
+				691DEB9B264566EC00B7271B /* DbBook.swift */,
+				691DEB9E264566EC00B7271B /* DbUser.swift */,
+				691DEB9C264566EC00B7271B /* DynamicQueries.swift */,
+				691DEB9D264566EC00B7271B /* Shared.swift */,
 			);
 			path = Generated;
 			sourceTree = "<group>";
@@ -209,7 +209,7 @@
 			);
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
-				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
 			projectDirPath = "";
@@ -259,15 +259,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				691DEB9F264566EC00B7271B /* DbBook.swift in Sources */,
+				691DEBA0264566EC00B7271B /* DynamicQueries.swift in Sources */,
 				8EDB20C1D3F9B82F0BEF7149 /* AppDelegate.swift in Sources */,
 				8EDB24E7EA5EA20A7782DE10 /* SceneDelegate.swift in Sources */,
 				8EDB216D5C236DF0F4E7A9B7 /* ViewController.swift in Sources */,
 				69B541CF25C5700500EDE898 /* User.swift in Sources */,
+				691DEBA1264566EC00B7271B /* Shared.swift in Sources */,
+				691DEBA2264566EC00B7271B /* DbUser.swift in Sources */,
 				8EDB2DD4A368132DE1F052A4 /* Util.swift in Sources */,
-				8EDB291F892AA3B68A34C931 /* DbBook.swift in Sources */,
-				8EDB2441D51DDFCDAE5BAB5C /* DbUser.swift in Sources */,
-				8EDB2AFBBB5C95A4A8090C7A /* DynamicQueries.swift in Sources */,
-				8EDB27249C6767927DACD9DB /* Shared.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,7 +520,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -533,7 +533,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		69260EC725D68AE700647E4C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

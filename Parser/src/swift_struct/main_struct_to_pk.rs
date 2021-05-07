@@ -13,12 +13,9 @@ pub fn write_main_struct_to_pk(tmd: &mut TableMetaData<'_>) {
         .join(", ");
 
     tmd.line_writer.add_with_modifier(format!(
-        "extension {} {{
-            func primary_key() -> {} {{
-                .init({})
-            }}
-        }}
-    ",
-        tmd.struct_name, tmd.primary_key_struct_name, properties
+        "func primaryKey() -> {} {{
+            .init({})
+        }}",
+        tmd.primary_key_struct_name, properties
     ))
 }
