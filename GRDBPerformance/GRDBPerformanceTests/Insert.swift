@@ -60,3 +60,22 @@ class ReplaceTest: XCTestCase {
         checkCount(2)
     }
 }
+
+class UpdatableColumnTest: XCTestCase {
+    func testUpdatableColumn() {
+        let db = setupPool()
+        var user = DbUser(userUuid: UUID(), firstName: nil, jsonStruct: .init(age: 1), jsonStructOptional: nil, jsonStructArray: [], jsonStructArrayOptional: nil, integer: 1)
+
+        try! db.write { con in
+            try! user.genInsert(db: con)
+            
+            let newFirstName = "new"
+            
+            try! user.primaryKey().genUpdateFirstName(db: con, firstName: newFirstName)
+
+            user.firstName = newFirstName
+
+            XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+        }
+    }
+}

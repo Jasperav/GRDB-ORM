@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbUser: FetchableRecord, PersistableRecord, Codable {
+public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
     public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
     public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
@@ -64,6 +64,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable {
     // The initializer defined by the protocol
     public init(row: Row) {
         self.init(row: row, startingIndex: 0)
+    }
+
+    // Easy way to get the PrimaryKey from the table
+    public func primaryKey() -> DbUserPrimaryKey {
+        .init(userUuid: userUuid)
     }
 
     public func genInsert(db: Database) throws {
@@ -276,11 +281,157 @@ public struct DbUserPrimaryKey {
             try genDelete(db: database)
         }
     }
-}
 
-// Easy way to get the PrimaryKey from the table
-public extension DbUser {
-    func primary_key() -> DbUserPrimaryKey {
-        .init(userUuid: userUuid)
+    public enum UpdatableColumn {
+        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer
+
+        public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
+        public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
+        public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
+        public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
+        public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
+        public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
+    }
+
+    public func genUpdateFirstName(db: Database, firstName: String?) throws {
+        let arguments: StatementArguments = try [
+            firstName,
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateFirstNameQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateFirstName<T: DatabaseWriter>(dbWriter: T, firstName: String?) throws {
+        try dbWriter.write { database in
+            try genUpdateFirstName(db: database, firstName: firstName)
+        }
+    }
+
+    public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType) throws {
+        let arguments: StatementArguments = try [
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateJsonStruct<T: DatabaseWriter>(dbWriter: T, jsonStruct: JsonType) throws {
+        try dbWriter.write { database in
+            try genUpdateJsonStruct(db: database, jsonStruct: jsonStruct)
+        }
+    }
+
+    public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?) throws {
+        let arguments: StatementArguments = try [
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructOptionalQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateJsonStructOptional<T: DatabaseWriter>(dbWriter: T, jsonStructOptional: JsonType?) throws {
+        try dbWriter.write { database in
+            try genUpdateJsonStructOptional(db: database, jsonStructOptional: jsonStructOptional)
+        }
+    }
+
+    public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
+        let arguments: StatementArguments = try [
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateJsonStructArray<T: DatabaseWriter>(dbWriter: T, jsonStructArray: [JsonType]) throws {
+        try dbWriter.write { database in
+            try genUpdateJsonStructArray(db: database, jsonStructArray: jsonStructArray)
+        }
+    }
+
+    public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
+        let arguments: StatementArguments = try [
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayOptionalQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateJsonStructArrayOptional<T: DatabaseWriter>(dbWriter: T, jsonStructArrayOptional: [JsonType]?) throws {
+        try dbWriter.write { database in
+            try genUpdateJsonStructArrayOptional(db: database, jsonStructArrayOptional: jsonStructArrayOptional)
+        }
+    }
+
+    public func genUpdateInteger(db: Database, integer: Int) throws {
+        let arguments: StatementArguments = try [
+            integer,
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateIntegerQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateInteger<T: DatabaseWriter>(dbWriter: T, integer: Int) throws {
+        try dbWriter.write { database in
+            try genUpdateInteger(db: database, integer: integer)
+        }
     }
 }

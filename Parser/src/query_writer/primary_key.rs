@@ -1,6 +1,7 @@
-use crate::line_writer::{StaticInstance, WriteRead};
+use crate::line_writer::{parameter_types_separated_colon, StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
-use crate::swift_property::swift_properties_to_sqlite_database_values;
+use crate::some_kind_of_uppercase_first_letter;
+use crate::swift_property::{swift_properties_to_sqlite_database_values, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
 
 pub const SELECT_QUERY: &str = "selectQuery";
@@ -48,6 +49,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.write_select_query();
         self.write_select_query_expect();
         self.write_delete_query();
+        self.write_updatable_columns();
 
         self.table_meta_data.line_writer.add_closing_brackets();
     }
@@ -80,8 +82,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.table_meta_data.line_writer.add_wrapper_pool(
             StaticInstance::Instance,
             "Select",
-            &format!("{}?", self.table_meta_data.struct_name),
-            WriteRead::Read,
+            WriteRead::Read(format!("{}?", self.table_meta_data.struct_name)),
+            &vec![],
         );
     }
 
@@ -104,22 +106,20 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.table_meta_data.line_writer.add_wrapper_pool(
             StaticInstance::Instance,
             "SelectExpect",
-            self.table_meta_data.struct_name,
-            WriteRead::Read,
+            WriteRead::Read(self.table_meta_data.struct_name.to_string()),
+            &vec![],
         );
     }
 
-    fn write_delete_query(&mut self) {
-        let values =
-            swift_properties_to_sqlite_database_values(self.table_meta_data.primary_keys());
-
-        assert!(!values.is_empty());
-
-        self.table_meta_data
-            .line_writer
-            .add_comment("Deletes a unique row, asserts that the row actually existed");
+    fn execute_update_statement(
+        &mut self,
+        fn_name: &str,
+        parameters: &Vec<&SwiftProperty>,
+        values: &str,
+        statement: &str,
+    ) {
         self.table_meta_data.line_writer.add_with_modifier(format!(
-            "func genDelete(db: Database) throws {{
+            "func gen{}(db: Database{}) throws {{
             let arguments: StatementArguments = try [
                 {}
             ]
@@ -133,13 +133,104 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             assert(db.changesCount == 1)
         }}
         ",
-            values, DELETE_QUERY
+            fn_name,
+            parameter_types_separated_colon(parameters),
+            values,
+            statement
         ));
         self.table_meta_data.line_writer.add_wrapper_pool(
             StaticInstance::Instance,
-            "Delete",
-            "",
+            fn_name,
             WriteRead::Write,
+            parameters,
         );
+    }
+
+    fn write_delete_query(&mut self) {
+        let values =
+            swift_properties_to_sqlite_database_values(self.table_meta_data.primary_keys());
+
+        assert!(!values.is_empty());
+
+        self.table_meta_data
+            .line_writer
+            .add_comment("Deletes a unique row, asserts that the row actually existed");
+        self.execute_update_statement("Delete", &vec![], &values, DELETE_QUERY)
+    }
+
+    fn write_updatable_columns(&mut self) {
+        // Write the updatable columns
+        let updatable_columns = self
+            .table_meta_data
+            .non_primary_keys()
+            .into_iter()
+            .map(|s| s.clone())
+            .collect::<Vec<_>>();
+
+        // The ref makes it easier to call other functions
+        let updatable_columns = updatable_columns.iter().collect::<Vec<_>>();
+
+        if updatable_columns.is_empty() {
+            return;
+        }
+
+        let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
+        let cases = updatable_columns
+            .iter()
+            .map(|t| t.swift_property_name.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+        let queries = updatable_columns
+            .iter()
+            .map(|u| {
+                let update_query = format!(
+                    "update {} set {} = ? where {}",
+                    self.table_meta_data.table_name, u.column.name, pk_separated
+                );
+                format!(
+                    "{} static let update{}Query = \"{}\"",
+                    self.table_meta_data.line_writer.modifier,
+                    some_kind_of_uppercase_first_letter(&u.swift_property_name),
+                    update_query
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "enum UpdatableColumn {{
+                case {}
+
+                {}
+             }}",
+            cases, queries
+        ));
+
+        for property in &updatable_columns {
+            let mut values = self
+                .table_meta_data
+                .primary_keys()
+                .into_iter()
+                .map(|t| t.clone())
+                .collect::<Vec<_>>();
+
+            values.insert(0, property.clone().clone());
+
+            let values =
+                swift_properties_to_sqlite_database_values(values.iter().map(|v| v).collect());
+
+            self.execute_update_statement(
+                &format!(
+                    "Update{}",
+                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
+                ),
+                &vec![property],
+                &values,
+                &format!(
+                    "UpdatableColumn.update{}Query",
+                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
+                ),
+            );
+        }
     }
 }
