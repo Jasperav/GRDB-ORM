@@ -1,0 +1,4 @@
+[user-first-name]
+table = "table"
+columns_to_update = ["jmr"]
+func_name = "method_name"

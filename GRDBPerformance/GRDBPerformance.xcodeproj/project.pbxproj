@@ -25,6 +25,8 @@
 		8EDB2958947EC267F3400DE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2228146EE3529FC7AE14 /* Assets.xcassets */; };
 		8EDB2A6EFEC2CA05239A53CA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2EA1B269369A06C0A189 /* LaunchScreen.storyboard */; };
 		8EDB2B9460A3CADF34315E80 /* Insert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB2A073F1F23BD634ADF13 /* Insert.swift */; };
+		8EDB2C5CA75D7687E66575AB /* Upserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB2ECC389D2604101B6362 /* Upserts.swift */; };
+		8EDB2C9F86C92E9792D52B11 /* Upserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB2F8E0FFB62F6BFADA6C1 /* Upserts.swift */; };
 		8EDB2DD4A368132DE1F052A4 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB29D295E7BF625ED8E694 /* Util.swift */; };
 /* End PBXBuildFile section */
 
@@ -61,6 +63,8 @@
 		8EDB29D295E7BF625ED8E694 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		8EDB2A073F1F23BD634ADF13 /* Insert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Insert.swift; sourceTree = "<group>"; };
 		8EDB2D725E2FB79679BB9F4E /* GRDBPerformance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GRDBPerformance.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EDB2ECC389D2604101B6362 /* Upserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Upserts.swift; sourceTree = "<group>"; };
+		8EDB2F8E0FFB62F6BFADA6C1 /* Upserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Upserts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +93,7 @@
 				691DEB9E264566EC00B7271B /* DbUser.swift */,
 				691DEB9C264566EC00B7271B /* DynamicQueries.swift */,
 				691DEB9D264566EC00B7271B /* Shared.swift */,
+				8EDB2F8E0FFB62F6BFADA6C1 /* Upserts.swift */,
 			);
 			path = Generated;
 			sourceTree = "<group>";
@@ -120,6 +125,7 @@
 				8EDB20700B42A291685AFCDA /* DynamicQueries.swift */,
 				69DF467025C45F8D00BA57ED /* Setup.swift */,
 				8EDB23D3877E6B3FA177082A /* Info.plist */,
+				8EDB2ECC389D2604101B6362 /* Upserts.swift */,
 			);
 			path = GRDBPerformanceTests;
 			sourceTree = "<group>";
@@ -252,6 +258,7 @@
 				69DF467125C45F8D00BA57ED /* Setup.swift in Sources */,
 				69DF468D25C47E7100BA57ED /* Select.swift in Sources */,
 				8EDB2514FAB767ABAE46899C /* DynamicQueries.swift in Sources */,
+				8EDB2C5CA75D7687E66575AB /* Upserts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,6 +275,7 @@
 				691DEBA1264566EC00B7271B /* Shared.swift in Sources */,
 				691DEBA2264566EC00B7271B /* DbUser.swift in Sources */,
 				8EDB2DD4A368132DE1F052A4 /* Util.swift in Sources */,
+				8EDB2C9F86C92E9792D52B11 /* Upserts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

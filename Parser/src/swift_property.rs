@@ -188,7 +188,7 @@ fn sqlite_type_to_swift_type(t: Type) -> &'static str {
 }
 
 /// This transforms given [SwiftProperty]s to SQLite database values
-pub fn swift_properties_to_sqlite_database_values(swift_properties: Vec<&SwiftProperty>) -> String {
+pub fn swift_properties_to_sqlite_database_values(swift_properties: &[&SwiftProperty]) -> String {
     swift_properties
         .iter()
         .map(|property| {

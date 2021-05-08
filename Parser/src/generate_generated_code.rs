@@ -2,6 +2,7 @@ use crate::configuration::{Config, Visibility};
 use crate::custom_mapping::CustomMapping;
 use crate::dynamic_queries::DynamicQuery;
 use crate::parse::parse;
+use crate::upsert::Upsert;
 use regex::Regex;
 use rusqlite::NO_PARAMS;
 use sqlite_parser::Metadata;
@@ -109,6 +110,15 @@ fn update_generated_code() {
                 query: "select exists(select 1 from Book)".to_string(),
             },
         ],
+        upserts: vec![Upsert {
+            table: "User".to_string(),
+            columns_to_update: vec![
+                "jsonStruct".to_string(),
+                "jsonStructOptional".to_string(),
+                "integer".to_string(),
+            ],
+            func_name: "upsertExample".to_string(),
+        }],
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",
         use_swiftformat: true,

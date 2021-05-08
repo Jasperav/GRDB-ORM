@@ -11,9 +11,6 @@
 #   It can be read like this: take column (second argument) firstName from table (first argument) as parameter
 #   with name firstName (third argument)
 #
-#   Note: you can also used fixed types, like this:
-#       ["FIXED", "Int", "firstName"]
-#
 # [extension]
 #   The extension is the type to add the method to (extension User { myMethod() {...} })
 #
@@ -24,7 +21,7 @@
 #   The types to return from the function. If you are deleting/updating a row, this must be empty.
 #
 # [return_types_is_array]
-#   Determines if the return type is an array. If you are deleting/updating a row, this value doesn't matter.
+#   Determines if the return type is an array. If you are deleting/updating a row, this value is ignored.
 #
 # [query]
 #   The actual query
