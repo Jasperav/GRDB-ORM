@@ -22,7 +22,8 @@ public func setupPool() -> DatabasePool {
                 jsonStructOptional TEXT,
                 jsonStructArray TEXT NOT NULL,
                 jsonStructArrayOptional TEXT,
-                integer INTEGER NOT NULL
+                integer INTEGER NOT NULL,
+                bool INTEGER NOT NULL
             );
         create table Book
             (
