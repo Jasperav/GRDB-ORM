@@ -1,18 +1,9 @@
-use std::ops::{Deref, DerefMut};
-
-use rusqlite::{Connection, Error, NO_PARAMS};
-use sqlite_parser::Metadata;
-
-use crate::configuration::Config;
 use crate::dynamic_queries::reader::DynamicQuery;
 use crate::dynamic_queries::return_type::{Query, ReturnType};
-use crate::line_writer::{parameter_types_separated_colon, LineWriter, StaticInstance, WriteRead};
+use crate::line_writer::{parameter_types_separated_colon, StaticInstance, WriteRead};
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{
-    create_swift_properties, create_swift_type_name, swift_properties_to_sqlite_database_values,
-    SwiftProperty, SwiftType, SwiftTypeWithTypeName,
-};
+use crate::swift_property::create_swift_type_name;
 
 /// Parses a dynamic query
 impl<'a> Parser<'a> {
@@ -209,19 +200,4 @@ impl<'a> Parser<'a> {
 
         self.add_closing_brackets();
     }
-}
-
-fn separate_by_colon(parameters: &[(String, String)]) -> String {
-    if parameters.is_empty() {
-        return "".to_string();
-    }
-
-    ", ".to_string()
-        + &parameters
-            .iter()
-            .map(|(parameter_name, parameter_value)| {
-                format!("{}: {}", parameter_name, parameter_value)
-            })
-            .collect::<Vec<_>>()
-            .join(", ")
 }

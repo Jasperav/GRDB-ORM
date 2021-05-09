@@ -13,6 +13,10 @@ class UpsertTest: XCTestCase {
 
         user.integer += 1
 
-        user.upsertExample(dbWriter: <#T##T##T#>)
+        try! user.upsertExample(dbWriter: db)
+
+        let retrievedUser = try! user.primaryKey().genSelectExpect(dbReader: db)
+
+        XCTAssertEqual(user, retrievedUser)
     }
 }

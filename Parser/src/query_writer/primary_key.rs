@@ -1,4 +1,4 @@
-use crate::line_writer::{parameter_types_separated_colon, StaticInstance, WriteRead};
+use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{swift_properties_to_sqlite_database_values, SwiftProperty};
@@ -138,7 +138,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .table_meta_data
             .primary_keys()
             .into_iter()
-            .map(|s| s.clone())
+            .cloned()
             .collect::<Vec<_>>();
 
         assert!(!values.is_empty());

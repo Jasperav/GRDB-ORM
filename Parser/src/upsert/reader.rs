@@ -1,4 +1,3 @@
-use crate::dynamic_queries::DynamicQuery;
 use toml::Value;
 
 /// The custom mapping for a type

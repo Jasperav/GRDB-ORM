@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
         self.new_line();
     }
 
-    pub fn write(mut self, file_name: &str) {
+    pub fn write(self, file_name: &str) {
         self.line_writer.write_to_file(file_name);
 
         println!("Successfully processed");
