@@ -1,4 +1,4 @@
-use crate::parse::{test_query, Parser};
+use crate::parse::Parser;
 use crate::query_writer::QueryWriterMainStruct;
 use crate::swift_property::{create_swift_properties, create_swift_type_name};
 use crate::table_meta_data::TableMetaData;
@@ -56,7 +56,14 @@ impl<'a> Parser<'a> {
             let update = upsert
                 .columns_to_update
                 .iter()
-                .map(|c| format!("{column}=excluded.{column}", column = c))
+                .map(|c| {
+                    assert!(tmd
+                        .swift_properties
+                        .iter()
+                        .any(|s| s.column.name.to_lowercase() == c.to_lowercase()));
+
+                    format!("{column}=excluded.{column}", column = c)
+                })
                 .collect::<Vec<_>>()
                 .join(", ");
 
@@ -66,7 +73,7 @@ impl<'a> Parser<'a> {
                 insert_query, pk_comma, update
             );
 
-            test_query(&self.config.sqlite_location, &query, true);
+            // Don't actually test the query because the table can have mandatory foreign keys
 
             let values = tmd.swift_properties.clone();
 
