@@ -46,7 +46,8 @@ extension DbUser {
                 jsonStructOptional: nil,
                 jsonStructArray: [JsonType(age: 1)],
                 jsonStructArrayOptional: nil,
-                integer: 1)
+                integer: 1,
+                bool: true)
     }
 }
 
@@ -58,6 +59,7 @@ extension User {
                 jsonStructOptional: nil,
                 jsonStructArray: [JsonType(age: 1)],
                 jsonStructArrayOptional: nil,
-                integer: 1)
+                integer: 1,
+                bool: true)
     }
 }

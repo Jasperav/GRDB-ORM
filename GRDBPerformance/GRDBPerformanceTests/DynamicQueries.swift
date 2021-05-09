@@ -18,7 +18,8 @@ class DynamicQueryTest: XCTestCase {
                 jsonStructArrayOptional: [
                     JsonType(age: 3)
                 ],
-                integer: 2)
+                integer: 2,
+                bool: true)
         let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
         let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 

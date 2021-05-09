@@ -35,6 +35,10 @@ fn update_generated_code() {
                 the_type: "Int64".to_string(),
                 regexes: vec![Regex::new("tsCreated").unwrap()],
             },
+            CustomMapping {
+                the_type: "Bool".to_string(),
+                regexes: vec![Regex::new("bool").unwrap()],
+            },
         ],
         dynamic_queries: vec![
             DynamicQuery {
@@ -148,7 +152,8 @@ pub fn create_db() -> (Metadata, String) {
                 jsonStructOptional TEXT,
                 jsonStructArray TEXT NOT NULL,
                 jsonStructArrayOptional TEXT,
-                integer INTEGER NOT NULL
+                integer INTEGER NOT NULL,
+                bool INTEGER NOT NULL
             );
         ",
         NO_PARAMS,
