@@ -1,4 +1,4 @@
-use crate::parse::{test_query, Parser};
+use crate::parse::Parser;
 use crate::query_writer::QueryWriterMainStruct;
 use crate::swift_property::{create_swift_properties, create_swift_type_name};
 use crate::table_meta_data::TableMetaData;
