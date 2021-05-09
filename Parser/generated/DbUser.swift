@@ -6,10 +6,10 @@ import GRDB
 // Mapped table to struct
 public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
-    public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
-    public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer) values (?, ?, ?, ?, ?, ?, ?)"
+    public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool) values (?, ?, ?, ?, ?, ?, ?, ?)"
+    public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool) values (?, ?, ?, ?, ?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from User"
-    public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ? where userUuid = ?"
+    public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ?, bool = ? where userUuid = ?"
 
     // Mapped columns to properties
     public let userUuid: UUID
@@ -19,6 +19,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public var jsonStructArray: [JsonType]
     public var jsonStructArrayOptional: [JsonType]?
     public var integer: Int
+    public var bool: Bool
 
     // Default initializer
     public init(userUuid: UUID,
@@ -27,7 +28,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 jsonStructOptional: JsonType?,
                 jsonStructArray: [JsonType],
                 jsonStructArrayOptional: [JsonType]?,
-                integer: Int)
+                integer: Int,
+                bool: Bool)
     {
         self.userUuid = userUuid
         self.firstName = firstName
@@ -36,6 +38,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         self.jsonStructArray = jsonStructArray
         self.jsonStructArrayOptional = jsonStructArrayOptional
         self.integer = integer
+        self.bool = bool
     }
 
     // Row initializer
@@ -59,6 +62,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }()
         integer = row[6 + startingIndex]
+        bool = row[7 + startingIndex]
     }
 
     // The initializer defined by the protocol
@@ -98,6 +102,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 }
             }(),
             integer,
+            bool,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -141,6 +146,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 }
             }(),
             integer,
+            bool,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -195,6 +201,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 }
             }(),
             integer,
+            bool,
             userUuid.uuidString,
         ]
 
@@ -283,7 +290,7 @@ public struct DbUserPrimaryKey {
     }
 
     public enum UpdatableColumn {
-        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer
+        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool
 
         public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
         public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
@@ -291,6 +298,7 @@ public struct DbUserPrimaryKey {
         public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
         public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
         public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
+        public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
     }
 
     public func genUpdateFirstName(db: Database, firstName: String?) throws {
@@ -432,6 +440,27 @@ public struct DbUserPrimaryKey {
     public func genUpdateInteger<T: DatabaseWriter>(dbWriter: T, integer: Int) throws {
         try dbWriter.write { database in
             try genUpdateInteger(db: database, integer: integer)
+        }
+    }
+
+    public func genUpdateBool(db: Database, bool: Bool) throws {
+        let arguments: StatementArguments = try [
+            bool,
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBoolQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateBool<T: DatabaseWriter>(dbWriter: T, bool: Bool) throws {
+        try dbWriter.write { database in
+            try genUpdateBool(db: database, bool: bool)
         }
     }
 }
