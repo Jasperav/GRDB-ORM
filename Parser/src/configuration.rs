@@ -4,6 +4,7 @@ use crate::custom_mapping::CustomMapping;
 use crate::dynamic_queries::DynamicQuery;
 use crate::line_writer::LineWriter;
 use crate::output_dir_initializer::create_safe_dir;
+use crate::upsert::Upsert;
 
 /// All the configuration that can be done in one place
 pub struct Config {
@@ -11,6 +12,7 @@ pub struct Config {
     pub output_dir: PathBuf,
     pub custom_mapping: Vec<CustomMapping>,
     pub dynamic_queries: Vec<DynamicQuery>,
+    pub upserts: Vec<Upsert>,
     pub suffix_swift_structs: &'static str,
     pub prefix_swift_structs: &'static str,
     pub use_swiftformat: bool,

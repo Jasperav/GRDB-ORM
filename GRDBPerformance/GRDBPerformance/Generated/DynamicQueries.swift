@@ -30,8 +30,8 @@ public extension DbBook {
     }
 
     static func booksForUserWithSpecificUuid<T: DatabaseReader>(dbReader: T, userUuid: UUID) throws -> [(DbBook, Int, [JsonType]?, Int)] {
-        try dbReader.read { db in
-            try Self.booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
+        try dbReader.read { database in
+            try booksForUserWithSpecificUuid(db: database, userUuid: userUuid)
         }
     }
 }
@@ -56,8 +56,8 @@ public extension DbUser {
     }
 
     static func findByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> DbUser? {
-        try dbReader.read { db in
-            try Self.findByUsername(db: db, firstName: firstName)
+        try dbReader.read { database in
+            try findByUsername(db: database, firstName: firstName)
         }
     }
 }
@@ -82,8 +82,8 @@ public extension DbUser {
     }
 
     static func findUserUuidByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> UUID? {
-        try dbReader.read { db in
-            try Self.findUserUuidByUsername(db: db, firstName: firstName)
+        try dbReader.read { database in
+            try findUserUuidByUsername(db: database, firstName: firstName)
         }
     }
 }
@@ -103,8 +103,8 @@ public extension DbUser {
     }
 
     static func amountOfUsers<T: DatabaseReader>(dbReader: T) throws -> Int {
-        try dbReader.read { db in
-            try Self.amountOfUsers(db: db)
+        try dbReader.read { database in
+            try amountOfUsers(db: database)
         }
     }
 }
@@ -123,8 +123,8 @@ public extension DbBook {
     }
 
     static func deleteByUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
-        try dbWriter.write { db in
-            try Self.deleteByUserUuid(db: db, userUuid: userUuid)
+        try dbWriter.write { database in
+            try deleteByUserUuid(db: database, userUuid: userUuid)
         }
     }
 }
@@ -144,8 +144,8 @@ public extension DbBook {
     }
 
     static func hasAtLeastOneBook<T: DatabaseReader>(dbReader: T) throws -> Bool {
-        try dbReader.read { db in
-            try Self.hasAtLeastOneBook(db: db)
+        try dbReader.read { database in
+            try hasAtLeastOneBook(db: database)
         }
     }
 }

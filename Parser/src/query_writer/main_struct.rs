@@ -76,7 +76,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         )
     }
 
-    fn static_unique_insert_query(&mut self) -> WriteResult {
+    pub fn static_unique_insert_query(&mut self) -> WriteResult {
         self.columns_question_marks(INSERT_UNIQUE_QUERY, "insert")
     }
 
@@ -109,7 +109,11 @@ impl<'a> QueryWriterMainStruct<'a> {
 
     fn write_insert(&mut self) {
         let db_values = swift_properties_to_sqlite_database_values(
-            self.table_meta_data.swift_properties.iter().collect(),
+            self.table_meta_data
+                .swift_properties
+                .iter()
+                .collect::<Vec<_>>()
+                .as_slice(),
         );
 
         self.write("Insert", INSERT_UNIQUE_QUERY, &db_values);
@@ -131,7 +135,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         non_pk.append(&mut pk);
 
-        let values = swift_properties_to_sqlite_database_values(non_pk);
+        let values = swift_properties_to_sqlite_database_values(&non_pk);
 
         self.write("Update", UPDATE_UNIQUE_QUERY, &values);
     }
@@ -176,6 +180,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             static_instance,
             method_name,
             WriteRead::Write,
+            true,
             &[],
         );
     }

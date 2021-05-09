@@ -1,0 +1,21 @@
+# Below is an example of an upsert
+# https://www.sqlite.org/lang_UPSERT.html
+#
+# []
+#   It starts with a mandatory comment, which looks like this: [my comment].
+#
+# [table]
+#   The name of the table you want the upsert to generated for
+#
+# [columns_to_update]
+#   The updates that are included in the ON CONFLICT clause
+#
+# [func_name]
+#   The Swift function name to generate
+#
+# EXAMPLE
+#
+# [user-first-name]
+#   table = "User"
+#   columns_to_update = ["firstName"]
+#   func_name = "updateFirstName"

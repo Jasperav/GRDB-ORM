@@ -1,4 +1,4 @@
-use crate::line_writer::{parameter_types_separated_colon, StaticInstance, WriteRead};
+use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{swift_properties_to_sqlite_database_values, SwiftProperty};
@@ -56,7 +56,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn write_select_query(&mut self) {
         let values =
-            swift_properties_to_sqlite_database_values(self.table_meta_data.primary_keys());
+            swift_properties_to_sqlite_database_values(&self.table_meta_data.primary_keys());
 
         self.table_meta_data
             .line_writer
@@ -83,6 +83,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             StaticInstance::Instance,
             "Select",
             WriteRead::Read(format!("{}?", self.table_meta_data.struct_name)),
+            true,
             &[],
         );
     }
@@ -107,6 +108,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             StaticInstance::Instance,
             "SelectExpect",
             WriteRead::Read(self.table_meta_data.struct_name.to_string()),
+            true,
             &[],
         );
     }
@@ -115,47 +117,38 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         &mut self,
         fn_name: &str,
         parameters: &[&SwiftProperty],
-        values: &str,
+        values: &[&SwiftProperty],
         statement: &str,
     ) {
-        self.table_meta_data.line_writer.add_with_modifier(format!(
-            "func gen{}(db: Database{}) throws {{
-            let arguments: StatementArguments = try [
-                {}
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: Self.{})
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-
-            assert(db.changesCount == 1)
-        }}
-        ",
+        self.table_meta_data.write_update_with_wrapper(
             fn_name,
-            parameter_types_separated_colon(parameters),
+            parameters,
             values,
-            statement
-        ));
-        self.table_meta_data.line_writer.add_wrapper_pool(
-            StaticInstance::Instance,
-            fn_name,
-            WriteRead::Write,
-            &parameters.to_vec(),
+            &format!("Self.{}", statement),
+            true,
         );
     }
 
     fn write_delete_query(&mut self) {
-        let values =
-            swift_properties_to_sqlite_database_values(self.table_meta_data.primary_keys());
-
-        assert!(!values.is_empty());
-
         self.table_meta_data
             .line_writer
             .add_comment("Deletes a unique row, asserts that the row actually existed");
-        self.execute_update_statement("Delete", &[], &values, DELETE_QUERY)
+
+        let values = self
+            .table_meta_data
+            .primary_keys()
+            .into_iter()
+            .cloned()
+            .collect::<Vec<_>>();
+
+        assert!(!values.is_empty());
+
+        self.execute_update_statement(
+            "Delete",
+            &[],
+            &values.iter().collect::<Vec<_>>(),
+            DELETE_QUERY,
+        )
     }
 
     fn write_updatable_columns(&mut self) {
@@ -216,15 +209,13 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
-            let values = swift_properties_to_sqlite_database_values(values.iter().collect());
-
             self.execute_update_statement(
                 &format!(
                     "Update{}",
                     some_kind_of_uppercase_first_letter(&property.swift_property_name)
                 ),
                 &[property],
-                &values,
+                &values.iter().collect::<Vec<_>>(),
                 &format!(
                     "UpdatableColumn.update{}Query",
                     some_kind_of_uppercase_first_letter(&property.swift_property_name)

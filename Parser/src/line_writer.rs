@@ -130,27 +130,33 @@ impl LineWriter {
         static_instance: StaticInstance,
         original_method: &str,
         write_read: WriteRead,
+        is_auto_generated: bool,
         parameter_with_types: &[&SwiftProperty],
     ) {
         let colon_separated_parameter_types_separated =
             parameter_types_separated_colon(parameter_with_types);
         let colon_separated_parameter_separated = parameter_separated_colon(parameter_with_types);
+        let method_name = if is_auto_generated {
+            format!("gen{}", original_method)
+        } else {
+            original_method.to_string()
+        };
 
         self.lines.push(format!(
-            "{} {}func gen{}<T: {}>({}: T{}) throws {}{{\n",
+            "{} {}func {}<T: {}>({}: T{}) throws {}{{\n",
             self.modifier,
             static_instance.modifier(),
-            original_method,
+            &method_name,
             write_read.generic_type(),
             write_read.database_reader_or_writer(),
             colon_separated_parameter_types_separated,
             write_read.return_type()
         ));
         self.lines.push(format!(
-            "try {}.{} {{ database in\ntry gen{}(db: database{})\n}}\n}}",
+            "try {}.{} {{ database in\ntry {}(db: database{})\n}}\n}}",
             write_read.database_reader_or_writer(),
             write_read.to_str(),
-            original_method,
+            &method_name,
             colon_separated_parameter_separated
         ));
     }

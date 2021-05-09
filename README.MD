@@ -44,6 +44,8 @@ The queries are validated when generating a Swift `func` for them
    Json types or `UUID`s
 3. Add custom queries by adding them to [dyn_queries](Parser/config/dyn_queries.toml). Maybe more queries will
 be added over time that are commonly used to the standard generated output.
+4. Add upsert queries by adding them to [upserts](Parser/config/upserts.toml). It generated upserts according to
+https://www.sqlite.org/lang_UPSERT.html
 
 ## Performance
 The performance tests can be found in [/GRDBPerformance/GRDBPerformanceTests](/GRDBPerformance/GRDBPerformanceTests) and are ran with the following configuration:
@@ -77,7 +79,7 @@ _These results are not comparable to [GRDB performance tests](https://github.com
 
 ## Roadmap
 - CI that
-    - auto update performance table 
+    - auto update performance table. Can be done by reading out the output from the Xcode test
     - creates TOC
     - creates the executable
     - Put the up to date generated code in the right folder and also in the performance test dir
