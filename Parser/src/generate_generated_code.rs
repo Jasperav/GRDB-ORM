@@ -128,6 +128,7 @@ fn update_generated_code() {
         use_swiftformat: true,
         sqlite_location: path.clone(),
         all_immutable: false,
+        imports: "import Foundation\nimport GRDB".to_string(),
     };
 
     parse(metadata, config);

@@ -8,7 +8,6 @@ pub fn write(config: &Config) {
 
     let mut line_writer = config.create_line_writer();
 
-    line_writer.add_line("import Foundation".to_string());
     line_writer.add_line("enum Shared {".to_string());
 
     write_json_coder(&mut line_writer);

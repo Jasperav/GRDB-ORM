@@ -15,8 +15,6 @@ impl<'a> Parser<'a> {
             return;
         }
 
-        self.write_imports("dynamic queries");
-
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
             test_query(

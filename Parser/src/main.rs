@@ -77,6 +77,14 @@ fn main() {
     );
 
     let tables = sqlite_parser::parse_no_parser(sqlite_location);
+    let packages = (*properties::PACKAGES).clone() + "Foundation|GRDB";
+    let packages = packages
+        .split("|")
+        .into_iter()
+        .filter(|s| s != &"|")
+        .map(|i| format!("import {}", i))
+        .collect::<Vec<_>>()
+        .join("\n");
     let config = Config {
         visibility: Visibility::from_str(&*properties::VISIBILITY),
         output_dir: Path::new(&*properties::OUTPUT_DIR).to_owned(),
@@ -88,6 +96,7 @@ fn main() {
         use_swiftformat: *properties::USE_SWIFTFORMAT,
         sqlite_location: properties::SQLITE_LOCATION.to_owned(),
         all_immutable: *properties::ALL_IMMUTABLE,
+        imports: packages,
     };
 
     println!("Successfully parsed configuration files");

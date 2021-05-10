@@ -55,14 +55,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn write_imports(&mut self, print: &str) {
-        println!("Preparing to process {}", print);
-
-        self.add_line("import Foundation".to_string());
-        self.add_line("import GRDB".to_string());
-        self.new_line();
-    }
-
     pub fn write(self, file_name: &str) {
         self.line_writer.write_to_file(file_name);
 
