@@ -77,7 +77,7 @@ fn main() {
     );
 
     let tables = sqlite_parser::parse_no_parser(sqlite_location);
-    let packages = (*properties::PACKAGES).clone() + "Foundation|GRDB";
+    let packages = (*properties::PACKAGES).clone() + "|Foundation|GRDB";
     let packages = packages
         .split("|")
         .into_iter()
