@@ -6,10 +6,10 @@ import GRDB
 // Mapped table to struct
 public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
-    public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool) values (?, ?, ?, ?, ?, ?, ?, ?)"
-    public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool) values (?, ?, ?, ?, ?, ?, ?, ?)"
+    public static let insertUniqueQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from User"
-    public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ?, bool = ? where userUuid = ?"
+    public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ?, bool = ?, serializedInfo = ?, serializedInfoNullable = ? where userUuid = ?"
 
     // Mapped columns to properties
     public let userUuid: UUID
@@ -20,6 +20,26 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public var jsonStructArrayOptional: [JsonType]?
     public var integer: Int
     public var bool: Bool
+    public private(set) var serializedInfo: Data
+    public func serializedInfoAutoConvert() -> SerializedInfo {
+        try! SerializedInfo(serializedData: serializedInfo)
+    }
+
+    public mutating func serializedInfoAutoSet(serializedInfo: SerializedInfo) {
+        self.serializedInfo = try! serializedInfo.serializedData()
+    }
+
+    public private(set) var serializedInfoNullable: Data?
+    public func serializedInfoNullableAutoConvert() -> SerializedInfo? {
+        guard let serializedInfoNullable = serializedInfoNullable else {
+            return nil
+        }
+        return try! SerializedInfo(serializedData: serializedInfoNullable)
+    }
+
+    public mutating func serializedInfoNullableAutoSet(serializedInfoNullable: SerializedInfo?) {
+        self.serializedInfoNullable = try! serializedInfoNullable?.serializedData()
+    }
 
     // Default initializer
     public init(userUuid: UUID,
@@ -29,7 +49,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 jsonStructArray: [JsonType],
                 jsonStructArrayOptional: [JsonType]?,
                 integer: Int,
-                bool: Bool)
+                bool: Bool,
+                serializedInfo: SerializedInfo,
+                serializedInfoNullable: SerializedInfo?)
     {
         self.userUuid = userUuid
         self.firstName = firstName
@@ -39,6 +61,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         self.jsonStructArrayOptional = jsonStructArrayOptional
         self.integer = integer
         self.bool = bool
+        self.serializedInfo = try! serializedInfo.serializedData()
+        self.serializedInfoNullable = try! serializedInfoNullable?.serializedData()
     }
 
     // Row initializer
@@ -63,6 +87,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }()
         integer = row[6 + startingIndex]
         bool = row[7 + startingIndex]
+        serializedInfo = row[8 + startingIndex]
+        serializedInfoNullable = row[9 + startingIndex]
     }
 
     // The initializer defined by the protocol
@@ -103,6 +129,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -147,6 +175,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -202,6 +232,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
             userUuid.uuidString,
         ]
 
@@ -290,7 +322,7 @@ public struct DbUserPrimaryKey {
     }
 
     public enum UpdatableColumn {
-        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool
+        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
 
         public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
         public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
@@ -299,6 +331,8 @@ public struct DbUserPrimaryKey {
         public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
         public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
         public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
+        public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
+        public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
     }
 
     public func genUpdateFirstName(db: Database, firstName: String?) throws {
@@ -461,6 +495,48 @@ public struct DbUserPrimaryKey {
     public func genUpdateBool<T: DatabaseWriter>(dbWriter: T, bool: Bool) throws {
         try dbWriter.write { database in
             try genUpdateBool(db: database, bool: bool)
+        }
+    }
+
+    public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
+        let arguments: StatementArguments = try [
+            try serializedInfo.serializedData(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateSerializedInfo<T: DatabaseWriter>(dbWriter: T, serializedInfo: SerializedInfo) throws {
+        try dbWriter.write { database in
+            try genUpdateSerializedInfo(db: database, serializedInfo: serializedInfo)
+        }
+    }
+
+    public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?) throws {
+        let arguments: StatementArguments = try [
+            try serializedInfoNullable?.serializedData(),
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoNullableQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        assert(db.changesCount == 1)
+    }
+
+    public func genUpdateSerializedInfoNullable<T: DatabaseWriter>(dbWriter: T, serializedInfoNullable: SerializedInfo?) throws {
+        try dbWriter.write { database in
+            try genUpdateSerializedInfoNullable(db: database, serializedInfoNullable: serializedInfoNullable)
         }
     }
 }

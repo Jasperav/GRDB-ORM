@@ -35,6 +35,8 @@ fn validate(queries: &[DynamicQuery]) {
     let regex = Regex::new(r" \?").unwrap();
 
     for dyn_query in queries {
+        assert!(dyn_query.return_types.iter().all(|r| !r.contains('?')));
+
         // Check if the amount of parameters query placeholders (?) equals the amount of Swift parameters
         let occurrences = regex
             .captures(&dyn_query.query)

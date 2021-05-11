@@ -11,6 +11,7 @@
 		691DEBA0264566EC00B7271B /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9C264566EC00B7271B /* DynamicQueries.swift */; };
 		691DEBA1264566EC00B7271B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9D264566EC00B7271B /* Shared.swift */; };
 		691DEBA2264566EC00B7271B /* DbUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9E264566EC00B7271B /* DbUser.swift */; };
+		691DEBB52649F16300B7271B /* EqualsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEBB42649F16300B7271B /* EqualsCheck.swift */; };
 		69260EC825D68AE700647E4C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 69260EC725D68AE700647E4C /* GRDB */; };
 		69B541C025C565FB00EDE898 /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B541BF25C565FB00EDE898 /* Update.swift */; };
 		69B541CF25C5700500EDE898 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF468425C463B100BA57ED /* User.swift */; };
@@ -45,6 +46,7 @@
 		691DEB9C264566EC00B7271B /* DynamicQueries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicQueries.swift; sourceTree = "<group>"; };
 		691DEB9D264566EC00B7271B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 		691DEB9E264566EC00B7271B /* DbUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbUser.swift; sourceTree = "<group>"; };
+		691DEBB42649F16300B7271B /* EqualsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualsCheck.swift; sourceTree = "<group>"; };
 		69B541BF25C565FB00EDE898 /* Update.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Update.swift; sourceTree = "<group>"; };
 		69DF467025C45F8D00BA57ED /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
 		69DF468425C463B100BA57ED /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 				69DF467025C45F8D00BA57ED /* Setup.swift */,
 				8EDB23D3877E6B3FA177082A /* Info.plist */,
 				8EDB2ECC389D2604101B6362 /* Upserts.swift */,
+				691DEBB42649F16300B7271B /* EqualsCheck.swift */,
 			);
 			path = GRDBPerformanceTests;
 			sourceTree = "<group>";
@@ -215,7 +218,7 @@
 			);
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
-				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
 			projectDirPath = "";
@@ -257,6 +260,7 @@
 				8EDB2B9460A3CADF34315E80 /* Insert.swift in Sources */,
 				69DF467125C45F8D00BA57ED /* Setup.swift in Sources */,
 				69DF468D25C47E7100BA57ED /* Select.swift in Sources */,
+				691DEBB52649F16300B7271B /* EqualsCheck.swift in Sources */,
 				8EDB2514FAB767ABAE46899C /* DynamicQueries.swift in Sources */,
 				8EDB2C5CA75D7687E66575AB /* Upserts.swift in Sources */,
 			);
@@ -528,7 +532,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -541,7 +545,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		69260EC725D68AE700647E4C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

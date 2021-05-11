@@ -1,6 +1,8 @@
 // // This file is generated, do not edit
 
 import Foundation
+import GRDB
+
 enum Shared {
     // JSONEncoder used for coding JSON columns
     static let jsonEncoder: JSONEncoder = {
@@ -28,4 +30,10 @@ enum Shared {
 
         return encoder
     }()
+}
+
+public extension Data {
+    func serializedData() -> Data {
+        self
+    }
 }

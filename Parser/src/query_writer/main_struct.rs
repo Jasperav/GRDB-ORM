@@ -1,6 +1,6 @@
 use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
-use crate::swift_property::swift_properties_to_sqlite_database_values;
+use crate::swift_property::encode_swift_properties;
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
@@ -108,7 +108,7 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write_insert(&mut self) {
-        let db_values = swift_properties_to_sqlite_database_values(
+        let db_values = encode_swift_properties(
             self.table_meta_data
                 .swift_properties
                 .iter()
@@ -135,7 +135,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         non_pk.append(&mut pk);
 
-        let values = swift_properties_to_sqlite_database_values(&non_pk);
+        let values = encode_swift_properties(&non_pk);
 
         self.write("Update", UPDATE_UNIQUE_QUERY, &values);
     }

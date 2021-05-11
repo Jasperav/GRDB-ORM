@@ -17,6 +17,46 @@ pub struct SwiftProperty {
     pub column: Column,
 }
 
+impl SwiftProperty {
+    pub fn optional_question_mark(&self) -> &'static str {
+        if self.column.nullable {
+            "?"
+        } else {
+            ""
+        }
+    }
+    pub fn serialize_deserialize_blob(&self) -> Option<(String, String)> {
+        if !is_mapped_blob_type(self.column.the_type, &self.swift_type.type_name) {
+            return None;
+        }
+
+        let (serialize_question_mark, deserialize_return_if_nil) = if self.column.nullable {
+            (
+                "?",
+                format!(
+                    "guard let {a} = {a} else {{\nreturn nil\n}}\nreturn ",
+                    a = self.swift_property_name
+                ),
+            )
+        } else {
+            ("", "".to_string())
+        };
+        let serialize = format!(
+            "self.{a} = try! {a}{}.serializedData()",
+            serialize_question_mark,
+            a = self.swift_property_name
+        );
+        let deserialize = format!(
+            "{}try! {}(serializedData: {})",
+            deserialize_return_if_nil,
+            self.swift_type.type_name.replace("?", ""),
+            self.swift_property_name
+        );
+
+        Some((serialize, deserialize))
+    }
+}
+
 /// Type information about the Swift property
 #[derive(Clone)]
 pub struct SwiftTypeWithTypeName {
@@ -33,9 +73,8 @@ pub enum SwiftType {
 }
 
 impl SwiftType {
-    pub fn from_str(str: &str) -> Self {
-        // If the type is build in, it's not Json. Else it must be Json.
-        if is_build_in_type(str) {
+    pub fn new(str: &str, t: Type) -> Self {
+        if is_build_in_type(str, t) {
             Self::NoJson
         } else {
             Self::Json
@@ -64,7 +103,7 @@ pub fn create_swift_property(column: &Column, custom_mapping: &[CustomMapping]) 
         }
     }
 
-    let swift_type = SwiftType::from_str(&inferred_type);
+    let swift_type = SwiftType::new(&inferred_type, column.the_type);
 
     // If the column is nullable, also make the Swift property nullable
     let type_name = if column.nullable {
@@ -104,6 +143,30 @@ pub trait SwiftPropertyDecoder {
     fn assign(&self, property_name: &str, decoded: &str) -> String;
 }
 
+pub fn create_row_index(row_index: &str) -> String {
+    format!("row[{}]", row_index)
+}
+
+pub fn wrap_null_check(nullable: bool, row_index: &str, decode: &str) -> String {
+    if nullable {
+        // Wrap it inside if let else block and remove the optional type
+        format!(
+            "{{
+                if row.hasNull(atIndex: {}) {{
+                    return nil
+                }} else {{
+                    return {}
+                }}
+            }}()",
+            row_index,
+            // Remove the optional type
+            decode.replace('?', "")
+        )
+    } else {
+        decode.to_string()
+    }
+}
+
 /// Decodes a [SwiftProperty]
 /// This is the process of turning a [GRDB.Row] index to a Swift property
 pub fn decode_swift_property<T: SwiftPropertyDecoder>(
@@ -112,7 +175,7 @@ pub fn decode_swift_property<T: SwiftPropertyDecoder>(
 ) -> String {
     let row_index = decoder.row_index();
     // This is the correct row index for decoding the SwiftProperty
-    let row = format!("row[{}]", row_index);
+    let row = create_row_index(&row_index);
 
     match property.swift_type.swift_type {
         SwiftType::NoJson => {
@@ -127,23 +190,7 @@ pub fn decode_swift_property<T: SwiftPropertyDecoder>(
                 &property.swift_type.type_name, row
             );
 
-            let decode = if property.column.nullable {
-                // Wrap it inside if let else block and remove the optional type
-                format!(
-                    "{{
-                        if row.hasNull(atIndex: {}) {{
-                            return nil
-                        }} else {{
-                            return {}
-                        }}
-                    }}()",
-                    row_index,
-                    // Remove the optional type
-                    decode.replace('?', "")
-                )
-            } else {
-                decode
-            };
+            let decode = wrap_null_check(property.column.nullable, &row_index, &decode);
 
             // Now the property can be assigned
             decoder.assign(&property.swift_property_name, &decode)
@@ -151,44 +198,8 @@ pub fn decode_swift_property<T: SwiftPropertyDecoder>(
     }
 }
 
-/// A type is 'build-in' when the type is standard Swift type
-pub fn is_build_in_type(check: &str) -> bool {
-    check == "String"
-        || check == "Int"
-        || check == "UUID"
-        || check == "Int64"
-        || check == "Int32"
-        || check == "Bool"
-}
-
-/// Creates a Swift type from a [&str]
-pub fn create_swift_type_name(from: &str, config: &Config) -> String {
-    if is_build_in_type(from) {
-        // If the type is build in, nothing has to be done
-        return from.to_string();
-    }
-
-    // Capitalize the input
-    let struct_name_before_fix = crate::some_kind_of_uppercase_first_letter(from);
-
-    // Take into account the prefix and suffix
-    format!(
-        "{}{}{}",
-        &config.prefix_swift_structs, struct_name_before_fix, &config.suffix_swift_structs
-    )
-}
-
-/// Translates a SQLite type to a Swift type
-fn sqlite_type_to_swift_type(t: Type) -> &'static str {
-    match t {
-        Type::Text | Type::String | Type::Real => "String",
-        Type::Integer => "Int",
-        Type::Blob => "Data",
-    }
-}
-
 /// This transforms given [SwiftProperty]s to SQLite database values
-pub fn swift_properties_to_sqlite_database_values(swift_properties: &[&SwiftProperty]) -> String {
+pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
     swift_properties
         .iter()
         .map(|property| {
@@ -197,20 +208,28 @@ pub fn swift_properties_to_sqlite_database_values(swift_properties: &[&SwiftProp
 
             match property.swift_type.swift_type {
                 SwiftType::NoJson => {
-                    let database_value = if removed_optional == "UUID" {
-                        // Currently always the uuid string property is used, no data
-                        ".uuidString"
+                    if property.serialize_deserialize_blob().is_some() {
+                        format!(
+                            "try {}{}.serializedData()",
+                            property.swift_property_name,
+                            property.optional_question_mark()
+                        )
                     } else {
-                        ""
-                    };
+                        let database_value = if removed_optional == "UUID" {
+                            // Currently always the uuid string property is used, no data
+                            ".uuidString"
+                        } else {
+                            ""
+                        };
 
-                    let db_value = property.swift_property_name.clone() + database_value;
+                        let db_value = property.swift_property_name.clone() + database_value;
 
-                    if is_optional {
-                        // Only remove the first dot, because else optional uuid's will result in compile errors
-                        db_value.replacen('.', "?.", 1)
-                    } else {
-                        db_value
+                        if is_optional {
+                            // Only remove the first dot, because else optional uuid's will result in compile errors
+                            db_value.replacen('.', "?.", 1)
+                        } else {
+                            db_value
+                        }
                     }
                 }
                 SwiftType::Json => {
@@ -238,6 +257,49 @@ pub fn swift_properties_to_sqlite_database_values(swift_properties: &[&SwiftProp
         })
         .collect::<Vec<_>>()
         .join(", \n")
+}
+
+/// A type is 'build-in' when the type is standard Swift type
+pub fn is_build_in_type(check: &str, t: Type) -> bool {
+    check == "String"
+        || check == "Int"
+        || check == "UUID"
+        || check == "Int64"
+        || check == "Int32"
+        || check == "Bool"
+        || check == "Data"
+        || is_mapped_blob_type(t, check)
+}
+
+pub fn is_mapped_blob_type(t: Type, swift_type_name: &str) -> bool {
+    t == Type::Blob && swift_type_name != "Data"
+}
+
+/// Creates a Swift type from a [&str]
+pub fn create_swift_type_name(from: &str, config: &Config) -> String {
+    // TODO: should use the actual column
+    if is_build_in_type(from, Type::Text) {
+        // If the type is build in, nothing has to be done
+        return from.to_string();
+    }
+
+    // Capitalize the input
+    let struct_name_before_fix = crate::some_kind_of_uppercase_first_letter(from);
+
+    // Take into account the prefix and suffix
+    format!(
+        "{}{}{}",
+        &config.prefix_swift_structs, struct_name_before_fix, &config.suffix_swift_structs
+    )
+}
+
+/// Translates a SQLite type to a Swift type
+fn sqlite_type_to_swift_type(t: Type) -> &'static str {
+    match t {
+        Type::Text | Type::String | Type::Real => "String",
+        Type::Integer => "Int",
+        Type::Blob => "Data",
+    }
 }
 
 /// Creates a property: Type from a swift property

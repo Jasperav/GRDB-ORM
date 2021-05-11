@@ -40,7 +40,7 @@ class ReplaceTest: XCTestCase {
         checkCount(0)
 
         let createUser: () -> DbUser = {
-            DbUser(userUuid: UUID(), firstName: nil, jsonStruct: .init(age: 1), jsonStructOptional: nil, jsonStructArray: [], jsonStructArrayOptional: nil, integer: 1, bool: true)
+            DbUser.random()
         }
 
         var user = createUser()
@@ -64,7 +64,7 @@ class ReplaceTest: XCTestCase {
 class UpdatableColumnTest: XCTestCase {
     func testUpdatableColumn() {
         let db = setupPool()
-        var user = DbUser(userUuid: UUID(), firstName: nil, jsonStruct: .init(age: 1), jsonStructOptional: nil, jsonStructArray: [], jsonStructArrayOptional: nil, integer: 1, bool: false)
+        var user = DbUser.random()
 
         try! db.write { con in
             try! user.genInsert(db: con)

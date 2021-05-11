@@ -12,14 +12,7 @@ struct TestRunner {
 
         try! db.write { db in
             for _ in 0..<amountToGenerate {
-                let user = DbUser(userUuid: UUID(),
-                        firstName: nil,
-                        jsonStruct: JsonType(age: 1),
-                        jsonStructOptional: nil,
-                        jsonStructArray: [],
-                        jsonStructArrayOptional: nil,
-                        integer: 1,
-                        bool: true)
+                let user = DbUser.random()
 
                 uuids.append(user.userUuid)
 

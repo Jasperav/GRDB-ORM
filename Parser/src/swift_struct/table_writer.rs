@@ -29,9 +29,6 @@ impl<'a> TableWriter<'a> {
             // The lines to eventually write
             let mut line_writer = self.config.create_line_writer();
 
-            line_writer.add_line("import GRDB\nimport Foundation".to_string());
-            line_writer.new_line();
-
             // Create swift properties, taken the configuration into account
             let swift_properties = create_swift_properties(table, &self.config.custom_mapping);
 

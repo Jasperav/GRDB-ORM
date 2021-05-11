@@ -39,6 +39,10 @@ fn update_generated_code() {
                 the_type: "Bool".to_string(),
                 regexes: vec![Regex::new("bool").unwrap()],
             },
+            CustomMapping {
+                the_type: "SerializedInfo".to_string(),
+                regexes: vec![Regex::new("serializedInfo*").unwrap()],
+            },
         ],
         dynamic_queries: vec![
             DynamicQuery {
@@ -69,7 +73,7 @@ fn update_generated_code() {
                     "firstName".to_string(),
                     "firstName".to_string(),
                 )],
-                return_types: vec!["User?".to_string()],
+                return_types: vec!["User".to_string()],
                 return_types_is_array: false,
                 query: "select * from User where firstName = ?".to_string(),
             },
@@ -81,7 +85,7 @@ fn update_generated_code() {
                     "firstName".to_string(),
                     "firstName".to_string(),
                 )],
-                return_types: vec!["User.userUuid?".to_string()],
+                return_types: vec!["User.userUuid".to_string()],
                 return_types_is_array: false,
                 query: "select userUuid from User where firstName = ?".to_string(),
             },
@@ -113,6 +117,29 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select exists(select 1 from Book)".to_string(),
             },
+            DynamicQuery {
+                extension: "User".to_string(),
+                func_name: "serializeInfoSingle".to_string(),
+                parameter_types: vec![],
+                return_types: vec![
+                    "User.serializedInfo".to_string(),
+                    "User.serializedInfoNullable".to_string(),
+                ],
+                return_types_is_array: false,
+                query: "select serializedInfo, serializedInfoNullable from user limit 1"
+                    .to_string(),
+            },
+            DynamicQuery {
+                extension: "User".to_string(),
+                func_name: "serializeInfoArray".to_string(),
+                parameter_types: vec![],
+                return_types: vec![
+                    "User.serializedInfo".to_string(),
+                    "User.serializedInfoNullable".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select serializedInfo, serializedInfoNullable from user".to_string(),
+            },
         ],
         upserts: vec![Upsert {
             table: "User".to_string(),
@@ -128,6 +155,7 @@ fn update_generated_code() {
         use_swiftformat: true,
         sqlite_location: path.clone(),
         all_immutable: false,
+        imports: "import Foundation\nimport GRDB".to_string(),
     };
 
     parse(metadata, config);
@@ -153,7 +181,9 @@ pub fn create_db() -> (Metadata, String) {
                 jsonStructArray TEXT NOT NULL,
                 jsonStructArrayOptional TEXT,
                 integer INTEGER NOT NULL,
-                bool INTEGER NOT NULL
+                bool INTEGER NOT NULL,
+                serializedInfo BLOB NOT NULL,
+                serializedInfoNullable BLOB
             );
         ",
         NO_PARAMS,

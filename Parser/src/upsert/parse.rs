@@ -12,9 +12,6 @@ impl<'a> Parser<'a> {
             return;
         }
 
-        // Write the generic imports
-        self.write_imports("upserts");
-
         // Process each upsert
         for upsert in &self.config.upserts {
             // Not logical if no updates are present

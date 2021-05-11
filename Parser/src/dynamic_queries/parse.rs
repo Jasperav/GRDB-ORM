@@ -15,8 +15,6 @@ impl<'a> Parser<'a> {
             return;
         }
 
-        self.write_imports("dynamic queries");
-
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
             test_query(
@@ -139,10 +137,8 @@ impl<'a> Parser<'a> {
                 return_type: _return_type,
                 decoding,
             } => {
-                let return_value = query.replace_optional_for_closure(
-                    dynamic_query.return_types_is_array,
-                    &dynamic_query.return_types,
-                );
+                let return_value =
+                    query.replace_optional_for_closure(dynamic_query.return_types_is_array);
 
                 // Remove the trailing and leading '[' and ']' and put that in return_value_closure
                 // This is because in the closure, rows are processed one by one, and there is no need
@@ -165,36 +161,19 @@ impl<'a> Parser<'a> {
                     type_fetch_all, return_value_closure
                 ));
                 self.add_line(decoding.to_string());
-                self.add_line("})".to_string());
+                self.add_line("})");
 
                 if dynamic_query.return_types_is_array {
                     // if the return type is an array, it can be returned directly, no need for checking the resultset
-                    self.add_line("return converted".to_string());
+                    self.add_line("return converted");
                 } else {
-                    // it isn't an array and the return type len is 1, check if it's nullable
-                    let suffix = if dynamic_query.return_types[0].contains('?') {
-                        // It nullable, the result set len should be 0 or 1
-                        self.add_line(
-                            "assert(converted.count <= 1, \"Expected 1 or zero rows\")".to_string(),
-                        );
-
-                        ""
-                    } else {
-                        // If it's not nullable, than the result set len must be exactly 1
-                        self.add_line(
-                            "assert(converted.count == 1, \"Expected 1 row\")".to_string(),
-                        );
-
-                        // Not optional return type, force unwrap
-                        "!"
-                    };
-
-                    self.add_line(format!("return converted.first{}", suffix));
+                    self.add_line("assert(converted.count <= 1, \"Expected 1 or zero rows\")");
+                    self.add_line("return converted.first");
                 }
             }
             Query::UpdateOrDelete => {
                 // This is easy, just execute it
-                self.add_line("try statement.execute()".to_string());
+                self.add_line("try statement.execute()");
             }
         }
 

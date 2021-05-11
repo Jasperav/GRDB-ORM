@@ -18,14 +18,24 @@ pub struct Config {
     pub use_swiftformat: bool,
     pub sqlite_location: String,
     pub all_immutable: bool,
+    pub imports: String,
 }
 
 impl Config {
     pub fn create_line_writer(&self) -> LineWriter {
-        LineWriter::new(
+        let mut line_writer = LineWriter::new(
             self.visibility.modifier(),
             create_safe_dir(&self.output_dir),
-        )
+        );
+
+        self.write_imports(&mut line_writer);
+
+        line_writer
+    }
+
+    fn write_imports(&self, line_writer: &mut LineWriter) {
+        line_writer.add_line(self.imports.clone());
+        line_writer.new_line();
     }
 
     pub fn immutability(&self, is_pk: bool) -> &'static str {

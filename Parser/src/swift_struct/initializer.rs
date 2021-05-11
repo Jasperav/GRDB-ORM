@@ -23,7 +23,13 @@ pub fn write_default_initializer(
     let arguments = swift_properties_and_types(swift_properties).join(", \n");
     let assign = swift_properties
         .iter()
-        .map(|p| format!("self.{a} = {a}", a = &p.swift_property_name))
+        .map(|p| {
+            if let Some((serialize, _)) = p.serialize_deserialize_blob() {
+                serialize
+            } else {
+                format!("self.{a} = {a}", a = &p.swift_property_name)
+            }
+        })
         .collect::<Vec<_>>()
         .join("\n");
 

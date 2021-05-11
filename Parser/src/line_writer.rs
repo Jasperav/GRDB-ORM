@@ -109,8 +109,8 @@ impl LineWriter {
         self.lines.push("\n".to_string());
     }
 
-    pub fn add_line(&mut self, line: String) {
-        self.lines.push(line);
+    pub fn add_line<T: ToString>(&mut self, line: T) {
+        self.lines.push(line.to_string());
     }
 
     pub fn add_comment(&mut self, comment: &str) {

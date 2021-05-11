@@ -1,13 +1,13 @@
 use std::ops::Index;
 
 use regex::Regex;
-use sqlite_parser::Metadata;
+use sqlite_parser::{Metadata, Type};
 
 use crate::configuration::Config;
 use crate::line_writer::LineWriter;
 use crate::swift_property::{
-    create_swift_property, create_swift_type_name, decode_swift_property, is_build_in_type,
-    SwiftPropertyDecoder,
+    create_row_index, create_swift_property, create_swift_type_name, decode_swift_property,
+    is_build_in_type, wrap_null_check, SwiftPropertyDecoder,
 };
 
 /// Transforms the input of the toml return values in dyn_queries to usable Swift return types
@@ -60,20 +60,18 @@ impl Query {
     /// Replace the optional type here, no need for it.
     /// This is needed for the type to map, this is always nonnull.
     /// Only do this when there is a single type and it isn't an array, else e.g. (DbUser, SomeType?) will be corrupted
-    pub fn replace_optional_for_closure(
-        &self,
-        return_types_is_array: bool,
-        return_types: &[String],
-    ) -> String {
+    pub fn replace_optional_for_closure(&self, return_types_is_array: bool) -> String {
         match &self {
             Query::Select {
                 return_type,
                 decoding: _decoding,
             } => {
-                if return_types_is_array || !return_types[0].contains('?') {
+                if return_types_is_array {
                     return_type.clone()
                 } else {
-                    return_type.replace("?", "")
+                    // The return type ALWAYS has a trailing question mark, remove it
+                    assert!(return_type.ends_with('?'));
+                    return_type.strip_suffix('?').unwrap().to_string()
                 }
             }
             Query::UpdateOrDelete => panic!(),
@@ -109,7 +107,8 @@ impl<'a> ReturnType<'a> {
                 let suffix = if rt.contains('?') { "?" } else { "" };
 
                 // If the type is a Swift type, it's easy, directly decode it
-                if is_build_in_type(&without_question_mark) {
+                // The Type is always TEXT, it doesn't matter for this case since blobs are handled in the last block
+                if is_build_in_type(&without_question_mark, Type::Text) {
                     let format = format!("row[{}]", index);
 
                     // It always needs just 1 index
@@ -167,8 +166,26 @@ impl<'a> ReturnType<'a> {
                         }
                     }
 
+                    let decoder = Decoder { index };
+
                     // Find out how to decode this property
-                    let decoded = decode_swift_property(&Decoder { index }, &swift_property);
+                    let decoded = if let Some((_, _)) = swift_property.serialize_deserialize_blob()
+                    {
+                        let row_index = create_row_index(&decoder.row_index());
+                        let decode = format!(
+                            "try! {}(serializedData: {})",
+                            swift_property.swift_type.type_name, row_index
+                        );
+                        let decode = wrap_null_check(
+                            swift_property.column.nullable,
+                            &decoder.row_index(),
+                            &decode,
+                        );
+
+                        decoder.assign("", &decode)
+                    } else {
+                        decode_swift_property(&decoder, &swift_property)
+                    };
 
                     // Just decoding 1 column
                     index += 1;
@@ -190,9 +207,15 @@ impl<'a> ReturnType<'a> {
                 format!("[({})]", separated)
             }
         } else {
-            assert_eq!(1, return_types_swift_struct.len());
+            assert!(!return_types_swift_struct.is_empty());
 
-            return_types_swift_struct[0].clone()
+            if return_types_swift_struct.len() == 1 {
+                let rt = return_types_swift_struct[0].to_string();
+
+                format!("{}?", rt)
+            } else {
+                format!("({})?", return_types_swift_struct.join(", "))
+            }
         };
 
         Query::Select {

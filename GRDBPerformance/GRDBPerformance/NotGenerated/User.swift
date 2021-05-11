@@ -11,10 +11,12 @@ public struct User: FetchableRecord, PersistableRecord, Codable {
     public let jsonStructArrayOptional: [JsonType]?
     public let integer: Int
     public let bool: Bool
+    public let serializedInfo: Data
+    public let serializedInfoNullable: Data?
 
     public static var databaseUUIDEncodingStrategy: DatabaseUUIDEncodingStrategy { .string }
 
-    public init(userUuid: UUID, firstName: String?, jsonStruct: JsonType, jsonStructOptional: JsonType?, jsonStructArray: [JsonType], jsonStructArrayOptional: [JsonType]?, integer: Int, bool: Bool) {
+    public init(userUuid: UUID, firstName: String?, jsonStruct: JsonType, jsonStructOptional: JsonType?, jsonStructArray: [JsonType], jsonStructArrayOptional: [JsonType]?, integer: Int, bool: Bool, serializedInfo: Data, serializedInfoNullable: Data?) {
         self.userUuid = userUuid
         self.firstName = firstName
         self.jsonStruct = jsonStruct
@@ -23,5 +25,7 @@ public struct User: FetchableRecord, PersistableRecord, Codable {
         self.jsonStructArrayOptional = jsonStructArrayOptional
         self.integer = integer
         self.bool = bool
+        self.serializedInfo = serializedInfo
+        self.serializedInfoNullable = serializedInfoNullable
     }
 }
