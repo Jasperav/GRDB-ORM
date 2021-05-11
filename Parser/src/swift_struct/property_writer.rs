@@ -26,13 +26,37 @@ impl<'a> PropertyWriter<'a> {
         };
 
         for property in properties {
-            let swift_property = swift_property_and_type(&property);
+            if let Some((serialize, deserialize)) = property.serialize_deserialize_blob() {
+                let w = &mut self.table_meta_data.line_writer;
 
-            self.table_meta_data.line_writer.add_with_modifier(format!(
-                "{} {}",
-                self.config.immutability(property.column.part_of_pk),
-                swift_property
-            ));
+                w.add_with_modifier(format!(
+                    "private(set) var {}: Data{}",
+                    property.swift_property_name,
+                    property.optional_question_mark()
+                ));
+                w.add_with_modifier(format!(
+                    "func {spn}AutoConvert() -> {t}{{
+                        {}
+                    }}
+
+                    {} mutating func {spn}AutoSet({spn}: {t}) {{
+                        {}
+                    }}",
+                    deserialize,
+                    w.modifier,
+                    serialize,
+                    spn = property.swift_property_name,
+                    t = property.swift_type.type_name
+                ));
+            } else {
+                let swift_property = swift_property_and_type(&property);
+
+                self.table_meta_data.line_writer.add_with_modifier(format!(
+                    "{} {}",
+                    self.config.immutability(property.column.part_of_pk),
+                    swift_property
+                ));
+            }
         }
 
         self.table_meta_data.line_writer.new_line();

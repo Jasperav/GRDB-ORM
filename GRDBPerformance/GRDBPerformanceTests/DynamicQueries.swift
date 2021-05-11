@@ -9,17 +9,7 @@ class DynamicQueryTest: XCTestCase {
         
         assertAmountOfUsersBeforeInsertion(db: db)
         
-        let user = DbUser(
-                userUuid: UUID(),
-                firstName: "name",
-                jsonStruct: JsonType(age: 1),
-                jsonStructOptional: nil,
-                jsonStructArray: [],
-                jsonStructArrayOptional: [
-                    JsonType(age: 3)
-                ],
-                integer: 2,
-                bool: true)
+        let user = DbUser.random()
         let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
         let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 
@@ -94,5 +84,44 @@ class DynamicQueryTest: XCTestCase {
         try! DbBook.genDeleteAll(dbWriter: db)
 
         XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
+    }
+
+    func testMappedBlobColumn() {
+        let db = setupPool()
+
+        XCTAssertNil(try! DbUser.serializeInfoSingle(dbReader: db))
+        XCTAssert(try! DbUser.serializeInfoArray(dbReader: db).isEmpty)
+
+        var dbUser = DbUser.random()
+
+        dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
+
+        try! dbUser.genInsert(dbWriter: db)
+
+        let check: (SerializedInfo, SerializedInfo?) -> () = {
+            XCTAssertEqual($0, dbUser.serializedInfoAutoConvert())
+            XCTAssertEqual($1, dbUser.serializedInfoNullableAutoConvert())
+        }
+
+        let (serialize, serializeNullable) = try! DbUser.serializeInfoSingle(dbReader: db)!
+
+        check(serialize, serializeNullable)
+
+        dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: .data("Something"))
+
+        try! dbUser.primaryKey().genUpdateSerializedInfoNullable(dbWriter: db, serializedInfoNullable: dbUser.serializedInfoNullableAutoConvert())
+
+        let (serializeUpdated, serializeNullableUpdated) = try! DbUser.serializeInfoSingle(dbReader: db)!
+
+        check(serializeUpdated, serializeNullableUpdated)
+
+        let array = try! DbUser.serializeInfoArray(dbReader: db)
+
+        XCTAssertEqual(1, array.count)
+
+        for (s, n) in array {
+            XCTAssertEqual(s, serializeUpdated)
+            XCTAssertEqual(n, serializeNullableUpdated)
+        }
     }
 }

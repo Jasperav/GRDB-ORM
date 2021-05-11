@@ -1,7 +1,7 @@
 use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{swift_properties_to_sqlite_database_values, SwiftProperty};
+use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
 
 pub const SELECT_QUERY: &str = "selectQuery";
@@ -55,8 +55,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
     }
 
     fn write_select_query(&mut self) {
-        let values =
-            swift_properties_to_sqlite_database_values(&self.table_meta_data.primary_keys());
+        let values = encode_swift_properties(&self.table_meta_data.primary_keys());
 
         self.table_meta_data
             .line_writer

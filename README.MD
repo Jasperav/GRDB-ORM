@@ -41,11 +41,17 @@ The queries are validated when generating a Swift `func` for them
 ## Add your configuration
 1. Go to the [.env](Parser/config/.env) file and fill at least `SQLITE_LOCATION` and `OUTPUT_DIR`
 2. Add your custom type mapping to [custom_mapping](Parser/config/custom_mapping.toml). This is useful if you use 
-   Json types or `UUID`s
+   Json types* or `UUID`s
 3. Add custom queries by adding them to [dyn_queries](Parser/config/dyn_queries.toml). Maybe more queries will
 be added over time that are commonly used to the standard generated output.
 4. Add upsert queries by adding them to [upserts](Parser/config/upserts.toml). It generated upserts according to
 https://www.sqlite.org/lang_UPSERT.html
+   
+* Values with database type 'TEXT' should conform to protocol Codable. If your type can for some reason not conform to this protocol,
+change the database type to 'BLOB' and make sure your type has the following methods:
+  
+- `func serializedData() throws -> Data {...}`
+- `func serializedData(data: Data) throws -> Self {...}`
 
 ## Performance
 The performance tests can be found in [/GRDBPerformance/GRDBPerformanceTests](/GRDBPerformance/GRDBPerformanceTests) and are ran with the following configuration:

@@ -1,8 +1,6 @@
 use crate::configuration::Config;
 use crate::line_writer::LineWriter;
-use crate::swift_property::{
-    create_swift_properties, swift_properties_to_sqlite_database_values, SwiftProperty,
-};
+use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
 use rusqlite::{Error, NO_PARAMS};
 use sqlite_parser::Metadata;
@@ -90,10 +88,8 @@ impl<'a> Parser<'a> {
         // Rename the column to the parameter argument name, the param name gets precedence
         swift_property.swift_property_name = param_name.to_string();
 
-        // Add the decoding functionality
-        database_values.push(swift_properties_to_sqlite_database_values(&[
-            &swift_property,
-        ]));
+        // Add the encoding functionality
+        database_values.push(encode_swift_properties(&[&swift_property]));
 
         parameters.push(swift_property);
     }

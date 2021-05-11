@@ -89,20 +89,20 @@ public extension DbUser {
 }
 
 public extension DbUser {
-    typealias AmountOfUsersType = Int
+    typealias AmountOfUsersType = Int?
 
-    static func amountOfUsers(db: Database) throws -> Int {
+    static func amountOfUsers(db: Database) throws -> Int? {
         let statement = try db.cachedSelectStatement(sql: """
         select count(*) from User
         """)
         let converted: [Int] = try Row.fetchAll(statement).map { row -> Int in
             row[0]
         }
-        assert(converted.count == 1, "Expected 1 row")
-        return converted.first!
+        assert(converted.count <= 1, "Expected 1 or zero rows")
+        return converted.first
     }
 
-    static func amountOfUsers<T: DatabaseReader>(dbReader: T) throws -> Int {
+    static func amountOfUsers<T: DatabaseReader>(dbReader: T) throws -> Int? {
         try dbReader.read { database in
             try amountOfUsers(db: database)
         }
@@ -130,22 +130,75 @@ public extension DbBook {
 }
 
 public extension DbBook {
-    typealias HasAtLeastOneBookType = Bool
+    typealias HasAtLeastOneBookType = Bool?
 
-    static func hasAtLeastOneBook(db: Database) throws -> Bool {
+    static func hasAtLeastOneBook(db: Database) throws -> Bool? {
         let statement = try db.cachedSelectStatement(sql: """
         select exists(select 1 from Book)
         """)
         let converted: [Bool] = try Row.fetchAll(statement).map { row -> Bool in
             row[0]
         }
-        assert(converted.count == 1, "Expected 1 row")
-        return converted.first!
+        assert(converted.count <= 1, "Expected 1 or zero rows")
+        return converted.first
     }
 
-    static func hasAtLeastOneBook<T: DatabaseReader>(dbReader: T) throws -> Bool {
+    static func hasAtLeastOneBook<T: DatabaseReader>(dbReader: T) throws -> Bool? {
         try dbReader.read { database in
             try hasAtLeastOneBook(db: database)
+        }
+    }
+}
+
+public extension DbUser {
+    typealias SerializeInfoSingleType = (SerializedInfo, SerializedInfo?)?
+
+    static func serializeInfoSingle(db: Database) throws -> (SerializedInfo, SerializedInfo?)? {
+        let statement = try db.cachedSelectStatement(sql: """
+        select serializedInfo, serializedInfoNullable from user limit 1
+        """)
+        let converted: [(SerializedInfo, SerializedInfo?)] = try Row.fetchAll(statement).map { row -> (SerializedInfo, SerializedInfo?) in
+            (try! SerializedInfo(serializedData: row[0]), {
+                if row.hasNull(atIndex: 1) {
+                    return nil
+                } else {
+                    return try! SerializedInfo(serializedData: row[1])
+                }
+            }())
+        }
+        assert(converted.count <= 1, "Expected 1 or zero rows")
+        return converted.first
+    }
+
+    static func serializeInfoSingle<T: DatabaseReader>(dbReader: T) throws -> (SerializedInfo, SerializedInfo?)? {
+        try dbReader.read { database in
+            try serializeInfoSingle(db: database)
+        }
+    }
+}
+
+public extension DbUser {
+    typealias SerializeInfoArrayType = [(SerializedInfo, SerializedInfo?)]
+
+    static func serializeInfoArray(db: Database) throws -> [(SerializedInfo, SerializedInfo?)] {
+        let statement = try db.cachedSelectStatement(sql: """
+        select serializedInfo, serializedInfoNullable from user
+        """)
+        let converted: [(SerializedInfo, SerializedInfo?)] = try Row.fetchAll(statement).map { row -> (SerializedInfo, SerializedInfo?) in
+            (try! SerializedInfo(serializedData: row[0]), {
+                if row.hasNull(atIndex: 1) {
+                    return nil
+                } else {
+                    return try! SerializedInfo(serializedData: row[1])
+                }
+            }())
+        }
+        return converted
+    }
+
+    static func serializeInfoArray<T: DatabaseReader>(dbReader: T) throws -> [(SerializedInfo, SerializedInfo?)] {
+        try dbReader.read { database in
+            try serializeInfoArray(db: database)
         }
     }
 }

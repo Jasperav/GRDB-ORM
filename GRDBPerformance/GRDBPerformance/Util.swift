@@ -1,6 +1,20 @@
 import Foundation
 import GRDB
 
+public enum SerializedInfo: Equatable {
+    case data(String)
+
+    public init(serializedData: Data) {
+        self = SerializedInfo.data(String(decoding: serializedData, as: UTF8.self))
+    }
+
+    public func serializedData() -> Data {
+        switch self {
+        case .data(let s): return s.data(using: .utf8)!
+        }
+    }
+}
+
 public func setupPool() -> DatabasePool {
     let url = try! FileManager.default
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -23,7 +37,9 @@ public func setupPool() -> DatabasePool {
                 jsonStructArray TEXT NOT NULL,
                 jsonStructArrayOptional TEXT,
                 integer INTEGER NOT NULL,
-                bool INTEGER NOT NULL
+                bool INTEGER NOT NULL,
+                serializedInfo BLOB NOT NULL,
+                serializedInfoNullable BLOB
             );
         create table Book
             (
@@ -39,16 +55,20 @@ public func setupPool() -> DatabasePool {
     return dbPool
 }
 
+public let contentSerializedInfo = "Something"
+
 extension DbUser {
     public static func random() -> DbUser {
         DbUser(userUuid: UUID(),
-                firstName: nil,
+                firstName: "SomeName",
                 jsonStruct: JsonType(age: 1),
                 jsonStructOptional: nil,
                 jsonStructArray: [JsonType(age: 1)],
                 jsonStructArrayOptional: nil,
                 integer: 1,
-                bool: true)
+                bool: true,
+                serializedInfo: SerializedInfo.data(contentSerializedInfo),
+                serializedInfoNullable: nil)
     }
 }
 
@@ -61,6 +81,8 @@ extension User {
                 jsonStructArray: [JsonType(age: 1)],
                 jsonStructArrayOptional: nil,
                 integer: 1,
-                bool: true)
+                bool: true,
+                serializedInfo: contentSerializedInfo.data(using: .utf8)!,
+                serializedInfoNullable: nil)
     }
 }

@@ -1,5 +1,5 @@
 use crate::line_writer::{parameter_types_separated_colon, LineWriter, StaticInstance, WriteRead};
-use crate::swift_property::{swift_properties_to_sqlite_database_values, SwiftProperty};
+use crate::swift_property::{encode_swift_properties, SwiftProperty};
 
 /// Holds information about the current processing table
 pub struct TableMetaData<'a> {
@@ -40,7 +40,7 @@ impl<'a> TableMetaData<'a> {
                 fn_name.to_string()
             },
             parameter_types_separated_colon(parameters),
-            swift_properties_to_sqlite_database_values(values),
+            encode_swift_properties(values),
             sql
         ));
 

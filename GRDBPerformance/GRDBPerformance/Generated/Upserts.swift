@@ -30,9 +30,11 @@ public extension DbUser {
             }(),
             integer,
             bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool) values (?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStruct=excluded.jsonStruct, jsonStructOptional=excluded.jsonStructOptional, integer=excluded.integer")
+        let statement = try db.cachedUpdateStatement(sql: "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStruct=excluded.jsonStruct, jsonStructOptional=excluded.jsonStructOptional, integer=excluded.integer")
 
         statement.setUncheckedArguments(arguments)
 

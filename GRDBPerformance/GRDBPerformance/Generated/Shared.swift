@@ -31,3 +31,9 @@ enum Shared {
         return encoder
     }()
 }
+
+public extension Data {
+    func serializedData() -> Data {
+        self
+    }
+}
