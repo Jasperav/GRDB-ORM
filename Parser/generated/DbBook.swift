@@ -47,7 +47,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         .init(bookUuid: bookUuid)
     }
 
-    public func genInsert(db: Database) throws {
+    public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -61,8 +61,10 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
@@ -71,7 +73,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genReplace(db: Database) throws {
+    public func genReplace(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -85,8 +87,10 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genReplace<T: DatabaseWriter>(dbWriter: T) throws {
@@ -107,7 +111,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genUpdate(db: Database) throws {
+    public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -121,8 +125,10 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdate<T: DatabaseWriter>(dbWriter: T) throws {
@@ -181,7 +187,7 @@ public struct DbBookPrimaryKey {
     }
 
     // Deletes a unique row, asserts that the row actually existed
-    public func genDelete(db: Database) throws {
+    public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
         ]
@@ -192,7 +198,9 @@ public struct DbBookPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
@@ -209,7 +217,7 @@ public struct DbBookPrimaryKey {
         public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
     }
 
-    public func genUpdateUserUuid(db: Database, userUuid: UUID?) throws {
+    public func genUpdateUserUuid(db: Database, userUuid: UUID?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             userUuid?.uuidString,
             bookUuid.uuidString,
@@ -221,7 +229,9 @@ public struct DbBookPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID?) throws {
@@ -230,7 +240,7 @@ public struct DbBookPrimaryKey {
         }
     }
 
-    public func genUpdateIntegerOptional(db: Database, integerOptional: Int?) throws {
+    public func genUpdateIntegerOptional(db: Database, integerOptional: Int?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             integerOptional,
             bookUuid.uuidString,
@@ -242,7 +252,9 @@ public struct DbBookPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateIntegerOptional<T: DatabaseWriter>(dbWriter: T, integerOptional: Int?) throws {
@@ -251,7 +263,7 @@ public struct DbBookPrimaryKey {
         }
     }
 
-    public func genUpdateTsCreated(db: Database, tsCreated: Int64) throws {
+    public func genUpdateTsCreated(db: Database, tsCreated: Int64, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             tsCreated,
             bookUuid.uuidString,
@@ -263,7 +275,9 @@ public struct DbBookPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateTsCreated<T: DatabaseWriter>(dbWriter: T, tsCreated: Int64) throws {

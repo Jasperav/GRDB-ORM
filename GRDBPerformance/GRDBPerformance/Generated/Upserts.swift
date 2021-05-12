@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 public extension DbUser {
-    func upsertExample(db: Database) throws {
+    func upsertExample(db: Database, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
@@ -40,7 +40,9 @@ public extension DbUser {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     func upsertExample<T: DatabaseWriter>(dbWriter: T) throws {

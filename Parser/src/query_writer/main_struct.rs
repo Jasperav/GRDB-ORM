@@ -141,8 +141,8 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write(&mut self, method_name: &str, query: &str, values: &str) {
-        let (static_instance, args, check) = if values.is_empty() {
-            (StaticInstance::Static, "".to_string(), "".to_string())
+        let (static_instance, args, check, arguments) = if values.is_empty() {
+            (StaticInstance::Static, "".to_string(), "", "")
         } else {
             let args = format!(
                 "let arguments: StatementArguments = try [
@@ -152,14 +152,18 @@ impl<'a> QueryWriterMainStruct<'a> {
                 statement.setUncheckedArguments(arguments)",
                 values
             );
-            let check = "// Only 1 row should be affected
-                assert(db.changesCount == 1)";
+            let check = "if assertOneRowAffected {\n// Only 1 row should be affected\nassert(db.changesCount == 1)}";
 
-            (StaticInstance::Instance, args, check.to_string())
+            (
+                StaticInstance::Instance,
+                args,
+                check,
+                ", assertOneRowAffected: Bool = true",
+            )
         };
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
-            "{}func gen{}(db: Database) throws {{
+            "{}func gen{}(db: Database{}) throws {{
                 let statement = try db.cachedUpdateStatement(sql: Self.{})
 
                 {}
@@ -171,6 +175,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         ",
             static_instance.modifier(),
             method_name,
+            arguments,
             query,
             args,
             check

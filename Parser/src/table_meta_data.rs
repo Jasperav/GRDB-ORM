@@ -20,7 +20,7 @@ impl<'a> TableMetaData<'a> {
         is_auto_generated: bool,
     ) {
         self.line_writer.add_with_modifier(format!(
-            "func {}(db: Database{}) throws {{
+            "func {}(db: Database{}, assertOneRowAffected: Bool = true) throws {{
             let arguments: StatementArguments = try [
                 {}
             ]
@@ -31,7 +31,9 @@ impl<'a> TableMetaData<'a> {
 
             try statement.execute()
 
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {{
+                assert(db.changesCount == 1)
+            }}
         }}
         ",
             if is_auto_generated {

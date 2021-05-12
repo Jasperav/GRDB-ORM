@@ -101,7 +101,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         .init(userUuid: userUuid)
     }
 
-    public func genInsert(db: Database) throws {
+    public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -137,8 +137,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
@@ -147,7 +149,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genReplace(db: Database) throws {
+    public func genReplace(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -183,8 +185,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genReplace<T: DatabaseWriter>(dbWriter: T) throws {
@@ -205,7 +209,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genUpdate(db: Database) throws {
+    public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -241,8 +245,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         try statement.execute()
 
-        // Only 1 row should be affected
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdate<T: DatabaseWriter>(dbWriter: T) throws {
@@ -301,7 +307,7 @@ public struct DbUserPrimaryKey {
     }
 
     // Deletes a unique row, asserts that the row actually existed
-    public func genDelete(db: Database) throws {
+    public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             userUuid.uuidString,
         ]
@@ -312,7 +318,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
@@ -335,7 +343,7 @@ public struct DbUserPrimaryKey {
         public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
     }
 
-    public func genUpdateFirstName(db: Database, firstName: String?) throws {
+    public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             firstName,
             userUuid.uuidString,
@@ -347,7 +355,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateFirstName<T: DatabaseWriter>(dbWriter: T, firstName: String?) throws {
@@ -356,7 +366,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType) throws {
+    public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
@@ -371,7 +381,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateJsonStruct<T: DatabaseWriter>(dbWriter: T, jsonStruct: JsonType) throws {
@@ -380,7 +392,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?) throws {
+    public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             {
                 try jsonStructOptional.map {
@@ -397,7 +409,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateJsonStructOptional<T: DatabaseWriter>(dbWriter: T, jsonStructOptional: JsonType?) throws {
@@ -406,7 +420,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
+    public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType], assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
@@ -421,7 +435,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateJsonStructArray<T: DatabaseWriter>(dbWriter: T, jsonStructArray: [JsonType]) throws {
@@ -430,7 +446,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
+    public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             {
                 try jsonStructArrayOptional.map {
@@ -447,7 +463,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateJsonStructArrayOptional<T: DatabaseWriter>(dbWriter: T, jsonStructArrayOptional: [JsonType]?) throws {
@@ -456,7 +474,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateInteger(db: Database, integer: Int) throws {
+    public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             integer,
             userUuid.uuidString,
@@ -468,7 +486,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateInteger<T: DatabaseWriter>(dbWriter: T, integer: Int) throws {
@@ -477,7 +497,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateBool(db: Database, bool: Bool) throws {
+    public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             bool,
             userUuid.uuidString,
@@ -489,7 +509,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateBool<T: DatabaseWriter>(dbWriter: T, bool: Bool) throws {
@@ -498,7 +520,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
+    public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             try serializedInfo.serializedData(),
             userUuid.uuidString,
@@ -510,7 +532,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateSerializedInfo<T: DatabaseWriter>(dbWriter: T, serializedInfo: SerializedInfo) throws {
@@ -519,7 +543,7 @@ public struct DbUserPrimaryKey {
         }
     }
 
-    public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?) throws {
+    public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
         let arguments: StatementArguments = try [
             try serializedInfoNullable?.serializedData(),
             userUuid.uuidString,
@@ -531,7 +555,9 @@ public struct DbUserPrimaryKey {
 
         try statement.execute()
 
-        assert(db.changesCount == 1)
+        if assertOneRowAffected {
+            assert(db.changesCount == 1)
+        }
     }
 
     public func genUpdateSerializedInfoNullable<T: DatabaseWriter>(dbWriter: T, serializedInfoNullable: SerializedInfo?) throws {
