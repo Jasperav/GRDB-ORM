@@ -103,8 +103,6 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write_insert();
         self.write_delete();
         self.write_update();
-
-        self.table_meta_data.line_writer.add_closing_brackets();
     }
 
     fn write_insert(&mut self) {
