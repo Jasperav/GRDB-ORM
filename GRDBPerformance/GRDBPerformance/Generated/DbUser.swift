@@ -329,8 +329,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
 
         public enum UpdatableColumn {
-            case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
+            case userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
 
+            public static let updateUserUuidQuery = "update User set userUuid = ? where userUuid = ?"
             public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
             public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
             public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
@@ -340,6 +341,29 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
             public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
             public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
+        }
+
+        public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                userUuid.uuidString,
+                self.userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateUserUuidQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
+            try dbWriter.write { database in
+                try genUpdateUserUuid(db: database, userUuid: userUuid)
+            }
         }
 
         public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {

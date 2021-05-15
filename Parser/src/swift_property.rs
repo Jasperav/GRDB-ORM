@@ -15,9 +15,20 @@ pub struct SwiftProperty {
     pub swift_type: SwiftTypeWithTypeName,
     // The actual column from which the data is extracted
     pub column: Column,
+    // Determines if this swift property is part of 'self'
+    // If this is false, the swift property is a parameter
+    pub refers_to_self: bool,
 }
 
 impl SwiftProperty {
+    pub fn property_name(&self) -> String {
+        if self.refers_to_self {
+            format!("self.{}", self.swift_property_name)
+        } else {
+            self.swift_property_name.clone()
+        }
+    }
+
     pub fn optional_question_mark(&self) -> &'static str {
         if self.column.nullable {
             "?"
@@ -25,6 +36,7 @@ impl SwiftProperty {
             ""
         }
     }
+
     pub fn serialize_deserialize_blob(&self) -> Option<(String, String)> {
         if !is_mapped_blob_type(self.column.the_type, &self.swift_type.type_name) {
             return None;
@@ -120,6 +132,7 @@ pub fn create_swift_property(column: &Column, custom_mapping: &[CustomMapping]) 
             swift_type,
         },
         column: column.clone(),
+        refers_to_self: false,
     }
 }
 
@@ -211,7 +224,7 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
                     if property.serialize_deserialize_blob().is_some() {
                         format!(
                             "try {}{}.serializedData()",
-                            property.swift_property_name,
+                            property.property_name(),
                             property.optional_question_mark()
                         )
                     } else {
@@ -222,7 +235,7 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
                             ""
                         };
 
-                        let db_value = property.swift_property_name.clone() + database_value;
+                        let db_value = property.property_name() + database_value;
 
                         if is_optional {
                             // Only remove the first dot, because else optional uuid's will result in compile errors
@@ -235,13 +248,13 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
                 SwiftType::Json => {
                     // This is a bit ugly, since optionals needs to be handled as well
                     let (head, tail, variable_name) = if is_optional {
-                        let head = format!("try {}.map {{", property.swift_property_name);
+                        let head = format!("try {}.map {{", property.property_name());
                         let tail = "}";
 
                         (head, tail, "$0".to_string())
                     } else {
                         // Both empty, maybe some cleaner way to do this would be nice
-                        ("".to_string(), "", property.swift_property_name.clone())
+                        ("".to_string(), "", property.property_name())
                     };
 
                     format!(

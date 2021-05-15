@@ -49,6 +49,15 @@ public func setupPool() -> DatabasePool {
                 tsCreated INTEGER NOT NULL,
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
             );
+
+        create table UserBook
+            (
+                bookUuid TEXT NOT NULL,
+                userUuid TEXT NOT NULL,
+                PRIMARY KEY (bookUuid, userUuid),
+                FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
         """)
     }
 

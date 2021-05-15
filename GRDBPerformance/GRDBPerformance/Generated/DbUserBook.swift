@@ -4,37 +4,28 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
+public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
-    public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
-    public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
-    public static let deleteAllQuery = "delete from Book"
-    public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
+    public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid) values (?, ?)"
+    public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid) values (?, ?)"
+    public static let deleteAllQuery = "delete from UserBook"
 
     // Mapped columns to properties
     public let bookUuid: UUID
-    public var userUuid: UUID?
-    public var integerOptional: Int?
-    public var tsCreated: Int64
+    public let userUuid: UUID
 
     // Default initializer
     public init(bookUuid: UUID,
-                userUuid: UUID?,
-                integerOptional: Int?,
-                tsCreated: Int64)
+                userUuid: UUID)
     {
         self.bookUuid = bookUuid
         self.userUuid = userUuid
-        self.integerOptional = integerOptional
-        self.tsCreated = tsCreated
     }
 
     // Row initializer
     public init(row: Row, startingIndex: Int) {
         bookUuid = row[0 + startingIndex]
         userUuid = row[1 + startingIndex]
-        integerOptional = row[2 + startingIndex]
-        tsCreated = row[3 + startingIndex]
     }
 
     // The initializer defined by the protocol
@@ -44,7 +35,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
     // Easy way to get the PrimaryKey from the table
     public func primaryKey() -> PrimaryKey {
-        .init(bookUuid: bookUuid)
+        .init(bookUuid: bookUuid, userUuid: userUuid)
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
@@ -52,9 +43,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
-            userUuid?.uuidString,
-            integerOptional,
-            tsCreated,
+            userUuid.uuidString,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -78,9 +67,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
-            userUuid?.uuidString,
-            integerOptional,
-            tsCreated,
+            userUuid.uuidString,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -111,67 +98,46 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
-
-        let arguments: StatementArguments = try [
-            userUuid?.uuidString,
-            integerOptional,
-            tsCreated,
-            bookUuid.uuidString,
-        ]
-
-        statement.setUncheckedArguments(arguments)
-
-        try statement.execute()
-
-        if assertOneRowAffected {
-            // Only 1 row should be affected
-            assert(db.changesCount == 1)
-        }
-    }
-
-    public func genUpdate<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genUpdate(db: database)
-        }
-    }
-
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries
-        public static let selectQuery = "select * from Book where bookUuid = ?"
-        public static let deleteQuery = "delete from Book where bookUuid = ?"
+        public static let selectQuery = "select * from UserBook where bookUuid = ? and userUuid = ?"
+        public static let deleteQuery = "delete from UserBook where bookUuid = ? and userUuid = ?"
 
         // Mapped columns to properties
         public let bookUuid: UUID
+        public let userUuid: UUID
 
         // Default initializer
-        public init(bookUuid: UUID) {
+        public init(bookUuid: UUID,
+                    userUuid: UUID)
+        {
             self.bookUuid = bookUuid
+            self.userUuid = userUuid
         }
 
         // Queries a unique row in the database, the row may or may not exist
-        public func genSelect(db: Database) throws -> DbBook? {
+        public func genSelect(db: Database) throws -> DbUserBook? {
             let arguments: StatementArguments = try [
                 bookUuid.uuidString,
+                userUuid.uuidString,
             ]
 
             let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
 
             statement.setUncheckedArguments(arguments)
 
-            return try DbBook.fetchOne(statement)
+            return try DbUserBook.fetchOne(statement)
         }
 
-        public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbBook? {
+        public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbUserBook? {
             try dbReader.read { database in
                 try genSelect(db: database)
             }
         }
 
         // Same as function 'genSelectUnique', but throws an error when no record has been found
-        public func genSelectExpect(db: Database) throws -> DbBook {
+        public func genSelectExpect(db: Database) throws -> DbUserBook {
             if let instance = try genSelect(db: db) {
                 return instance
             } else {
@@ -179,7 +145,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbBook {
+        public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbUserBook {
             try dbReader.read { database in
                 try genSelectExpect(db: database)
             }
@@ -189,6 +155,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bookUuid.uuidString,
+                userUuid.uuidString,
             ]
 
             let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
@@ -209,18 +176,17 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
 
         public enum UpdatableColumn {
-            case bookUuid, userUuid, integerOptional, tsCreated
+            case bookUuid, userUuid
 
-            public static let updateBookUuidQuery = "update Book set bookUuid = ? where bookUuid = ?"
-            public static let updateUserUuidQuery = "update Book set userUuid = ? where bookUuid = ?"
-            public static let updateIntegerOptionalQuery = "update Book set integerOptional = ? where bookUuid = ?"
-            public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
+            public static let updateBookUuidQuery = "update UserBook set bookUuid = ? where bookUuid = ? and userUuid = ?"
+            public static let updateUserUuidQuery = "update UserBook set userUuid = ? where bookUuid = ? and userUuid = ?"
         }
 
         public func genUpdateBookUuid(db: Database, bookUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bookUuid.uuidString,
                 self.bookUuid.uuidString,
+                userUuid.uuidString,
             ]
 
             let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBookUuidQuery)
@@ -240,10 +206,11 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpdateUserUuid(db: Database, userUuid: UUID?, assertOneRowAffected: Bool = true) throws {
+        public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                userUuid?.uuidString,
+                userUuid.uuidString,
                 bookUuid.uuidString,
+                self.userUuid.uuidString,
             ]
 
             let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateUserUuidQuery)
@@ -257,55 +224,9 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID?) throws {
+        public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
             try dbWriter.write { database in
                 try genUpdateUserUuid(db: database, userUuid: userUuid)
-            }
-        }
-
-        public func genUpdateIntegerOptional(db: Database, integerOptional: Int?, assertOneRowAffected: Bool = true) throws {
-            let arguments: StatementArguments = try [
-                integerOptional,
-                bookUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateIntegerOptionalQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-
-            if assertOneRowAffected {
-                assert(db.changesCount == 1)
-            }
-        }
-
-        public func genUpdateIntegerOptional<T: DatabaseWriter>(dbWriter: T, integerOptional: Int?) throws {
-            try dbWriter.write { database in
-                try genUpdateIntegerOptional(db: database, integerOptional: integerOptional)
-            }
-        }
-
-        public func genUpdateTsCreated(db: Database, tsCreated: Int64, assertOneRowAffected: Bool = true) throws {
-            let arguments: StatementArguments = try [
-                tsCreated,
-                bookUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateTsCreatedQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-
-            if assertOneRowAffected {
-                assert(db.changesCount == 1)
-            }
-        }
-
-        public func genUpdateTsCreated<T: DatabaseWriter>(dbWriter: T, tsCreated: Int64) throws {
-            try dbWriter.write { database in
-                try genUpdateTsCreated(db: database, tsCreated: tsCreated)
             }
         }
     }

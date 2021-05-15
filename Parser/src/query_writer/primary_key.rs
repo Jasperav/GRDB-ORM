@@ -152,19 +152,12 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn write_updatable_columns(&mut self) {
         // Write the updatable columns
-        let updatable_columns = self
-            .table_meta_data
-            .non_primary_keys()
-            .into_iter()
-            .cloned()
-            .collect::<Vec<_>>();
+        let updatable_columns = self.table_meta_data.swift_properties.to_vec();
 
         // The ref makes it easier to call other functions
         let updatable_columns = updatable_columns.iter().collect::<Vec<_>>();
 
-        if updatable_columns.is_empty() {
-            return;
-        }
+        assert!(!updatable_columns.is_empty());
 
         let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
         let cases = updatable_columns
@@ -204,6 +197,11 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 .primary_keys()
                 .into_iter()
                 .cloned()
+                .map(|mut s| {
+                    s.refers_to_self = true;
+
+                    s
+                })
                 .collect::<Vec<_>>();
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());

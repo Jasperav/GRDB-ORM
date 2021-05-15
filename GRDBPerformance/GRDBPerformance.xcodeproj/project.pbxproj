@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6907215D264FED0100E87BF2 /* DbUserBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6907215C264FED0100E87BF2 /* DbUserBook.swift */; };
 		691DEB9F264566EC00B7271B /* DbBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9B264566EC00B7271B /* DbBook.swift */; };
 		691DEBA0264566EC00B7271B /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9C264566EC00B7271B /* DynamicQueries.swift */; };
 		691DEBA1264566EC00B7271B /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9D264566EC00B7271B /* Shared.swift */; };
@@ -42,6 +43,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6907215C264FED0100E87BF2 /* DbUserBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DbUserBook.swift; path = ../../../Parser/generated/DbUserBook.swift; sourceTree = "<group>"; };
 		691DEB9B264566EC00B7271B /* DbBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbBook.swift; sourceTree = "<group>"; };
 		691DEB9C264566EC00B7271B /* DynamicQueries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DynamicQueries.swift; sourceTree = "<group>"; };
 		691DEB9D264566EC00B7271B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 		69DF467425C4619700BA57ED /* Generated */ = {
 			isa = PBXGroup;
 			children = (
+				6907215C264FED0100E87BF2 /* DbUserBook.swift */,
 				691DEB9B264566EC00B7271B /* DbBook.swift */,
 				691DEB9E264566EC00B7271B /* DbUser.swift */,
 				691DEB9C264566EC00B7271B /* DynamicQueries.swift */,
@@ -275,6 +278,7 @@
 				8EDB20C1D3F9B82F0BEF7149 /* AppDelegate.swift in Sources */,
 				8EDB24E7EA5EA20A7782DE10 /* SceneDelegate.swift in Sources */,
 				8EDB216D5C236DF0F4E7A9B7 /* ViewController.swift in Sources */,
+				6907215D264FED0100E87BF2 /* DbUserBook.swift in Sources */,
 				69B541CF25C5700500EDE898 /* User.swift in Sources */,
 				691DEBA1264566EC00B7271B /* Shared.swift in Sources */,
 				691DEBA2264566EC00B7271B /* DbUser.swift in Sources */,

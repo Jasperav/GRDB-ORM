@@ -209,11 +209,35 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
 
         public enum UpdatableColumn {
-            case userUuid, integerOptional, tsCreated
+            case bookUuid, userUuid, integerOptional, tsCreated
 
+            public static let updateBookUuidQuery = "update Book set bookUuid = ? where bookUuid = ?"
             public static let updateUserUuidQuery = "update Book set userUuid = ? where bookUuid = ?"
             public static let updateIntegerOptionalQuery = "update Book set integerOptional = ? where bookUuid = ?"
             public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
+        }
+
+        public func genUpdateBookUuid(db: Database, bookUuid: UUID, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                bookUuid.uuidString,
+                self.bookUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBookUuidQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public func genUpdateBookUuid<T: DatabaseWriter>(dbWriter: T, bookUuid: UUID) throws {
+            try dbWriter.write { database in
+                try genUpdateBookUuid(db: database, bookUuid: bookUuid)
+            }
         }
 
         public func genUpdateUserUuid(db: Database, userUuid: UUID?, assertOneRowAffected: Bool = true) throws {
