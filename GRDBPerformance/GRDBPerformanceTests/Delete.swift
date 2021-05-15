@@ -6,7 +6,7 @@ import Foundation
 class DeletePerformanceTest: XCTestCase {
     func testGenerated() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
-            try! DbUserPrimaryKey(userUuid: uuid).genDelete(db: db)
+            try! DbUser.PrimaryKey(userUuid: uuid).genDelete(db: db)
         })
     }
 

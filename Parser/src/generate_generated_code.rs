@@ -170,7 +170,7 @@ pub fn create_db() -> (Metadata, String) {
 
     let con = rusqlite::Connection::open(&db_path).unwrap();
 
-    con.execute(
+    con.execute_batch(
         "
         create table User
             (
@@ -185,22 +185,25 @@ pub fn create_db() -> (Metadata, String) {
                 serializedInfo BLOB NOT NULL,
                 serializedInfoNullable BLOB
             );
-        ",
-        NO_PARAMS,
-    )
-    .unwrap();
 
-    con.execute(
-        "
-            create table Book
+        create table Book
             (
                 bookUuid TEXT PRIMARY KEY NOT NULL,
                 userUuid TEXT,
                 integerOptional INTEGER,
                 tsCreated INTEGER NOT NULL,
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
-            );",
-        NO_PARAMS,
+            );
+
+        create table UserBook
+            (
+                bookUuid TEXT NOT NULL,
+                userUuid TEXT NOT NULL,
+                PRIMARY KEY (bookUuid, userUuid),
+                FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
+        ",
     )
     .unwrap();
 

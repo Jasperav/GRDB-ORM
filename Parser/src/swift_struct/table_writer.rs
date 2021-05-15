@@ -36,8 +36,7 @@ impl<'a> TableWriter<'a> {
             let struct_name = create_swift_type_name(table_name, &self.config);
 
             // The primary key struct name to write
-            let primary_key_struct_name =
-                create_swift_type_name(&(table_name.clone() + "PrimaryKey"), &self.config);
+            let primary_key_struct_name = "PrimaryKey";
 
             // Start the actual writing
             line_writer.add_comment("Mapped table to struct");
@@ -54,7 +53,7 @@ impl<'a> TableWriter<'a> {
                         swift_properties: &swift_properties,
                         struct_name: &struct_name,
                         table_name: &table_name,
-                        primary_key_struct_name: &primary_key_struct_name
+                        primary_key_struct_name
                     }
                 };
                 (MainStruct) => {
@@ -104,6 +103,8 @@ impl<'a> TableWriter<'a> {
             qw!(flow = PrimaryKeyStruct, {
                 crate::swift_struct::initializer::write_default_initializer(&mut line_writer, &pk)
             });
+
+            line_writer.add_closing_brackets();
 
             line_writer.write_to_file(&struct_name);
         }

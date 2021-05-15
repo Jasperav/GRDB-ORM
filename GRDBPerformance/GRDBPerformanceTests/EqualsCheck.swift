@@ -36,7 +36,7 @@ class EqualsCheck: XCTestCase {
         try! db.write { con in
             try! user.insert(con)
 
-            let dbUserNew = try! DbUserPrimaryKey(userUuid: user.userUuid).genSelectExpect(db: con)
+            let dbUserNew = try! DbUser.PrimaryKey(userUuid: user.userUuid).genSelectExpect(db: con)
 
             XCTAssertEqual(userData, try! encoder.encode(dbUserNew))
         }

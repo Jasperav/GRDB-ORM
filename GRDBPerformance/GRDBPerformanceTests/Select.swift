@@ -7,7 +7,7 @@ class SelectPerformanceTest: XCTestCase {
     func testGenerated() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
             // Don't call the expect function here to mimic the testGRDB method (both return User?)
-            let _ = try! DbUserPrimaryKey(userUuid: uuid).genSelect(db: db)!
+            let _ = try! DbUser.PrimaryKey(userUuid: uuid).genSelect(db: db)!
         })
     }
 

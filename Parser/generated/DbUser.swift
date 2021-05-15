@@ -97,7 +97,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     }
 
     // Easy way to get the PrimaryKey from the table
-    public func primaryKey() -> DbUserPrimaryKey {
+    public func primaryKey() -> PrimaryKey {
         .init(userUuid: userUuid)
     }
 
@@ -256,313 +256,337 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             try genUpdate(db: database)
         }
     }
-}
 
-// Write the primary key struct, useful for selecting or deleting a unique row
-public struct DbUserPrimaryKey {
-    // Static queries
-    public static let selectQuery = "select * from User where userUuid = ?"
-    public static let deleteQuery = "delete from User where userUuid = ?"
+    // Write the primary key struct, useful for selecting or deleting a unique row
+    public struct PrimaryKey {
+        // Static queries
+        public static let selectQuery = "select * from User where userUuid = ?"
+        public static let deleteQuery = "delete from User where userUuid = ?"
 
-    // Mapped columns to properties
-    public let userUuid: UUID
+        // Mapped columns to properties
+        public let userUuid: UUID
 
-    // Default initializer
-    public init(userUuid: UUID) {
-        self.userUuid = userUuid
-    }
-
-    // Queries a unique row in the database, the row may or may not exist
-    public func genSelect(db: Database) throws -> DbUser? {
-        let arguments: StatementArguments = try [
-            userUuid.uuidString,
-        ]
-
-        let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
-
-        statement.setUncheckedArguments(arguments)
-
-        return try DbUser.fetchOne(statement)
-    }
-
-    public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbUser? {
-        try dbReader.read { database in
-            try genSelect(db: database)
+        // Default initializer
+        public init(userUuid: UUID) {
+            self.userUuid = userUuid
         }
-    }
 
-    // Same as function 'genSelectUnique', but throws an error when no record has been found
-    public func genSelectExpect(db: Database) throws -> DbUser {
-        if let instance = try genSelect(db: db) {
-            return instance
-        } else {
-            throw DatabaseError(message: "Didn't found a record for \(self)")
+        // Queries a unique row in the database, the row may or may not exist
+        public func genSelect(db: Database) throws -> DbUser? {
+            let arguments: StatementArguments = try [
+                userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            return try DbUser.fetchOne(statement)
         }
-    }
 
-    public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbUser {
-        try dbReader.read { database in
-            try genSelectExpect(db: database)
+        public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbUser? {
+            try dbReader.read { database in
+                try genSelect(db: database)
+            }
         }
-    }
 
-    // Deletes a unique row, asserts that the row actually existed
-    public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            userUuid.uuidString,
-        ]
-
-        let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
-
-        statement.setUncheckedArguments(arguments)
-
-        try statement.execute()
-
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+        // Same as function 'genSelectUnique', but throws an error when no record has been found
+        public func genSelectExpect(db: Database) throws -> DbUser {
+            if let instance = try genSelect(db: db) {
+                return instance
+            } else {
+                throw DatabaseError(message: "Didn't found a record for \(self)")
+            }
         }
-    }
 
-    public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genDelete(db: database)
+        public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbUser {
+            try dbReader.read { database in
+                try genSelectExpect(db: database)
+            }
         }
-    }
 
-    public enum UpdatableColumn {
-        case firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
+        // Deletes a unique row, asserts that the row actually existed
+        public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                userUuid.uuidString,
+            ]
 
-        public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
-        public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
-        public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
-        public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
-        public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
-        public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
-        public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
-        public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
-        public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
-    }
+            let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
 
-    public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            firstName,
-            userUuid.uuidString,
-        ]
+            statement.setUncheckedArguments(arguments)
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateFirstNameQuery)
+            try statement.execute()
 
-        statement.setUncheckedArguments(arguments)
-
-        try statement.execute()
-
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateFirstName<T: DatabaseWriter>(dbWriter: T, firstName: String?) throws {
-        try dbWriter.write { database in
-            try genUpdateFirstName(db: database, firstName: firstName)
+        public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
+            try dbWriter.write { database in
+                try genDelete(db: database)
+            }
         }
-    }
 
-    public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            {
-                let data = try Shared.jsonEncoder.encode(jsonStruct)
-                return String(data: data, encoding: .utf8)!
-            }(),
-            userUuid.uuidString,
-        ]
+        public enum UpdatableColumn {
+            case userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructQuery)
-
-        statement.setUncheckedArguments(arguments)
-
-        try statement.execute()
-
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            public static let updateUserUuidQuery = "update User set userUuid = ? where userUuid = ?"
+            public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
+            public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
+            public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
+            public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
+            public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
+            public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
+            public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
+            public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
+            public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
         }
-    }
 
-    public func genUpdateJsonStruct<T: DatabaseWriter>(dbWriter: T, jsonStruct: JsonType) throws {
-        try dbWriter.write { database in
-            try genUpdateJsonStruct(db: database, jsonStruct: jsonStruct)
+        public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                userUuid.uuidString,
+                self.userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateUserUuidQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
+        public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
+            try dbWriter.write { database in
+                try genUpdateUserUuid(db: database, userUuid: userUuid)
+            }
+        }
+
+        public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                firstName,
+                userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateFirstNameQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public func genUpdateFirstName<T: DatabaseWriter>(dbWriter: T, firstName: String?) throws {
+            try dbWriter.write { database in
+                try genUpdateFirstName(db: database, firstName: firstName)
+            }
+        }
+
+        public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                {
+                    let data = try Shared.jsonEncoder.encode(jsonStruct)
                     return String(data: data, encoding: .utf8)!
-                }
-            }(),
-            userUuid.uuidString,
-        ]
+                }(),
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructOptionalQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateJsonStructOptional<T: DatabaseWriter>(dbWriter: T, jsonStructOptional: JsonType?) throws {
-        try dbWriter.write { database in
-            try genUpdateJsonStructOptional(db: database, jsonStructOptional: jsonStructOptional)
+        public func genUpdateJsonStruct<T: DatabaseWriter>(dbWriter: T, jsonStruct: JsonType) throws {
+            try dbWriter.write { database in
+                try genUpdateJsonStruct(db: database, jsonStruct: jsonStruct)
+            }
         }
-    }
 
-    public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType], assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            {
-                let data = try Shared.jsonEncoder.encode(jsonStructArray)
-                return String(data: data, encoding: .utf8)!
-            }(),
-            userUuid.uuidString,
-        ]
+        public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                {
+                    try jsonStructOptional.map {
+                        let data = try Shared.jsonEncoder.encode($0)
+                        return String(data: data, encoding: .utf8)!
+                    }
+                }(),
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructOptionalQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateJsonStructArray<T: DatabaseWriter>(dbWriter: T, jsonStructArray: [JsonType]) throws {
-        try dbWriter.write { database in
-            try genUpdateJsonStructArray(db: database, jsonStructArray: jsonStructArray)
+        public func genUpdateJsonStructOptional<T: DatabaseWriter>(dbWriter: T, jsonStructOptional: JsonType?) throws {
+            try dbWriter.write { database in
+                try genUpdateJsonStructOptional(db: database, jsonStructOptional: jsonStructOptional)
+            }
         }
-    }
 
-    public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
+        public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType], assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                {
+                    let data = try Shared.jsonEncoder.encode(jsonStructArray)
                     return String(data: data, encoding: .utf8)!
-                }
-            }(),
-            userUuid.uuidString,
-        ]
+                }(),
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayOptionalQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateJsonStructArrayOptional<T: DatabaseWriter>(dbWriter: T, jsonStructArrayOptional: [JsonType]?) throws {
-        try dbWriter.write { database in
-            try genUpdateJsonStructArrayOptional(db: database, jsonStructArrayOptional: jsonStructArrayOptional)
+        public func genUpdateJsonStructArray<T: DatabaseWriter>(dbWriter: T, jsonStructArray: [JsonType]) throws {
+            try dbWriter.write { database in
+                try genUpdateJsonStructArray(db: database, jsonStructArray: jsonStructArray)
+            }
         }
-    }
 
-    public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            integer,
-            userUuid.uuidString,
-        ]
+        public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                {
+                    try jsonStructArrayOptional.map {
+                        let data = try Shared.jsonEncoder.encode($0)
+                        return String(data: data, encoding: .utf8)!
+                    }
+                }(),
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateIntegerQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateJsonStructArrayOptionalQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateInteger<T: DatabaseWriter>(dbWriter: T, integer: Int) throws {
-        try dbWriter.write { database in
-            try genUpdateInteger(db: database, integer: integer)
+        public func genUpdateJsonStructArrayOptional<T: DatabaseWriter>(dbWriter: T, jsonStructArrayOptional: [JsonType]?) throws {
+            try dbWriter.write { database in
+                try genUpdateJsonStructArrayOptional(db: database, jsonStructArrayOptional: jsonStructArrayOptional)
+            }
         }
-    }
 
-    public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            bool,
-            userUuid.uuidString,
-        ]
+        public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                integer,
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBoolQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateIntegerQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateBool<T: DatabaseWriter>(dbWriter: T, bool: Bool) throws {
-        try dbWriter.write { database in
-            try genUpdateBool(db: database, bool: bool)
+        public func genUpdateInteger<T: DatabaseWriter>(dbWriter: T, integer: Int) throws {
+            try dbWriter.write { database in
+                try genUpdateInteger(db: database, integer: integer)
+            }
         }
-    }
 
-    public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            try serializedInfo.serializedData(),
-            userUuid.uuidString,
-        ]
+        public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                bool,
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBoolQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateSerializedInfo<T: DatabaseWriter>(dbWriter: T, serializedInfo: SerializedInfo) throws {
-        try dbWriter.write { database in
-            try genUpdateSerializedInfo(db: database, serializedInfo: serializedInfo)
+        public func genUpdateBool<T: DatabaseWriter>(dbWriter: T, bool: Bool) throws {
+            try dbWriter.write { database in
+                try genUpdateBool(db: database, bool: bool)
+            }
         }
-    }
 
-    public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
-        let arguments: StatementArguments = try [
-            try serializedInfoNullable?.serializedData(),
-            userUuid.uuidString,
-        ]
+        public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                try serializedInfo.serializedData(),
+                userUuid.uuidString,
+            ]
 
-        let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoNullableQuery)
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoQuery)
 
-        statement.setUncheckedArguments(arguments)
+            statement.setUncheckedArguments(arguments)
 
-        try statement.execute()
+            try statement.execute()
 
-        if assertOneRowAffected {
-            assert(db.changesCount == 1)
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
         }
-    }
 
-    public func genUpdateSerializedInfoNullable<T: DatabaseWriter>(dbWriter: T, serializedInfoNullable: SerializedInfo?) throws {
-        try dbWriter.write { database in
-            try genUpdateSerializedInfoNullable(db: database, serializedInfoNullable: serializedInfoNullable)
+        public func genUpdateSerializedInfo<T: DatabaseWriter>(dbWriter: T, serializedInfo: SerializedInfo) throws {
+            try dbWriter.write { database in
+                try genUpdateSerializedInfo(db: database, serializedInfo: serializedInfo)
+            }
+        }
+
+        public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                try serializedInfoNullable?.serializedData(),
+                userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateSerializedInfoNullableQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public func genUpdateSerializedInfoNullable<T: DatabaseWriter>(dbWriter: T, serializedInfoNullable: SerializedInfo?) throws {
+            try dbWriter.write { database in
+                try genUpdateSerializedInfoNullable(db: database, serializedInfoNullable: serializedInfoNullable)
+            }
         }
     }
 }
