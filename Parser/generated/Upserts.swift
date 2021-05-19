@@ -44,10 +44,4 @@ public extension DbUser {
             assert(db.changesCount == 1)
         }
     }
-
-    func upsertExample<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try upsertExample(db: database)
-        }
-    }
 }

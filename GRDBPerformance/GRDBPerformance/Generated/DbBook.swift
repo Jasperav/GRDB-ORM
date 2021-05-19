@@ -8,6 +8,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
     public static let insertUniqueQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
+    public static let insertOrIgnoreUniqueQuery = "insert or ignore into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from Book"
     public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
 
@@ -67,10 +68,19 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genInsert<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genInsert(db: database)
-        }
+    public func genInsertOrIgnore(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.insertOrIgnoreUniqueQuery)
+
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid?.uuidString,
+            integerOptional,
+            tsCreated,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
     }
 
     public func genReplace(db: Database, assertOneRowAffected: Bool = true) throws {
@@ -93,22 +103,10 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func genReplace<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genReplace(db: database)
-        }
-    }
-
     public static func genDeleteAll(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.deleteAllQuery)
 
         try statement.execute()
-    }
-
-    public static func genDeleteAll<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genDeleteAll(db: database)
-        }
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
@@ -128,12 +126,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         if assertOneRowAffected {
             // Only 1 row should be affected
             assert(db.changesCount == 1)
-        }
-    }
-
-    public func genUpdate<T: DatabaseWriter>(dbWriter: T) throws {
-        try dbWriter.write { database in
-            try genUpdate(db: database)
         }
     }
 
@@ -164,24 +156,12 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             return try DbBook.fetchOne(statement)
         }
 
-        public func genSelect<T: DatabaseReader>(dbReader: T) throws -> DbBook? {
-            try dbReader.read { database in
-                try genSelect(db: database)
-            }
-        }
-
         // Same as function 'genSelectUnique', but throws an error when no record has been found
         public func genSelectExpect(db: Database) throws -> DbBook {
             if let instance = try genSelect(db: db) {
                 return instance
             } else {
                 throw DatabaseError(message: "Didn't found a record for \(self)")
-            }
-        }
-
-        public func genSelectExpect<T: DatabaseReader>(dbReader: T) throws -> DbBook {
-            try dbReader.read { database in
-                try genSelectExpect(db: database)
             }
         }
 
@@ -199,12 +179,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
-            }
-        }
-
-        public func genDelete<T: DatabaseWriter>(dbWriter: T) throws {
-            try dbWriter.write { database in
-                try genDelete(db: database)
             }
         }
 
@@ -234,12 +208,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpdateBookUuid<T: DatabaseWriter>(dbWriter: T, bookUuid: UUID) throws {
-            try dbWriter.write { database in
-                try genUpdateBookUuid(db: database, bookUuid: bookUuid)
-            }
-        }
-
         public func genUpdateUserUuid(db: Database, userUuid: UUID?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 userUuid?.uuidString,
@@ -254,12 +222,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
-            }
-        }
-
-        public func genUpdateUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID?) throws {
-            try dbWriter.write { database in
-                try genUpdateUserUuid(db: database, userUuid: userUuid)
             }
         }
 
@@ -280,12 +242,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpdateIntegerOptional<T: DatabaseWriter>(dbWriter: T, integerOptional: Int?) throws {
-            try dbWriter.write { database in
-                try genUpdateIntegerOptional(db: database, integerOptional: integerOptional)
-            }
-        }
-
         public func genUpdateTsCreated(db: Database, tsCreated: Int64, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 tsCreated,
@@ -300,12 +256,6 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
-            }
-        }
-
-        public func genUpdateTsCreated<T: DatabaseWriter>(dbWriter: T, tsCreated: Int64) throws {
-            try dbWriter.write { database in
-                try genUpdateTsCreated(db: database, tsCreated: tsCreated)
             }
         }
     }

@@ -6,46 +6,48 @@ import GRDB
 class DynamicQueryTest: XCTestCase {
     func testAll() {
         let db = setupPool()
-        
-        assertAmountOfUsersBeforeInsertion(db: db)
-        
-        let user = DbUser.random()
-        let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
-        let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 
-        try! db.write { db in
-            try! user.genInsert(db: db)
-            try! book0.genInsert(db: db)
-            try! book1.genInsert(db: db)
+        try! db.write { con in
+            assertAmountOfUsersBeforeInsertion(con: con)
+
+            let user = DbUser.random()
+            let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
+            let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
+
+            try! db.write { db in
+                try! user.genInsert(db: con)
+                try! book0.genInsert(db: con)
+                try! book1.genInsert(db: con)
+            }
+
+            assertBooksForUserWithSpecificUuid(con: con, user: user, book0: book0, book1: book1)
+            assertFindByUsername(con: con, find: user)
+            assertAmountOfUsersAfterInsertion(con: con)
+            assertAmountOfUsersAfterInsertion(con: con)
+            assertDeleteByUserUuid(con: con, user: user)
         }
-        
-        assertBooksForUserWithSpecificUuid(db: db, user: user, book0: book0, book1: book1)
-        assertFindByUsername(db: db, find: user)
-        assertAmountOfUsersAfterInsertion(db: db)
-        assertAmountOfUsersAfterInsertion(db: db)
-        assertDeleteByUserUuid(db: db, user: user)
     }
 
-    func assertFindByUsername(db: DatabasePool, find: DbUser) {
-        XCTAssert(try! DbUser.findByUsername(dbReader: db, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.findByUsername(dbReader: db, firstName: find.firstName!)!.userUuid)
-    }
-    
-    func assertFindUserUuidByUsername(db: DatabasePool, find: DbUser) {
-        XCTAssert(try! DbUser.findUserUuidByUsername(dbReader: db, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.findUserUuidByUsername(dbReader: db, firstName: find.firstName!)!)
+    func assertFindByUsername(con: Database, find: DbUser) {
+        XCTAssert(try! DbUser.findByUsername(db: con, firstName: "doesnotexists") == nil)
+        XCTAssertEqual(find.userUuid, try! DbUser.findByUsername(db: con, firstName: find.firstName!)!.userUuid)
     }
 
-    func assertAmountOfUsersAfterInsertion(db: DatabasePool) {
-        XCTAssertEqual(1, try! DbUser.amountOfUsers(dbReader: db))
+    func assertFindUserUuidByUsername(con: Database, find: DbUser) {
+        XCTAssert(try! DbUser.findUserUuidByUsername(db: con, firstName: "doesnotexists") == nil)
+        XCTAssertEqual(find.userUuid, try! DbUser.findUserUuidByUsername(db: con, firstName: find.firstName!)!)
     }
-    
-    func assertAmountOfUsersBeforeInsertion(db: DatabasePool) {
-        XCTAssertEqual(0, try! DbUser.amountOfUsers(dbReader: db))
+
+    func assertAmountOfUsersAfterInsertion(con: Database) {
+        XCTAssertEqual(1, try! DbUser.amountOfUsers(db: con))
     }
-    
-    func assertBooksForUserWithSpecificUuid(db: DatabasePool, user: DbUser, book0: DbBook, book1: DbBook) {
-        let result = try! DbBook.booksForUserWithSpecificUuid(dbReader: db, userUuid: user.userUuid)
+
+    func assertAmountOfUsersBeforeInsertion(con: Database) {
+        XCTAssertEqual(0, try! DbUser.amountOfUsers(db: con))
+    }
+
+    func assertBooksForUserWithSpecificUuid(con: Database, user: DbUser, book0: DbBook, book1: DbBook) {
+        let result = try! DbBook.booksForUserWithSpecificUuid(db: con, userUuid: user.userUuid)
 
         XCTAssertEqual(2, result.count)
 
@@ -63,65 +65,67 @@ class DynamicQueryTest: XCTestCase {
         XCTAssertEqual(book1.integerOptional, secondRow.0.integerOptional)
         // No need to check more I guess
     }
-    
-    func assertDeleteByUserUuid(db: DatabasePool, user: DbUser) {
-        try! db.write { db in
-            try! DbBook.deleteByUserUuid(db: db, userUuid: user.userUuid)
-            
-            XCTAssertEqual(2, db.changesCount)
-        }
+
+    func assertDeleteByUserUuid(con: Database, user: DbUser) {
+        try! DbBook.deleteByUserUuid(db: con, userUuid: user.userUuid)
+
+        XCTAssertEqual(2, con.changesCount)
     }
 
     func testBoolReturnType() {
         let db = setupPool()
 
-        XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
+        try! db.write { con in
+            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con))
 
-        try! DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: 0, tsCreated: 0).genInsert(dbWriter: db)
+            try! DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: 0, tsCreated: 0).genInsert(db: con)
 
-        XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(dbReader: db))
+            XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(db: con))
 
-        try! DbBook.genDeleteAll(dbWriter: db)
+            try! DbBook.genDeleteAll(db: con)
 
-        XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(dbReader: db))
+            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con))
+        }
     }
 
     func testMappedBlobColumn() {
         let db = setupPool()
 
-        XCTAssertNil(try! DbUser.serializeInfoSingle(dbReader: db))
-        XCTAssert(try! DbUser.serializeInfoArray(dbReader: db).isEmpty)
+        try! db.write { con in
+            XCTAssertNil(try! DbUser.serializeInfoSingle(db: con))
+            XCTAssert(try! DbUser.serializeInfoArray(db: con).isEmpty)
 
-        var dbUser = DbUser.random()
+            var dbUser = DbUser.random()
 
-        dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
+            dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
 
-        try! dbUser.genInsert(dbWriter: db)
+            try! dbUser.genInsert(db: con)
 
-        let check: (SerializedInfo, SerializedInfo?) -> () = {
-            XCTAssertEqual($0, dbUser.serializedInfoAutoConvert())
-            XCTAssertEqual($1, dbUser.serializedInfoNullableAutoConvert())
-        }
+            let check: (SerializedInfo, SerializedInfo?) -> () = {
+                XCTAssertEqual($0, dbUser.serializedInfoAutoConvert())
+                XCTAssertEqual($1, dbUser.serializedInfoNullableAutoConvert())
+            }
 
-        let (serialize, serializeNullable) = try! DbUser.serializeInfoSingle(dbReader: db)!
+            let (serialize, serializeNullable) = try! DbUser.serializeInfoSingle(db: con)!
 
-        check(serialize, serializeNullable)
+            check(serialize, serializeNullable)
 
-        dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: .data("Something"))
+            dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: .data("Something"))
 
-        try! dbUser.primaryKey().genUpdateSerializedInfoNullable(dbWriter: db, serializedInfoNullable: dbUser.serializedInfoNullableAutoConvert())
+            try! dbUser.primaryKey().genUpdateSerializedInfoNullable(db: con, serializedInfoNullable: dbUser.serializedInfoNullableAutoConvert())
 
-        let (serializeUpdated, serializeNullableUpdated) = try! DbUser.serializeInfoSingle(dbReader: db)!
+            let (serializeUpdated, serializeNullableUpdated) = try! DbUser.serializeInfoSingle(db: con)!
 
-        check(serializeUpdated, serializeNullableUpdated)
+            check(serializeUpdated, serializeNullableUpdated)
 
-        let array = try! DbUser.serializeInfoArray(dbReader: db)
+            let array = try! DbUser.serializeInfoArray(db: con)
 
-        XCTAssertEqual(1, array.count)
+            XCTAssertEqual(1, array.count)
 
-        for (s, n) in array {
-            XCTAssertEqual(s, serializeUpdated)
-            XCTAssertEqual(n, serializeNullableUpdated)
+            for (s, n) in array {
+                XCTAssertEqual(s, serializeUpdated)
+                XCTAssertEqual(n, serializeNullableUpdated)
+            }
         }
     }
 }

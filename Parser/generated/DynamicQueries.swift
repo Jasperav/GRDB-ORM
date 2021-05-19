@@ -28,12 +28,6 @@ public extension DbBook {
         }
         return converted
     }
-
-    static func booksForUserWithSpecificUuid<T: DatabaseReader>(dbReader: T, userUuid: UUID) throws -> [(DbBook, Int, [JsonType]?, Int)] {
-        try dbReader.read { database in
-            try booksForUserWithSpecificUuid(db: database, userUuid: userUuid)
-        }
-    }
 }
 
 public extension DbUser {
@@ -53,12 +47,6 @@ public extension DbUser {
         }
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
-    }
-
-    static func findByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> DbUser? {
-        try dbReader.read { database in
-            try findByUsername(db: database, firstName: firstName)
-        }
     }
 }
 
@@ -80,12 +68,6 @@ public extension DbUser {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
-
-    static func findUserUuidByUsername<T: DatabaseReader>(dbReader: T, firstName: String) throws -> UUID? {
-        try dbReader.read { database in
-            try findUserUuidByUsername(db: database, firstName: firstName)
-        }
-    }
 }
 
 public extension DbUser {
@@ -101,12 +83,6 @@ public extension DbUser {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
-
-    static func amountOfUsers<T: DatabaseReader>(dbReader: T) throws -> Int? {
-        try dbReader.read { database in
-            try amountOfUsers(db: database)
-        }
-    }
 }
 
 public extension DbBook {
@@ -120,12 +96,6 @@ public extension DbBook {
 
         statement.setUncheckedArguments(arguments)
         try statement.execute()
-    }
-
-    static func deleteByUserUuid<T: DatabaseWriter>(dbWriter: T, userUuid: UUID) throws {
-        try dbWriter.write { database in
-            try deleteByUserUuid(db: database, userUuid: userUuid)
-        }
     }
 }
 
@@ -141,12 +111,6 @@ public extension DbBook {
         }
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
-    }
-
-    static func hasAtLeastOneBook<T: DatabaseReader>(dbReader: T) throws -> Bool? {
-        try dbReader.read { database in
-            try hasAtLeastOneBook(db: database)
-        }
     }
 }
 
@@ -169,12 +133,6 @@ public extension DbUser {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
-
-    static func serializeInfoSingle<T: DatabaseReader>(dbReader: T) throws -> (SerializedInfo, SerializedInfo?)? {
-        try dbReader.read { database in
-            try serializeInfoSingle(db: database)
-        }
-    }
 }
 
 public extension DbUser {
@@ -194,11 +152,5 @@ public extension DbUser {
             }())
         }
         return converted
-    }
-
-    static func serializeInfoArray<T: DatabaseReader>(dbReader: T) throws -> [(SerializedInfo, SerializedInfo?)] {
-        try dbReader.read { database in
-            try serializeInfoArray(db: database)
-        }
     }
 }

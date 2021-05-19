@@ -1,4 +1,4 @@
-use crate::line_writer::{parameter_types_separated_colon, LineWriter, StaticInstance, WriteRead};
+use crate::line_writer::{parameter_types_separated_colon, LineWriter};
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
 
 /// Holds information about the current processing table
@@ -45,14 +45,6 @@ impl<'a> TableMetaData<'a> {
             encode_swift_properties(values),
             sql
         ));
-
-        self.line_writer.add_wrapper_pool(
-            StaticInstance::Instance,
-            fn_name,
-            WriteRead::Write,
-            is_auto_generated,
-            &parameters.to_vec(),
-        );
     }
     fn keys(&self, part_of_pk: bool) -> Vec<&SwiftProperty> {
         self.swift_properties

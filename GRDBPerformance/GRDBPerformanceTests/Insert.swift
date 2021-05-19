@@ -31,33 +31,36 @@ class InsertPerformanceTest: XCTestCase {
 class ReplaceTest: XCTestCase {
     func testReplace() throws {
         let db = setupPool()
-        let checkCount: (Int) -> () = {
-            let current = try! db.read { try! Int.fetchOne($0, sql: "select count(*) from user ")}!
 
-            XCTAssertEqual($0, current)
+        try! db.write { con in
+            let checkCount: (Int) -> () = {
+                let current = try! Int.fetchOne(con, sql: "select count(*) from user ")
+
+                XCTAssertEqual($0, current)
+            }
+
+            checkCount(0)
+
+            let createUser: () -> DbUser = {
+                DbUser.random()
+            }
+
+            var user = createUser()
+
+            try! user.genInsert(db: con)
+
+            checkCount(1)
+
+            user.firstName = "new"
+
+            try! user.genReplace(db: con)
+
+            checkCount(1)
+
+            try! createUser().genInsert(db: con)
+
+            checkCount(2)
         }
-
-        checkCount(0)
-
-        let createUser: () -> DbUser = {
-            DbUser.random()
-        }
-
-        var user = createUser()
-
-        try! user.genInsert(dbWriter: db)
-
-        checkCount(1)
-
-        user.firstName = "new"
-
-        try! user.genReplace(dbWriter: db)
-
-        checkCount(1)
-
-        try! createUser().genInsert(dbWriter: db)
-
-        checkCount(2)
     }
 }
 
@@ -76,6 +79,28 @@ class UpdatableColumnTest: XCTestCase {
             user.firstName = newFirstName
 
             XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+        }
+    }
+}
+
+class InsertOrIgnoreTest: XCTestCase {
+    func test() {
+        let db = setupPool()
+        let user = DbUser.random()
+
+        try! db.write { con in
+            try! user.genInsert(db: con)
+
+            var userClone = user
+
+            // The first name should not be updated
+            userClone.firstName = "somethingElse"
+
+            try! userClone.genInsertOrIgnore(db: con)
+
+            let retrieved = try! user.primaryKey().genSelectExpect(db: con)
+
+            XCTAssertEqual(user, retrieved)
         }
     }
 }

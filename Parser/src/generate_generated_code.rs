@@ -4,7 +4,6 @@ use crate::dynamic_queries::DynamicQuery;
 use crate::parse::parse;
 use crate::upsert::Upsert;
 use regex::Regex;
-use rusqlite::NO_PARAMS;
 use sqlite_parser::Metadata;
 use std::env::current_dir;
 use std::fs::File;
