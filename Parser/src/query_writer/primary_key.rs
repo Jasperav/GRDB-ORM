@@ -1,4 +1,3 @@
-use crate::line_writer::{StaticInstance, WriteRead};
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
@@ -78,13 +77,6 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             SELECT_QUERY,
             self.table_meta_data.struct_name
         ));
-        self.table_meta_data.line_writer.add_wrapper_pool(
-            StaticInstance::Instance,
-            "Select",
-            WriteRead::Read(format!("{}?", self.table_meta_data.struct_name)),
-            true,
-            &[],
-        );
     }
 
     fn write_select_query_expect(&mut self) {
@@ -102,14 +94,6 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         ",
             self.table_meta_data.struct_name
         ));
-
-        self.table_meta_data.line_writer.add_wrapper_pool(
-            StaticInstance::Instance,
-            "SelectExpect",
-            WriteRead::Read(self.table_meta_data.struct_name.to_string()),
-            true,
-            &[],
-        );
     }
 
     fn execute_update_statement(

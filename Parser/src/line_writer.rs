@@ -3,43 +3,6 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
-#[derive(Clone)]
-pub enum WriteRead {
-    Write,
-    // Return type
-    Read(String),
-}
-
-impl WriteRead {
-    pub fn to_str(&self) -> &'static str {
-        match self {
-            WriteRead::Write => "write",
-            WriteRead::Read(_) => "read",
-        }
-    }
-
-    pub fn database_reader_or_writer(&self) -> &'static str {
-        match self {
-            WriteRead::Write => "dbWriter",
-            WriteRead::Read(_) => "dbReader",
-        }
-    }
-
-    pub fn generic_type(&self) -> &'static str {
-        match self {
-            WriteRead::Write => "DatabaseWriter",
-            WriteRead::Read(_) => "DatabaseReader",
-        }
-    }
-
-    pub fn return_type(&self) -> String {
-        match &self {
-            WriteRead::Write => "".to_string(),
-            WriteRead::Read(rt) => format!("-> {}", rt),
-        }
-    }
-}
-
 /// Wrapper around a Vec<String>
 /// Eventually all strings inside the vec will be written to a file, separated by a newline
 #[derive(Debug)]
@@ -79,19 +42,6 @@ pub fn parameter_types_separated_colon(pt: &[&SwiftProperty]) -> String {
             .join(", ")
 }
 
-fn parameter_separated_colon(pt: &[&SwiftProperty]) -> String {
-    if pt.is_empty() {
-        return "".to_string();
-    }
-
-    ", ".to_string()
-        + &pt
-            .iter()
-            .map(|pt| format!("{}: {}", pt.swift_property_name, pt.swift_property_name))
-            .collect::<Vec<_>>()
-            .join(", ")
-}
-
 impl LineWriter {
     pub fn new(modifier: &'static str, output_dir: PathBuf) -> Self {
         let mut s = Self {
@@ -123,42 +73,6 @@ impl LineWriter {
 
     pub fn add_with_modifier(&mut self, t: String) {
         self.lines.push(format!("{} {}", self.modifier, t));
-    }
-
-    pub fn add_wrapper_pool(
-        &mut self,
-        static_instance: StaticInstance,
-        original_method: &str,
-        write_read: WriteRead,
-        is_auto_generated: bool,
-        parameter_with_types: &[&SwiftProperty],
-    ) {
-        let colon_separated_parameter_types_separated =
-            parameter_types_separated_colon(parameter_with_types);
-        let colon_separated_parameter_separated = parameter_separated_colon(parameter_with_types);
-        let method_name = if is_auto_generated {
-            format!("gen{}", original_method)
-        } else {
-            original_method.to_string()
-        };
-
-        self.lines.push(format!(
-            "{} {}func {}<T: {}>({}: T{}) throws {}{{\n",
-            self.modifier,
-            static_instance.modifier(),
-            &method_name,
-            write_read.generic_type(),
-            write_read.database_reader_or_writer(),
-            colon_separated_parameter_types_separated,
-            write_read.return_type()
-        ));
-        self.lines.push(format!(
-            "try {}.{} {{ database in\ntry {}(db: database{})\n}}\n}}",
-            write_read.database_reader_or_writer(),
-            write_read.to_str(),
-            &method_name,
-            colon_separated_parameter_separated
-        ));
     }
 
     pub fn write_to_file(self, file_name: &str) {

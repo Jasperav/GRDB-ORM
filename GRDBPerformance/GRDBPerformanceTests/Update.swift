@@ -42,20 +42,22 @@ class UpdatePrimaryKeyTest: XCTestCase {
         let db = setupPool()
         let user = DbUser.random()
 
-        try! user.genInsert(dbWriter: db)
+        try! db.write { con in
+            try! user.genInsert(db: con)
 
-        let book = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
+            let book = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 
-        try! book.genInsert(dbWriter: db)
+            try! book.genInsert(db: con)
 
-        let userBook = DbUserBook(bookUuid: book.bookUuid, userUuid: user.userUuid)
+            let userBook = DbUserBook(bookUuid: book.bookUuid, userUuid: user.userUuid)
 
-        try! userBook.genInsert(dbWriter: db)
+            try! userBook.genInsert(db: con)
 
-        let user2 = DbUser.random()
+            let user2 = DbUser.random()
 
-        try! user2.genInsert(dbWriter: db)
-        try! userBook.primaryKey().genUpdateUserUuid(dbWriter: db, userUuid: user2.userUuid)
-        try! DbUserBook.PrimaryKey(bookUuid: book.bookUuid, userUuid: user2.userUuid).genSelectExpect(dbReader: db)
+            try! user2.genInsert(db: con)
+            try! userBook.primaryKey().genUpdateUserUuid(db: con, userUuid: user2.userUuid)
+            try! DbUserBook.PrimaryKey(bookUuid: book.bookUuid, userUuid: user2.userUuid).genSelectExpect(db: con)
+        }
     }
 }

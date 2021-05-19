@@ -1,6 +1,6 @@
 use crate::dynamic_queries::reader::DynamicQuery;
 use crate::dynamic_queries::return_type::{Query, ReturnType};
-use crate::line_writer::{parameter_types_separated_colon, StaticInstance, WriteRead};
+use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::create_swift_type_name;
@@ -73,18 +73,6 @@ impl<'a> Parser<'a> {
             ));
 
             self.write_body(&dynamic_query, database_values, &query);
-            let read_write = match query {
-                Query::Select { .. } => WriteRead::Read(query.return_type()),
-                Query::UpdateOrDelete => WriteRead::Write,
-            };
-
-            self.line_writer.add_wrapper_pool(
-                StaticInstance::Static,
-                &dynamic_query.func_name,
-                read_write,
-                false,
-                &parameters,
-            );
 
             self.add_closing_brackets();
         }

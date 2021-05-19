@@ -8,15 +8,17 @@ class UpsertTest: XCTestCase {
         let db = setupPool()
         var user = DbUser.random()
 
-        // First try to update it
-        try! user.genInsert(dbWriter: db)
+        try! db.write { con in
+            // First try to update it
+            try! user.genInsert(db: con)
 
-        user.integer += 1
+            user.integer += 1
 
-        try! user.upsertExample(dbWriter: db)
+            try! user.upsertExample(db: con)
 
-        let retrievedUser = try! user.primaryKey().genSelectExpect(dbReader: db)
+            let retrievedUser = try! user.primaryKey().genSelectExpect(db: con)
 
-        XCTAssertEqual(user, retrievedUser)
+            XCTAssertEqual(user, retrievedUser)
+        }
     }
 }

@@ -1,9 +1,10 @@
-use crate::line_writer::{StaticInstance, WriteRead};
+use crate::line_writer::StaticInstance;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::swift_property::encode_swift_properties;
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
+pub const INSERT_OR_IGNORE_QUERY: &str = "insertOrIgnoreUniqueQuery";
 pub const REPLACE_UNIQUE_QUERY: &str = "replaceUniqueQuery";
 pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
@@ -34,6 +35,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         let mut static_queries = vec![
             self.static_unique_insert_query(),
             self.static_unique_replace_query(),
+            self.static_insert_or_ignore_query(),
             self.static_delete_all_query(),
         ];
 
@@ -84,6 +86,10 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.columns_question_marks(REPLACE_UNIQUE_QUERY, "replace")
     }
 
+    pub fn static_insert_or_ignore_query(&mut self) -> WriteResult {
+        self.columns_question_marks(INSERT_OR_IGNORE_QUERY, "insert or ignore")
+    }
+
     fn static_unique_update_query(&mut self) -> WriteResult {
         (
             UPDATE_UNIQUE_QUERY,
@@ -114,12 +120,13 @@ impl<'a> QueryWriterMainStruct<'a> {
                 .as_slice(),
         );
 
-        self.write("Insert", INSERT_UNIQUE_QUERY, &db_values);
-        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values);
+        self.write("Insert", INSERT_UNIQUE_QUERY, &db_values, true);
+        self.write("InsertOrIgnore", INSERT_OR_IGNORE_QUERY, &db_values, false);
+        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, true);
     }
 
     fn write_delete(&mut self) {
-        self.write("DeleteAll", DELETE_ALL_QUERY, &"");
+        self.write("DeleteAll", DELETE_ALL_QUERY, &"", true);
     }
 
     fn write_update(&mut self) {
@@ -135,10 +142,10 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         let values = encode_swift_properties(&non_pk);
 
-        self.write("Update", UPDATE_UNIQUE_QUERY, &values);
+        self.write("Update", UPDATE_UNIQUE_QUERY, &values, true);
     }
 
-    fn write(&mut self, method_name: &str, query: &str, values: &str) {
+    fn write(&mut self, method_name: &str, query: &str, values: &str, add_check: bool) {
         let (static_instance, args, check, arguments) = if values.is_empty() {
             (StaticInstance::Static, "".to_string(), "", "")
         } else {
@@ -150,14 +157,13 @@ impl<'a> QueryWriterMainStruct<'a> {
                 statement.setUncheckedArguments(arguments)",
                 values
             );
-            let check = "if assertOneRowAffected {\n// Only 1 row should be affected\nassert(db.changesCount == 1)}";
+            let (check, argument) = if add_check {
+                ("if assertOneRowAffected {\n// Only 1 row should be affected\nassert(db.changesCount == 1)}", ", assertOneRowAffected: Bool = true")
+            } else {
+                ("", "")
+            };
 
-            (
-                StaticInstance::Instance,
-                args,
-                check,
-                ", assertOneRowAffected: Bool = true",
-            )
+            (StaticInstance::Instance, args, check, argument)
         };
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
@@ -178,13 +184,5 @@ impl<'a> QueryWriterMainStruct<'a> {
             args,
             check
         ));
-
-        self.table_meta_data.line_writer.add_wrapper_pool(
-            static_instance,
-            method_name,
-            WriteRead::Write,
-            true,
-            &[],
-        );
     }
 }
