@@ -14,11 +14,9 @@ class DynamicQueryTest: XCTestCase {
             let book0 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: 0, tsCreated: 0)
             let book1 = DbBook(bookUuid: UUID(), userUuid: user.userUuid, integerOptional: nil, tsCreated: 0)
 
-            try! db.write { db in
-                try! user.genInsert(db: con)
-                try! book0.genInsert(db: con)
-                try! book1.genInsert(db: con)
-            }
+            try! user.genInsert(db: con)
+            try! book0.genInsert(db: con)
+            try! book1.genInsert(db: con)
 
             assertBooksForUserWithSpecificUuid(con: con, user: user, book0: book0, book1: book1)
             assertFindByUsername(con: con, find: user)

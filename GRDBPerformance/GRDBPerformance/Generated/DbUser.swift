@@ -181,7 +181,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         try statement.execute()
     }
 
-    public func genReplace(db: Database, assertOneRowAffected: Bool = true) throws {
+    public func genReplace(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -216,11 +216,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
-
-        if assertOneRowAffected {
-            // Only 1 row should be affected
-            assert(db.changesCount == 1)
-        }
     }
 
     public static func genDeleteAll(db: Database) throws {
