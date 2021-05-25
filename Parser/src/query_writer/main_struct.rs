@@ -122,7 +122,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         self.write("Insert", INSERT_UNIQUE_QUERY, &db_values, true);
         self.write("InsertOrIgnore", INSERT_OR_IGNORE_QUERY, &db_values, false);
-        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, true);
+        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, false);
     }
 
     fn write_delete(&mut self) {
