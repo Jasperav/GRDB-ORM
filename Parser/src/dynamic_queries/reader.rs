@@ -38,12 +38,14 @@ fn validate(queries: &[DynamicQuery]) {
         assert!(dyn_query.return_types.iter().all(|r| !r.contains('?')));
 
         // Check if the amount of parameters query placeholders (?) equals the amount of Swift parameters
-        let occurrences = regex
-            .captures(&dyn_query.query)
-            .map(|cap| cap.len())
-            .unwrap_or(0);
+        let occurrences = regex.find_iter(&dyn_query.query).count();
 
-        assert_eq!(dyn_query.parameter_types.len(), occurrences);
+        assert_eq!(
+            dyn_query.parameter_types.len(),
+            occurrences,
+            "Query: {}",
+            dyn_query.query
+        );
 
         // Check for a optional return type and if its an array (this is illegal)
         if dyn_query.return_types.len() == 1

@@ -154,3 +154,17 @@ public extension DbUser {
         return converted
     }
 }
+
+public extension DbUser {
+    static func serializeInfoArray(db: Database, serializedInfo: SerializedInfo, serializedInfoNullable: SerializedInfo, firstName: String) throws {
+        let statement = try db.cachedUpdateStatement(sql: """
+        update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?
+        """)
+        let arguments: StatementArguments = try [
+            try serializedInfo.serializedData(), try serializedInfoNullable.serializedData(), firstName,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+        try statement.execute()
+    }
+}
