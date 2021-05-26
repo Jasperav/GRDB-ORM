@@ -84,6 +84,7 @@ impl<'a> Parser<'a> {
         // Never should the argument be '= null' (= null in DB doesn't make sense and is a bug)
         // Replace the optional type with a nonnull type, regardless if the column is nullable
         swift_property.swift_type.type_name = swift_property.swift_type.type_name.replace('?', "");
+        swift_property.column.nullable = false;
 
         // Rename the column to the parameter argument name, the param name gets precedence
         swift_property.swift_property_name = param_name.to_string();

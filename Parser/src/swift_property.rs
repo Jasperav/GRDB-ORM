@@ -6,7 +6,7 @@ use crate::custom_mapping::CustomMapping;
 
 /// This represents a property in Swift
 /// This is an extracted column in SQLite
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SwiftProperty {
     // Currently always the same as the SQLite column name, maybe in the future this can be changed
     // to convert between camelCase and snake_case.
@@ -70,7 +70,7 @@ impl SwiftProperty {
 }
 
 /// Type information about the Swift property
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SwiftTypeWithTypeName {
     /// The type name of the Swift property (can be customized by the custom_mapping.toml file)
     pub type_name: String,
@@ -78,7 +78,7 @@ pub struct SwiftTypeWithTypeName {
 }
 
 /// A type can either be Json or not Json. Simple, right?
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum SwiftType {
     NoJson,
     Json,

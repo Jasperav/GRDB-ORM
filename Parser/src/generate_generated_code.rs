@@ -139,6 +139,18 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select serializedInfo, serializedInfoNullable from user".to_string(),
             },
+            DynamicQuery {
+                extension: "User".to_string(),
+                func_name: "serializeInfoArray".to_string(),
+                parameter_types: vec![
+                    ("User".to_string(), "serializedInfo".to_string(), "serializedInfo".to_string()),
+                    ("User".to_string(), "serializedInfoNullable".to_string(), "serializedInfoNullable".to_string()),
+                    ("User".to_string(), "firstName".to_string(), "firstName".to_string()),
+                ],
+                return_types: vec![],
+                return_types_is_array: false,
+                query: "update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?".to_string(),
+            },
         ],
         upserts: vec![Upsert {
             table: "User".to_string(),
