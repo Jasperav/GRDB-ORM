@@ -67,7 +67,9 @@ impl<'a> Parser<'a> {
         database_values: &mut Vec<String>,
         parameters: &mut Vec<SwiftProperty>,
     ) {
-        let table = self.tables.table(table).unwrap();
+        let table = self.tables.table(table).unwrap_or_else(|| {
+            panic!("Did not found table {} in tables {:#?}", table, self.tables)
+        });
 
         // Find the column in the table
         let mut swift_property = create_swift_properties(table, &self.config.custom_mapping)
