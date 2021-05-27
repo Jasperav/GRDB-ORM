@@ -37,6 +37,44 @@ class UpdatePerformanceTest: XCTestCase {
     }
 }
 
+class UpdateTest: XCTestCase {
+    func test() throws {
+        let db = setupPool()
+        var user = DbUser.random()
+
+        try! db.write { con in
+            try! user.genInsert(db: con)
+
+            let assertUser: () -> () = {
+                XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+            }
+
+            // First check with a nullable data type
+            let changeValue: (SerializedInfo?) -> () = {
+                user.serializedInfoNullableAutoSet(serializedInfoNullable: $0)
+
+                try! user.primaryKey().genUpdateSerializedInfoNullable(db: con, serializedInfoNullable: user.serializedInfoNullableAutoConvert())
+
+                assertUser()
+            }
+
+            // Make sure there is a value
+            changeValue(.data("something"))
+
+            // Make sure there is no value
+            changeValue(nil)
+
+            // Check with a nonnull type
+            user.bool = !user.bool
+
+            try! user.primaryKey().genUpdateBool(db: con, bool: user.bool)
+
+            assertUser()
+        }
+    }
+
+}
+
 class UpdatePrimaryKeyTest: XCTestCase {
     func testUpdatePk() throws {
         let db = setupPool()

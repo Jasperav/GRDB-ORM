@@ -137,7 +137,9 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
+            let sql: String = Self.deleteQuery
+
+            let statement = try db.cachedUpdateStatement(sql: sql)
 
             statement.setUncheckedArguments(arguments)
 
@@ -162,7 +164,9 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateBookUuidQuery)
+            let sql: String = UpdatableColumn.updateBookUuidQuery
+
+            let statement = try db.cachedUpdateStatement(sql: sql)
 
             statement.setUncheckedArguments(arguments)
 
@@ -180,7 +184,9 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 self.userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: Self.UpdatableColumn.updateUserUuidQuery)
+            let sql: String = UpdatableColumn.updateUserUuidQuery
+
+            let statement = try db.cachedUpdateStatement(sql: sql)
 
             statement.setUncheckedArguments(arguments)
 

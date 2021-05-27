@@ -21,6 +21,16 @@ pub struct SwiftProperty {
 }
 
 impl SwiftProperty {
+    // Never should the argument be '= null' (= null in DB doesn't make sense and is a bug)
+    // Replace the optional type with a nonnull type, regardless if the column is nullable
+    pub fn make_not_null(&mut self) {
+        if !self.column.nullable {
+            return;
+        }
+
+        self.swift_type.type_name = self.swift_type.type_name.replace("?", "");
+        self.column.nullable = false;
+    }
     pub fn property_name(&self) -> String {
         if self.refers_to_self {
             format!("self.{}", self.swift_property_name)

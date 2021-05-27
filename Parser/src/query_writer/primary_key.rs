@@ -96,20 +96,21 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         ));
     }
 
-    fn execute_update_statement(
+    fn execute_update_statement<T: FnOnce() -> String>(
         &mut self,
         fn_name: &str,
         parameters: &[&SwiftProperty],
         values: &[&SwiftProperty],
-        statement: &str,
+        sql: T,
+        add_assert_one_row_affected: bool,
     ) {
         self.table_meta_data.write_update(
             fn_name,
             parameters,
             values,
-            &format!("Self.{}", statement),
+            sql,
             true,
-            true,
+            add_assert_one_row_affected,
         );
     }
 
@@ -131,7 +132,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             "Delete",
             &[],
             &values.iter().collect::<Vec<_>>(),
-            DELETE_QUERY,
+            || format!("Self.{}", DELETE_QUERY),
+            true,
         )
     }
 
@@ -145,35 +147,83 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         assert!(!updatable_columns.is_empty());
 
         let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
+        let pk_comma_separated = self
+            .table_meta_data
+            .primary_keys()
+            .iter()
+            .map(|p| p.column.name.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
         let cases = updatable_columns
             .iter()
             .map(|t| t.swift_property_name.clone())
             .collect::<Vec<_>>()
             .join(", ");
-        let queries = updatable_columns
-            .iter()
-            .map(|u| {
-                let update_query = format!(
-                    "update {} set {} = ? where {}",
-                    self.table_meta_data.table_name, u.column.name, pk_separated
-                );
+
+        let mut update_queries = vec![];
+        let mut upsert_queries = vec![];
+
+        for column in &updatable_columns {
+            let create_update_query = |midfix| {
                 format!(
-                    "{} static let update{}Query = \"{}\"",
-                    self.table_meta_data.line_writer.modifier,
-                    some_kind_of_uppercase_first_letter(&u.swift_property_name),
-                    update_query
+                    "update {} set {} = {} where {}",
+                    self.table_meta_data.table_name, column.column.name, midfix, pk_separated
                 )
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
+            };
+
+            let update_query = create_update_query("?");
+            let create_query = |prefix, query| {
+                format!(
+                    "{} static let {}{}Query = \"{}\"\n",
+                    self.table_meta_data.line_writer.modifier,
+                    prefix,
+                    some_kind_of_uppercase_first_letter(&column.swift_property_name),
+                    query
+                )
+            };
+
+            let update = "update";
+            let upsert = "upsert";
+
+            update_queries.push(create_query(update, update_query.clone()));
+
+            // Doesn't really makes sense
+            if !column.column.part_of_pk {
+                let upsert_postfix = format!(
+                    " on conflict({}) do update set {column}=excluded.{column}",
+                    pk_comma_separated,
+                    column = column.column.name
+                );
+
+                let upsert_query = format!("{}{}", update_query, upsert_postfix);
+
+                upsert_queries.push(create_query(upsert, upsert_query));
+
+                if column.column.nullable {
+                    let update_nullable_query = create_update_query("null");
+
+                    update_queries.push(create_query(
+                        "updateNullable",
+                        update_nullable_query.clone(),
+                    ));
+                    upsert_queries.push(create_query(
+                        "upsertNullable",
+                        format!("{}{}", update_nullable_query, upsert_postfix),
+                    ))
+                }
+            }
+        }
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "enum UpdatableColumn {{
                 case {}
 
+                {}\n
                 {}
              }}",
-            cases, queries
+            cases,
+            update_queries.join(""),
+            upsert_queries.join(""),
         ));
 
         for property in &updatable_columns {
@@ -191,18 +241,67 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
-            self.execute_update_statement(
-                &format!(
-                    "Update{}",
-                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
-                ),
-                &[property],
-                &values.iter().collect::<Vec<_>>(),
-                &format!(
-                    "UpdatableColumn.update{}Query",
-                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
-                ),
-            );
+            let mut execute_update = |update, add_assert_one_row_affected, sql| {
+                self.execute_update_statement(
+                    &format!(
+                        "{}{}",
+                        some_kind_of_uppercase_first_letter(update),
+                        some_kind_of_uppercase_first_letter(&property.swift_property_name)
+                    ),
+                    &[property],
+                    &values.iter().collect::<Vec<_>>(),
+                    || sql,
+                    add_assert_one_row_affected,
+                );
+            };
+
+            let query_name = |prefix: &str, is_nullable: bool| {
+                let midfix = if is_nullable { "Nullable" } else { "" };
+
+                format!(
+                    "UpdatableColumn.{}{}{}Query",
+                    prefix,
+                    midfix,
+                    some_kind_of_uppercase_first_letter(&property.swift_property_name),
+                )
+            };
+
+            let create_sql_nullable = |nullable, non_null| {
+                format!(
+                    "{{
+                if {} == nil {{
+                    return {}
+                }} else {{
+                    return {}
+                }}
+                }}()",
+                    property.swift_property_name, nullable, non_null
+                )
+            };
+
+            let update = "update";
+
+            if property.column.nullable {
+                let nullable = query_name(update, true);
+                let nonnull = query_name(update, false);
+
+                execute_update(update, true, create_sql_nullable(nullable, nonnull));
+            } else {
+                execute_update(update, true, query_name(update, false));
+            }
+
+            let upsert = "upsert";
+
+            if !property.column.part_of_pk {
+                if property.column.nullable {
+                    let nullable = query_name(upsert, true);
+                    let nonnull = query_name(upsert, false);
+
+                    execute_update(upsert, false, create_sql_nullable(nullable, nonnull));
+                } else {
+                    execute_update(upsert, true, query_name(upsert, false));
+                }
+            }
         }
     }
 }

@@ -14,6 +14,12 @@ impl<'a> Parser<'a> {
 
         // Process each upsert
         for upsert in &self.config.upserts {
+            assert_ne!(
+                upsert.columns_to_update.len(),
+                1,
+                "This is already generated"
+            );
+
             // Not logical if no updates are present
             assert!(!upsert.columns_to_update.is_empty());
 
@@ -80,7 +86,7 @@ impl<'a> Parser<'a> {
                 &upsert.func_name,
                 &[],
                 &values.iter().collect::<Vec<_>>(),
-                &format!("\"{}\"", query),
+                || format!("\"{}\"", query),
                 false,
                 false,
             );
