@@ -18,7 +18,7 @@ impl<'a> TableMetaData<'a> {
         values: &[&SwiftProperty],
         sql: &str,
         is_auto_generated: bool,
-        addAssertOneRowAffected: bool,
+        add_assert_one_row_affected: bool,
     ) {
         self.line_writer.add_with_modifier(format!(
             "func {}(db: Database{}{}) throws {{
@@ -41,14 +41,14 @@ impl<'a> TableMetaData<'a> {
                 fn_name.to_string()
             },
             parameter_types_separated_colon(parameters),
-            if addAssertOneRowAffected {
+            if add_assert_one_row_affected {
                 ", assertOneRowAffected: Bool = true"
             } else {
                 ""
             },
             encode_swift_properties(values),
             sql,
-            if addAssertOneRowAffected {
+            if add_assert_one_row_affected {
                 "if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }"
