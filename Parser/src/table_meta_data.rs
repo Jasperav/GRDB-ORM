@@ -11,16 +11,17 @@ pub struct TableMetaData<'a> {
 }
 
 impl<'a> TableMetaData<'a> {
-    pub fn write_update_with_wrapper(
+    pub fn write_update(
         &mut self,
         fn_name: &str,
         parameters: &[&SwiftProperty],
         values: &[&SwiftProperty],
         sql: &str,
         is_auto_generated: bool,
+        addAssertOneRowAffected: bool,
     ) {
         self.line_writer.add_with_modifier(format!(
-            "func {}(db: Database{}, assertOneRowAffected: Bool = true) throws {{
+            "func {}(db: Database{}{}) throws {{
             let arguments: StatementArguments = try [
                 {}
             ]
@@ -31,9 +32,7 @@ impl<'a> TableMetaData<'a> {
 
             try statement.execute()
 
-            if assertOneRowAffected {{
-                assert(db.changesCount == 1)
-            }}
+            {}
         }}
         ",
             if is_auto_generated {
@@ -42,8 +41,20 @@ impl<'a> TableMetaData<'a> {
                 fn_name.to_string()
             },
             parameter_types_separated_colon(parameters),
+            if addAssertOneRowAffected {
+                ", assertOneRowAffected: Bool = true"
+            } else {
+                ""
+            },
             encode_swift_properties(values),
-            sql
+            sql,
+            if addAssertOneRowAffected {
+                "if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }"
+            } else {
+                ""
+            }
         ));
     }
     fn keys(&self, part_of_pk: bool) -> Vec<&SwiftProperty> {
