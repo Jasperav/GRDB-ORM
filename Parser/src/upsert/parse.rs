@@ -76,11 +76,12 @@ impl<'a> Parser<'a> {
 
             tmd.line_writer
                 .add_line(format!("extension {} {{", &struct_name));
-            tmd.write_update_with_wrapper(
+            tmd.write_update(
                 &upsert.func_name,
                 &[],
                 &values.iter().collect::<Vec<_>>(),
                 &format!("\"{}\"", query),
+                false,
                 false,
             );
             tmd.line_writer.add_closing_brackets();

@@ -103,11 +103,12 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         values: &[&SwiftProperty],
         statement: &str,
     ) {
-        self.table_meta_data.write_update_with_wrapper(
+        self.table_meta_data.write_update(
             fn_name,
             parameters,
             values,
             &format!("Self.{}", statement),
+            true,
             true,
         );
     }
