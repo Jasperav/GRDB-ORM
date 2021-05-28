@@ -6,27 +6,33 @@ import GRDB
 // Mapped table to struct
 public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     // Static queries
-    public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid) values (?, ?)"
-    public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid) values (?, ?)"
-    public static let insertOrIgnoreUniqueQuery = "insert or ignore into UserBook (bookUuid, userUuid) values (?, ?)"
+    public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
+    public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
+    public static let insertOrIgnoreUniqueQuery = "insert or ignore into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
     public static let deleteAllQuery = "delete from UserBook"
+    public static let updateUniqueQuery = "update UserBook set realToDouble = ? where bookUuid = ? and userUuid = ?"
+    public static let upsertRealToDoubleQuery = "insert into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?) on conflict (bookUuid, userUuid) do update set realToDouble=excluded.realToDouble"
 
     // Mapped columns to properties
-    public let bookUuid: UUID
-    public let userUuid: UUID
+    public var bookUuid: UUID
+    public var userUuid: UUID
+    public var realToDouble: Double?
 
     // Default initializer
     public init(bookUuid: UUID,
-                userUuid: UUID)
+                userUuid: UUID,
+                realToDouble: Double?)
     {
         self.bookUuid = bookUuid
         self.userUuid = userUuid
+        self.realToDouble = realToDouble
     }
 
     // Row initializer
     public init(row: Row, startingIndex: Int) {
         bookUuid = row[0 + startingIndex]
         userUuid = row[1 + startingIndex]
+        realToDouble = row[2 + startingIndex]
     }
 
     // The initializer defined by the protocol
@@ -45,6 +51,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
             userUuid.uuidString,
+            realToDouble,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -63,6 +70,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
             userUuid.uuidString,
+            realToDouble,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -76,6 +84,21 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
             userUuid.uuidString,
+            realToDouble,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertRealToDouble(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertRealToDoubleQuery)
+
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid.uuidString,
+            realToDouble,
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -89,6 +112,25 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         try statement.execute()
     }
 
+    public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
+
+        let arguments: StatementArguments = try [
+            realToDouble,
+            bookUuid.uuidString,
+            userUuid.uuidString,
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+
+        if assertOneRowAffected {
+            // Only 1 row should be affected
+            assert(db.changesCount == 1)
+        }
+    }
+
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries
@@ -96,8 +138,8 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         public static let deleteQuery = "delete from UserBook where bookUuid = ? and userUuid = ?"
 
         // Mapped columns to properties
-        public let bookUuid: UUID
-        public let userUuid: UUID
+        public var bookUuid: UUID
+        public var userUuid: UUID
 
         // Default initializer
         public init(bookUuid: UUID,
@@ -149,10 +191,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         }
 
         public enum UpdatableColumn {
-            case bookUuid, userUuid
+            case bookUuid, userUuid, realToDouble
 
             public static let updateBookUuidQuery = "update UserBook set bookUuid = ? where bookUuid = ? and userUuid = ?"
             public static let updateUserUuidQuery = "update UserBook set userUuid = ? where bookUuid = ? and userUuid = ?"
+            public static let updateRealToDoubleQuery = "update UserBook set realToDouble = ? where bookUuid = ? and userUuid = ?"
         }
 
         public func genUpdateBookUuid(db: Database, bookUuid: UUID, assertOneRowAffected: Bool = true) throws {
@@ -181,6 +224,24 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             ]
 
             let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateUserUuidQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public func genUpdateRealToDouble(db: Database, realToDouble: Double?, assertOneRowAffected: Bool = true) throws {
+            let arguments: StatementArguments = try [
+                realToDouble,
+                bookUuid.uuidString,
+                userUuid.uuidString,
+            ]
+
+            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateRealToDoubleQuery)
 
             statement.setUncheckedArguments(arguments)
 

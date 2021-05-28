@@ -282,7 +282,7 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
         .join(", \n")
 }
 
-/// A type is 'build-in' when the type is standard Swift type
+/// A type is 'build-in' when the type is standard Swift type and does not need JSON en/de-coding
 pub fn is_build_in_type(check: &str, t: Type) -> bool {
     check == "String"
         || check == "Int"
@@ -291,6 +291,7 @@ pub fn is_build_in_type(check: &str, t: Type) -> bool {
         || check == "Int32"
         || check == "Bool"
         || check == "Data"
+        || check == "Double"
         || is_mapped_blob_type(t, check)
 }
 
@@ -319,9 +320,10 @@ pub fn create_swift_type_name(from: &str, config: &Config) -> String {
 /// Translates a SQLite type to a Swift type
 fn sqlite_type_to_swift_type(t: Type) -> &'static str {
     match t {
-        Type::Text | Type::String | Type::Real => "String",
+        Type::Text | Type::String => "String",
         Type::Integer => "Int",
         Type::Blob => "Data",
+        Type::Real => "Double",
     }
 }
 
