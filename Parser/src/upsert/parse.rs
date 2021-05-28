@@ -86,7 +86,7 @@ impl<'a> Parser<'a> {
                 &upsert.func_name,
                 &[],
                 &values.iter().collect::<Vec<_>>(),
-                || format!("\"{}\"", query),
+                &format!("\"{}\"", query),
                 false,
                 false,
             );

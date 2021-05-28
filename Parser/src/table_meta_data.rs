@@ -11,12 +11,12 @@ pub struct TableMetaData<'a> {
 }
 
 impl<'a> TableMetaData<'a> {
-    pub fn write_update<T: FnOnce() -> String>(
+    pub fn write_update(
         &mut self,
         fn_name: &str,
         parameters: &[&SwiftProperty],
         values: &[&SwiftProperty],
-        sql: T,
+        sql: &str,
         is_auto_generated: bool,
         add_assert_one_row_affected: bool,
     ) {
@@ -26,9 +26,7 @@ impl<'a> TableMetaData<'a> {
                 {}
             ]
 
-            let sql: String = {}
-
-            let statement = try db.cachedUpdateStatement(sql: sql)
+            let statement = try db.cachedUpdateStatement(sql: {})
 
             statement.setUncheckedArguments(arguments)
 
@@ -49,7 +47,7 @@ impl<'a> TableMetaData<'a> {
                 ""
             },
             encode_swift_properties(values),
-            sql(),
+            sql,
             if add_assert_one_row_affected {
                 "if assertOneRowAffected {
                 assert(db.changesCount == 1)
