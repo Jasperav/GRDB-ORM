@@ -27,7 +27,7 @@ class UpsertTest: XCTestCase {
             let upsertSingleColumn: (String?) -> () = {
                 user.firstName = $0
 
-                try! user.primaryKey().genUpsertFirstName(db: db, firstName: user.firstName)
+                try! user.primaryKey().genUpsertFirstName(db: con, firstName: user.firstName)
 
                 assertUser()
             }
