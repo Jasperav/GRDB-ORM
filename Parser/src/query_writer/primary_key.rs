@@ -21,7 +21,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn static_select_query(&mut self) -> WriteResult {
         (
-            SELECT_QUERY,
+            SELECT_QUERY.to_string(),
             format!(
                 "select * from {}{}",
                 self.table_meta_data.table_name,
@@ -32,7 +32,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn static_delete_query(&mut self) -> WriteResult {
         (
-            DELETE_QUERY,
+            DELETE_QUERY.to_string(),
             format!(
                 "delete from {}{}",
                 self.table_meta_data.table_name,
@@ -101,15 +101,16 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         fn_name: &str,
         parameters: &[&SwiftProperty],
         values: &[&SwiftProperty],
-        statement: &str,
+        sql: &str,
+        add_assert_one_row_affected: bool,
     ) {
         self.table_meta_data.write_update(
             fn_name,
             parameters,
             values,
-            &format!("Self.{}", statement),
+            sql,
             true,
-            true,
+            add_assert_one_row_affected,
         );
     }
 
@@ -131,7 +132,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             "Delete",
             &[],
             &values.iter().collect::<Vec<_>>(),
-            DELETE_QUERY,
+            &format!("Self.{}", DELETE_QUERY),
+            true,
         )
     }
 
@@ -150,22 +152,25 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .map(|t| t.swift_property_name.clone())
             .collect::<Vec<_>>()
             .join(", ");
-        let queries = updatable_columns
-            .iter()
-            .map(|u| {
-                let update_query = format!(
-                    "update {} set {} = ? where {}",
-                    self.table_meta_data.table_name, u.column.name, pk_separated
-                );
-                format!(
-                    "{} static let update{}Query = \"{}\"",
-                    self.table_meta_data.line_writer.modifier,
-                    some_kind_of_uppercase_first_letter(&u.swift_property_name),
-                    update_query
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
+
+        let mut update_queries = vec![];
+
+        let update = "update";
+
+        for column in &updatable_columns {
+            let update_query = format!(
+                "update {} set {} = ? where {}",
+                self.table_meta_data.table_name, column.column.name, pk_separated
+            );
+
+            update_queries.push(format!(
+                "{} static let {}{}Query = \"{}\"\n",
+                self.table_meta_data.line_writer.modifier,
+                update,
+                some_kind_of_uppercase_first_letter(&column.swift_property_name),
+                update_query
+            ));
+        }
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "enum UpdatableColumn {{
@@ -173,7 +178,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 {}
              }}",
-            cases, queries
+            cases,
+            update_queries.join(""),
         ));
 
         for property in &updatable_columns {
@@ -191,17 +197,21 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
+            let query_name = format!(
+                "UpdatableColumn.update{}Query",
+                some_kind_of_uppercase_first_letter(&property.swift_property_name),
+            );
+
             self.execute_update_statement(
                 &format!(
-                    "Update{}",
+                    "{}{}",
+                    some_kind_of_uppercase_first_letter(update),
                     some_kind_of_uppercase_first_letter(&property.swift_property_name)
                 ),
                 &[property],
                 &values.iter().collect::<Vec<_>>(),
-                &format!(
-                    "UpdatableColumn.update{}Query",
-                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
-                ),
+                &query_name,
+                true,
             );
         }
     }

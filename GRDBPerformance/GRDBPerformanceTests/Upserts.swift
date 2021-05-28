@@ -14,11 +14,26 @@ class UpsertTest: XCTestCase {
 
             user.integer += 1
 
+            // Upsert the whole user
             try! user.upsertExample(db: con)
 
-            let retrievedUser = try! user.primaryKey().genSelectExpect(db: con)
+            let assertUser: () -> () = {
+                XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+            }
 
-            XCTAssertEqual(user, retrievedUser)
+            assertUser()
+
+            // Upsert single column
+            let upsertSingleColumn: (String?) -> () = {
+                user.firstName = $0
+
+                try! user.genUpsertFirstName(db: con)
+
+                assertUser()
+            }
+
+            upsertSingleColumn(nil)
+            upsertSingleColumn("Something")
         }
     }
 }

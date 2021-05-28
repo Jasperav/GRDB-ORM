@@ -6,7 +6,7 @@ use crate::line_writer::LineWriter;
 pub(crate) use main_struct::QueryWriterMainStruct;
 pub(crate) use primary_key::QueryWriterPrimaryKey;
 
-type WriteResult = (&'static str, String);
+type WriteResult = (String, String);
 
 fn write_static_queries(line_writer: &mut LineWriter, queries: Vec<WriteResult>) {
     line_writer.add_comment("Static queries");

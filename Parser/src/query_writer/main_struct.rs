@@ -1,6 +1,7 @@
 use crate::line_writer::StaticInstance;
 use crate::query_writer::{write_static_queries, WriteResult};
-use crate::swift_property::encode_swift_properties;
+use crate::some_kind_of_uppercase_first_letter;
+use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
@@ -29,6 +30,13 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 }
 
+fn create_upsert_query_name(column_name: &str) -> String {
+    format!(
+        "upsert{}Query",
+        some_kind_of_uppercase_first_letter(&column_name)
+    )
+}
+
 // Static queries
 impl<'a> QueryWriterMainStruct<'a> {
     pub(crate) fn write_static_queries(mut self) {
@@ -43,12 +51,40 @@ impl<'a> QueryWriterMainStruct<'a> {
             static_queries.push(self.static_unique_update_query())
         }
 
+        // The first static query is always the insert query
+        static_queries.extend_from_slice(&self.static_upsert_queries(&static_queries[0].1));
+
         write_static_queries(&mut self.table_meta_data.line_writer, static_queries);
+    }
+
+    fn static_upsert_queries(&self, insert_query: &str) -> Vec<WriteResult> {
+        let mut v = vec![];
+        let pk_comma_separated = self
+            .table_meta_data
+            .primary_keys()
+            .iter()
+            .map(|p| p.column.name.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        for column in self.table_meta_data.non_primary_keys() {
+            let query_name = create_upsert_query_name(&column.column.name);
+            let query = format!(
+                "{} on conflict ({}) do update set {column}=excluded.{column}",
+                insert_query,
+                pk_comma_separated,
+                column = column.column.name
+            );
+
+            v.push((query_name, query));
+        }
+
+        v
     }
 
     fn static_delete_all_query(&mut self) -> WriteResult {
         (
-            DELETE_ALL_QUERY,
+            DELETE_ALL_QUERY.to_string(),
             format!("delete from {}", self.table_meta_data.table_name),
         )
     }
@@ -67,7 +103,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             .join(", ");
 
         (
-            query,
+            query.to_string(),
             format!(
                 "{} into {} ({}) values ({})",
                 prefix,
@@ -92,7 +128,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
     fn static_unique_update_query(&mut self) -> WriteResult {
         (
-            UPDATE_UNIQUE_QUERY,
+            UPDATE_UNIQUE_QUERY.to_string(),
             format!(
                 "update {} set {} where {}",
                 self.table_meta_data.table_name,
@@ -123,6 +159,25 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write("Insert", INSERT_UNIQUE_QUERY, &db_values, true);
         self.write("InsertOrIgnore", INSERT_OR_IGNORE_QUERY, &db_values, false);
         self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, false);
+
+        let non_pk_cloned = self
+            .table_meta_data
+            .non_primary_keys()
+            .iter()
+            .map(|c| <&SwiftProperty>::clone(c).clone())
+            .collect::<Vec<_>>();
+
+        for column in non_pk_cloned {
+            let query_name = create_upsert_query_name(&column.column.name);
+            let method_name = query_name.strip_suffix("Query").unwrap().to_string();
+
+            self.write(
+                &some_kind_of_uppercase_first_letter(&method_name),
+                &query_name,
+                &db_values,
+                false,
+            );
+        }
     }
 
     fn write_delete(&mut self) {

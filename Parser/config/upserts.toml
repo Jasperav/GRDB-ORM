@@ -1,5 +1,6 @@
 # Below is an example of an upsert
 # https://www.sqlite.org/lang_UPSERT.html
+# Note that an upsert is already generated for each column with the full primary key as on conflict clause
 #
 # []
 #   It starts with a mandatory comment, which looks like this: [my comment].

@@ -4,6 +4,7 @@
 # Don't add the generated folder to the ignored folder, so other people can easily see what is being generated
 # /generated
 /src/properties.rs
+/compiled
 ./generatedfortest.sqlite3
 ./Cargo.lock
 
