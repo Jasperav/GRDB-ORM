@@ -1,7 +1,7 @@
 use crate::line_writer::StaticInstance;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::encode_swift_properties;
+use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
@@ -79,7 +79,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             v.push((query_name, query));
         }
 
-        return v;
+        v
     }
 
     fn static_delete_all_query(&mut self) -> WriteResult {
@@ -164,7 +164,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             .table_meta_data
             .non_primary_keys()
             .iter()
-            .map(|c| c.clone().clone())
+            .map(|c| <&SwiftProperty>::clone(c).clone())
             .collect::<Vec<_>>();
 
         for column in non_pk_cloned {
