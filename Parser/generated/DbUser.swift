@@ -22,7 +22,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public static let upsertSerializedInfoNullableQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set serializedInfoNullable=excluded.serializedInfoNullable"
 
     // Mapped columns to properties
-    public let userUuid: UUID
+    public var userUuid: UUID
     public var firstName: String?
     public var jsonStruct: JsonType
     public var jsonStructOptional: JsonType?
@@ -615,7 +615,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public static let deleteQuery = "delete from User where userUuid = ?"
 
         // Mapped columns to properties
-        public let userUuid: UUID
+        public var userUuid: UUID
 
         // Default initializer
         public init(userUuid: UUID) {

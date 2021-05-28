@@ -16,7 +16,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     public static let upsertTsCreatedQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?) on conflict (bookUuid) do update set tsCreated=excluded.tsCreated"
 
     // Mapped columns to properties
-    public let bookUuid: UUID
+    public var bookUuid: UUID
     public var userUuid: UUID?
     public var integerOptional: Int?
     public var tsCreated: Int64
@@ -179,7 +179,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         public static let deleteQuery = "delete from Book where bookUuid = ?"
 
         // Mapped columns to properties
-        public let bookUuid: UUID
+        public var bookUuid: UUID
 
         // Default initializer
         public init(bookUuid: UUID) {

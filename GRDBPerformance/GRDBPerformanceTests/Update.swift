@@ -87,15 +87,21 @@ class UpdatePrimaryKeyTest: XCTestCase {
 
             try! book.genInsert(db: con)
 
-            let userBook = DbUserBook(bookUuid: book.bookUuid, userUuid: user.userUuid)
+            var userBook = DbUserBook(bookUuid: book.bookUuid, userUuid: user.userUuid, realToDouble: 123.456)
 
             try! userBook.genInsert(db: con)
 
             let user2 = DbUser.random()
 
             try! user2.genInsert(db: con)
-            try! userBook.primaryKey().genUpdateUserUuid(db: con, userUuid: user2.userUuid)
-            try! DbUserBook.PrimaryKey(bookUuid: book.bookUuid, userUuid: user2.userUuid).genSelectExpect(db: con)
+
+            userBook.userUuid = user2.userUuid
+
+            try! userBook.primaryKey().genUpdateUserUuid(db: con, userUuid: userBook.userUuid)
+
+            let new = try! DbUserBook.PrimaryKey(bookUuid: book.bookUuid, userUuid: user2.userUuid).genSelectExpect(db: con)
+
+            XCTAssertEqual(userBook, new)
         }
     }
 }

@@ -53,7 +53,7 @@ impl<'a> PropertyWriter<'a> {
 
                 self.table_meta_data.line_writer.add_with_modifier(format!(
                     "{} {}",
-                    self.config.immutability(property.column.part_of_pk),
+                    self.config.immutability(),
                     swift_property
                 ));
             }

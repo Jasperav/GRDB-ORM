@@ -38,8 +38,8 @@ impl Config {
         line_writer.new_line();
     }
 
-    pub fn immutability(&self, is_pk: bool) -> &'static str {
-        if self.all_immutable || is_pk {
+    pub fn immutability(&self) -> &'static str {
+        if self.all_immutable {
             "let"
         } else {
             "var"
