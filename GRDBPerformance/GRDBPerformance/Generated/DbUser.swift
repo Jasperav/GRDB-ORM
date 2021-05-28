@@ -11,6 +11,15 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public static let insertOrIgnoreUniqueQuery = "insert or ignore into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from User"
     public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ?, bool = ?, serializedInfo = ?, serializedInfoNullable = ? where userUuid = ?"
+    public static let upsertFirstNameQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set firstName=excluded.firstName"
+    public static let upsertJsonStructQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStruct=excluded.jsonStruct"
+    public static let upsertJsonStructOptionalQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStructOptional=excluded.jsonStructOptional"
+    public static let upsertJsonStructArrayQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStructArray=excluded.jsonStructArray"
+    public static let upsertJsonStructArrayOptionalQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStructArrayOptional=excluded.jsonStructArrayOptional"
+    public static let upsertIntegerQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set integer=excluded.integer"
+    public static let upsertBoolQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set bool=excluded.bool"
+    public static let upsertSerializedInfoQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set serializedInfo=excluded.serializedInfo"
+    public static let upsertSerializedInfoNullableQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set serializedInfoNullable=excluded.serializedInfoNullable"
 
     // Mapped columns to properties
     public let userUuid: UUID
@@ -218,6 +227,339 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         try statement.execute()
     }
 
+    public func genUpsertFirstName(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertFirstNameQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertJsonStruct(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertJsonStructQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertJsonStructOptional(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertJsonStructOptionalQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertJsonStructArray(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertJsonStructArrayQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertJsonStructArrayOptional(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertJsonStructArrayOptionalQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertInteger(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertIntegerQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertBool(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertBoolQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertSerializedInfo(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertSerializedInfoQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public func genUpsertSerializedInfoNullable(db: Database) throws {
+        let statement = try db.cachedUpdateStatement(sql: Self.upsertSerializedInfoNullableQuery)
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try serializedInfo.serializedData(),
+            try serializedInfoNullable?.serializedData(),
+        ]
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     public static func genDeleteAll(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.deleteAllQuery)
 
@@ -332,16 +674,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
             public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
             public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
-
-            public static let upsertFirstNameQuery = "update User set firstName = ? where userUuid = ? on conflict(userUuid) do update set firstName=excluded.firstName"
-            public static let upsertJsonStructQuery = "update User set jsonStruct = ? where userUuid = ? on conflict(userUuid) do update set jsonStruct=excluded.jsonStruct"
-            public static let upsertJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ? on conflict(userUuid) do update set jsonStructOptional=excluded.jsonStructOptional"
-            public static let upsertJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ? on conflict(userUuid) do update set jsonStructArray=excluded.jsonStructArray"
-            public static let upsertJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ? on conflict(userUuid) do update set jsonStructArrayOptional=excluded.jsonStructArrayOptional"
-            public static let upsertIntegerQuery = "update User set integer = ? where userUuid = ? on conflict(userUuid) do update set integer=excluded.integer"
-            public static let upsertBoolQuery = "update User set bool = ? where userUuid = ? on conflict(userUuid) do update set bool=excluded.bool"
-            public static let upsertSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ? on conflict(userUuid) do update set serializedInfo=excluded.serializedInfo"
-            public static let upsertSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ? on conflict(userUuid) do update set serializedInfoNullable=excluded.serializedInfoNullable"
         }
 
         public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
@@ -378,19 +710,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpsertFirstName(db: Database, firstName: String?) throws {
-            let arguments: StatementArguments = try [
-                firstName,
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertFirstNameQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-        }
-
         public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 {
@@ -409,22 +728,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }
-        }
-
-        public func genUpsertJsonStruct(db: Database, jsonStruct: JsonType) throws {
-            let arguments: StatementArguments = try [
-                {
-                    let data = try Shared.jsonEncoder.encode(jsonStruct)
-                    return String(data: data, encoding: .utf8)!
-                }(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertJsonStructQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
         }
 
         public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
@@ -449,24 +752,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpsertJsonStructOptional(db: Database, jsonStructOptional: JsonType?) throws {
-            let arguments: StatementArguments = try [
-                {
-                    try jsonStructOptional.map {
-                        let data = try Shared.jsonEncoder.encode($0)
-                        return String(data: data, encoding: .utf8)!
-                    }
-                }(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertJsonStructOptionalQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-        }
-
         public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType], assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 {
@@ -485,22 +770,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }
-        }
-
-        public func genUpsertJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
-            let arguments: StatementArguments = try [
-                {
-                    let data = try Shared.jsonEncoder.encode(jsonStructArray)
-                    return String(data: data, encoding: .utf8)!
-                }(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertJsonStructArrayQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
         }
 
         public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
@@ -525,24 +794,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpsertJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
-            let arguments: StatementArguments = try [
-                {
-                    try jsonStructArrayOptional.map {
-                        let data = try Shared.jsonEncoder.encode($0)
-                        return String(data: data, encoding: .utf8)!
-                    }
-                }(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertJsonStructArrayOptionalQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-        }
-
         public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 integer,
@@ -558,19 +809,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }
-        }
-
-        public func genUpsertInteger(db: Database, integer: Int) throws {
-            let arguments: StatementArguments = try [
-                integer,
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertIntegerQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
         }
 
         public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
@@ -590,19 +828,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpsertBool(db: Database, bool: Bool) throws {
-            let arguments: StatementArguments = try [
-                bool,
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertBoolQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-        }
-
         public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try serializedInfo.serializedData(),
@@ -620,19 +845,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public func genUpsertSerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
-            let arguments: StatementArguments = try [
-                try serializedInfo.serializedData(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertSerializedInfoQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
-        }
-
         public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try serializedInfoNullable?.serializedData(),
@@ -648,19 +860,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }
-        }
-
-        public func genUpsertSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?) throws {
-            let arguments: StatementArguments = try [
-                try serializedInfoNullable?.serializedData(),
-                userUuid.uuidString,
-            ]
-
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.upsertSerializedInfoNullableQuery)
-
-            statement.setUncheckedArguments(arguments)
-
-            try statement.execute()
         }
     }
 }

@@ -21,7 +21,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn static_select_query(&mut self) -> WriteResult {
         (
-            SELECT_QUERY,
+            SELECT_QUERY.to_string(),
             format!(
                 "select * from {}{}",
                 self.table_meta_data.table_name,
@@ -32,7 +32,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
     fn static_delete_query(&mut self) -> WriteResult {
         (
-            DELETE_QUERY,
+            DELETE_QUERY.to_string(),
             format!(
                 "delete from {}{}",
                 self.table_meta_data.table_name,
@@ -147,13 +147,6 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         assert!(!updatable_columns.is_empty());
 
         let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
-        let pk_comma_separated = self
-            .table_meta_data
-            .primary_keys()
-            .iter()
-            .map(|p| p.column.name.clone())
-            .collect::<Vec<_>>()
-            .join(", ");
         let cases = updatable_columns
             .iter()
             .map(|t| t.swift_property_name.clone())
@@ -161,52 +154,32 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .join(", ");
 
         let mut update_queries = vec![];
-        let mut upsert_queries = vec![];
 
         let update = "update";
-        let upsert = "upsert";
 
         for column in &updatable_columns {
             let update_query = format!(
                 "update {} set {} = ? where {}",
                 self.table_meta_data.table_name, column.column.name, pk_separated
             );
-            let create_query = |prefix, query| {
-                format!(
-                    "{} static let {}{}Query = \"{}\"\n",
-                    self.table_meta_data.line_writer.modifier,
-                    prefix,
-                    some_kind_of_uppercase_first_letter(&column.swift_property_name),
-                    query
-                )
-            };
 
-            update_queries.push(create_query(update, update_query.clone()));
-
-            // Doesn't really makes sense
-            if !column.column.part_of_pk {
-                let upsert_postfix = format!(
-                    " on conflict({}) do update set {column}=excluded.{column}",
-                    pk_comma_separated,
-                    column = column.column.name
-                );
-
-                let upsert_query = format!("{}{}", update_query, upsert_postfix);
-
-                upsert_queries.push(create_query(upsert, upsert_query));
-            }
+            update_queries.push(format!(
+                "{} static let {}{}Query = \"{}\"\n",
+                self.table_meta_data.line_writer.modifier,
+                update,
+                some_kind_of_uppercase_first_letter(&column.swift_property_name),
+                update_query
+            ));
         }
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "enum UpdatableColumn {{
                 case {}
 
-                {}\n
                 {}
              }}",
             cases,
             update_queries.join(""),
-            upsert_queries.join(""),
         ));
 
         for property in &updatable_columns {
@@ -224,33 +197,22 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
-            let mut execute_update = |update, add_assert_one_row_affected, sql: String| {
-                self.execute_update_statement(
-                    &format!(
-                        "{}{}",
-                        some_kind_of_uppercase_first_letter(update),
-                        some_kind_of_uppercase_first_letter(&property.swift_property_name)
-                    ),
-                    &[property],
-                    &values.iter().collect::<Vec<_>>(),
-                    &sql,
-                    add_assert_one_row_affected,
-                );
-            };
+            let query_name = format!(
+                "UpdatableColumn.update{}Query",
+                some_kind_of_uppercase_first_letter(&property.swift_property_name),
+            );
 
-            let query_name = |prefix: &str| {
-                format!(
-                    "UpdatableColumn.{}{}Query",
-                    prefix,
-                    some_kind_of_uppercase_first_letter(&property.swift_property_name),
-                )
-            };
-
-            execute_update(update, true, query_name(update));
-
-            if !property.column.part_of_pk {
-                execute_update(upsert, false, query_name(upsert));
-            }
+            self.execute_update_statement(
+                &format!(
+                    "{}{}",
+                    some_kind_of_uppercase_first_letter(update),
+                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
+                ),
+                &[property],
+                &values.iter().collect::<Vec<_>>(),
+                &query_name,
+                true,
+            );
         }
     }
 }
