@@ -54,6 +54,7 @@ public func setupPool() -> DatabasePool {
             (
                 bookUuid TEXT NOT NULL,
                 userUuid TEXT NOT NULL,
+                realToDouble REAL,
                 PRIMARY KEY (bookUuid, userUuid),
                 FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)

@@ -95,9 +95,9 @@ class UpdatePrimaryKeyTest: XCTestCase {
 
             try! user2.genInsert(db: con)
 
-            userBook.userUuid = user2.userUuid
+            try! userBook.primaryKey().genUpdateUserUuid(db: con, userUuid: user2.userUuid)
 
-            try! userBook.primaryKey().genUpdateUserUuid(db: con, userUuid: userBook.userUuid)
+            userBook.userUuid = user2.userUuid
 
             let new = try! DbUserBook.PrimaryKey(bookUuid: book.bookUuid, userUuid: user2.userUuid).genSelectExpect(db: con)
 
