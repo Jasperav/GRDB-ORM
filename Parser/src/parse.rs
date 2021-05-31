@@ -127,7 +127,9 @@ pub(crate) fn test_query(
         assert!(return_types_is_empty)
     }
 
-    if let Err(e) = connection.query_row(&query_for_validation, NO_PARAMS, |_| Ok(())) {
+    let query = format!("explain {}", query_for_validation);
+
+    if let Err(e) = connection.query_row(&query, NO_PARAMS, |_| Ok(())) {
         match e {
             Error::QueryReturnedNoRows => {
                 // Fine
