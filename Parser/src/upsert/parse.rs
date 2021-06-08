@@ -60,6 +60,12 @@ impl<'a> Parser<'a> {
                 .columns_to_update
                 .iter()
                 .map(|c| {
+                    if !tmd
+                        .swift_properties
+                        .iter()
+                        .any(|s| s.column.name.to_lowercase() == c.to_lowercase()) {
+                        panic!("Tried to upsert column {}, but that isn't present in column list {:#?} for table {}", c, upsert.columns_to_update, upsert.table);
+                    }
                     assert!(tmd
                         .swift_properties
                         .iter()
