@@ -3,7 +3,11 @@ use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::create_swift_type_name;
+use crate::swift_property::{
+    create_swift_type_name, decode_swift_property, encode_swift_properties, SwiftProperty,
+};
+
+pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
 
 /// Parses a dynamic query
 impl<'a> Parser<'a> {
@@ -29,14 +33,35 @@ impl<'a> Parser<'a> {
             // The conversion of parameter to databaseValue
             let mut database_values = vec![];
 
-            for (table, column, param_name) in &dynamic_query.parameter_types {
-                self.find_swift_property(
-                    table,
-                    column,
-                    param_name,
-                    &mut database_values,
-                    &mut parameters,
-                );
+            let mut prefix = 0;
+
+            for (index, (table, column, param_name)) in
+                dynamic_query.parameter_types.iter().enumerate()
+            {
+                let default = usize::MAX;
+                let current_match = dynamic_query.query[prefix..].find("?").unwrap_or(default);
+                let in_query = dynamic_query.query[prefix..]
+                    .find(PARAMETERIZED_IN_QUERY)
+                    .unwrap_or(default);
+                let belongs_to_parameterized_in_query = in_query < current_match;
+
+                prefix = prefix
+                    + if belongs_to_parameterized_in_query {
+                        in_query
+                    } else {
+                        current_match
+                    }
+                    + 1;
+
+                let mut swift_property =
+                    self.find_swift_property(table, column, param_name, &mut database_values);
+
+                if belongs_to_parameterized_in_query {
+                    swift_property.swift_type.type_name =
+                        format!("[{}]", swift_property.swift_type.type_name);
+                }
+
+                parameters.push((belongs_to_parameterized_in_query, swift_property));
             }
 
             let parameters = parameters.iter().collect::<Vec<_>>();
@@ -68,11 +93,13 @@ impl<'a> Parser<'a> {
             self.add_with_modifier(format!(
                 "static func {}(db: Database{}) throws {} {{",
                 dynamic_query.func_name,
-                parameter_types_separated_colon(&parameters),
+                parameter_types_separated_colon(
+                    &parameters.iter().map(|p| &p.1).collect::<Vec<_>>()
+                ),
                 func_return_type
             ));
 
-            self.write_body(&dynamic_query, database_values, &query);
+            self.write_body(&dynamic_query, parameters, &query, &func_return_type);
 
             self.add_closing_brackets();
         }
@@ -96,28 +123,73 @@ impl<'a> Parser<'a> {
     fn write_body(
         &mut self,
         dynamic_query: &DynamicQuery,
-        database_values: Vec<String>,
+        swift_properties: Vec<&(bool, SwiftProperty)>,
         query: &Query,
+        func_return_type: &str,
     ) {
-        // Add the query as multiline text
+        let has_arguments = !swift_properties.is_empty();
+
         self.add_line(format!(
-            "let statement = try db.cached{}Statement(sql: \"\"\"\n{}\n\"\"\")",
-            query.statement(),
+            "var query = \"\"\"\n{}\n\"\"\"",
             dynamic_query.query
         ));
 
-        if !database_values.is_empty() {
-            // Set unchecked arguments to the statement if there are arguments
-            let separated = database_values.join(", ");
+        if has_arguments {
+            self.add_line("var dbValues = [DatabaseValueConvertible]()");
+        }
 
-            self.add_line(format!(
-                "let arguments: StatementArguments = try [
-                    {}
-                ]
+        for (is_array, swift_property) in swift_properties {
+            if *is_array {
+                let mut swift_property_clone = swift_property.clone();
 
-                statement.setUncheckedArguments(arguments)",
-                separated
-            ));
+                swift_property_clone.swift_property_name = "v".to_string();
+
+                let encode = encode_swift_properties(&[&swift_property_clone]);
+
+                self.add_line(format!(
+                    "if {param}.isEmpty {{
+                        return {}
+                    }}
+
+                    for v in {param} {{
+                        dbValues.append({})
+                    }}
+
+                    // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
+                    _ = {{
+                        let questionMarks = String(repeating: \"?, \", count: {param}.count)
+                        // Remove the trailing question mark
+                        let questionMarksCorrected = \"(\" + questionMarks.dropLast().dropLast() + \")\"
+                        let occurrence = query.range(of: \"{}\")!
+
+                        query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
+                    }}()
+                    ",
+                    if func_return_type.is_empty() {
+                        ""
+                    } else {
+                        "[]"
+                    },
+                    encode,
+                    PARAMETERIZED_IN_QUERY,
+                    param = swift_property.swift_property_name,
+                ));
+            } else {
+                let encode = encode_swift_properties(&[&swift_property]);
+
+                self.add_line(format!("dbValues.append({})", encode));
+            }
+        }
+
+        self.add_line(format!(
+            "let statement = try db.cached{}Statement(sql: query)",
+            query.statement()
+        ));
+
+        if has_arguments {
+            // TODO: find out why the unwrap is needed
+            self.add_line("let arguments = StatementArguments(dbValues)!");
+            self.add_line("statement.setUncheckedArguments(arguments)");
         }
 
         match &query {

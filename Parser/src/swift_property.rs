@@ -268,7 +268,7 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
                     };
 
                     format!(
-                        "{{
+                        "try {{
                             {}
                                 let data = try Shared.jsonEncoder.encode({})
                                 return String(data: data, encoding: .utf8)!{}

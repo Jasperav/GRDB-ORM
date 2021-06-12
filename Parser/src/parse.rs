@@ -1,4 +1,5 @@
 use crate::configuration::Config;
+use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
 use crate::line_writer::LineWriter;
 use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
@@ -65,8 +66,7 @@ impl<'a> Parser<'a> {
         column: &str,
         param_name: &str,
         database_values: &mut Vec<String>,
-        parameters: &mut Vec<SwiftProperty>,
-    ) {
+    ) -> SwiftProperty {
         let table = self.tables.table(table).unwrap_or_else(|| {
             panic!("Did not found table {} in tables {:#?}", table, self.tables)
         });
@@ -91,7 +91,7 @@ impl<'a> Parser<'a> {
         // Add the encoding functionality
         database_values.push(encode_swift_properties(&[&swift_property]));
 
-        parameters.push(swift_property);
+        swift_property
     }
 }
 
@@ -105,7 +105,9 @@ pub(crate) fn test_query(
     let connection = rusqlite::Connection::open(sqlite_location).unwrap();
 
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
-    let query_for_validation = query.replace(" ?", " 1").replace("(?", "(1");
+    let query_for_validation = query
+        .replace(" ?", " '1'")
+        .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
     println!("Validating query '{}'", query_for_validation);
 

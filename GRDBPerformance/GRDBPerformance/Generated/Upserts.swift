@@ -8,21 +8,21 @@ public extension DbUser {
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            {
+            try {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            {
+            try {
                 try jsonStructOptional.map {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 }
             }(),
-            {
+            try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            {
+            try {
                 try jsonStructArrayOptional.map {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
