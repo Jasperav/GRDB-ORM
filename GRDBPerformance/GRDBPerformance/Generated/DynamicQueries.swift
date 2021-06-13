@@ -216,7 +216,7 @@ public extension DbUser {
 
     static func complex(db: Database, firstNames0: [String], jsonStructOptional: JsonType, integer: [Int], serializedInfoNullable: SerializedInfo) throws -> [DbUser] {
         var query = """
-        select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and firstName in %PARAM_IN% and firstName = ?
+        select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?
         """
         var dbValues = [DatabaseValueConvertible]()
         if firstNames0.isEmpty {

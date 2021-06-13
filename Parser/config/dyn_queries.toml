@@ -35,3 +35,8 @@
 # return_types = ["User"]
 # return_types_is_array = true
 # query = "select * from User where firstName = ?"
+#
+# Tips
+#   When using an IN query, make sure to use the special syntax: %PARAM_IN%
+#   That looks like this:
+#   query = "select * from User where firstName in %PARAM_IN%"

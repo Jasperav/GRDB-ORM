@@ -1,5 +1,4 @@
 use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
-use regex::Regex;
 use toml::Value;
 
 /// The configuration of a dynamic query
@@ -45,11 +44,13 @@ fn validate(queries: &[DynamicQuery]) {
         assert!(dyn_query.return_types.iter().all(|r| !r.contains('?')));
 
         // Check if the amount of parameters query placeholders (?) equals the amount of Swift parameters
-        let occurrences = dyn_query.query.matches("?").count();
+        let occurrences_question_mark = dyn_query.query.matches("?").count();
+        let occurrences_parameterized_query =
+            dyn_query.query.matches(PARAMETERIZED_IN_QUERY).count();
 
         assert_eq!(
             dyn_query.parameter_types.len(),
-            occurrences,
+            occurrences_question_mark + occurrences_parameterized_query,
             "Query: {}",
             dyn_query.query
         );

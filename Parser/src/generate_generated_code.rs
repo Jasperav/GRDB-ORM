@@ -172,7 +172,7 @@ fn update_generated_code() {
                 ],
                 return_types: vec!["User".to_string()],
                 return_types_is_array: true,
-                query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and firstName in %PARAM_IN% and firstName = ?".to_string(),
+                query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
             },
         ],
         upserts: vec![Upsert {
