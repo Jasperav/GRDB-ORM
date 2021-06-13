@@ -1,4 +1,4 @@
-use regex::Regex;
+use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
 use toml::Value;
 
 /// The configuration of a dynamic query
@@ -29,20 +29,28 @@ fn transform(content: &str) -> Vec<DynamicQuery> {
 }
 
 /// Validates [DynamicQuery]s for common problems
-// Note sure how I can replace the regex
-#[allow(clippy::trivial_regex)]
 fn validate(queries: &[DynamicQuery]) {
-    let regex = Regex::new(r" \?").unwrap();
-
     for dyn_query in queries {
+        let illegal_patterns = [" in ?", " in (?)"];
+
+        for illegal in &illegal_patterns {
+            assert!(
+                !dyn_query.query.contains(illegal),
+                "use ' in {}'",
+                PARAMETERIZED_IN_QUERY
+            );
+        }
+
         assert!(dyn_query.return_types.iter().all(|r| !r.contains('?')));
 
         // Check if the amount of parameters query placeholders (?) equals the amount of Swift parameters
-        let occurrences = regex.find_iter(&dyn_query.query).count();
+        let occurrences_question_mark = dyn_query.query.matches('?').count();
+        let occurrences_parameterized_query =
+            dyn_query.query.matches(PARAMETERIZED_IN_QUERY).count();
 
         assert_eq!(
             dyn_query.parameter_types.len(),
-            occurrences,
+            occurrences_question_mark + occurrences_parameterized_query,
             "Query: {}",
             dyn_query.query
         );

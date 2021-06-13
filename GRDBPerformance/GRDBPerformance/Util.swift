@@ -19,6 +19,8 @@ public func setupPool() -> DatabasePool {
     let url = try! FileManager.default
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("db.sqlite")
+    
+    print("Database location: \(url)")
 
     // Remove the DB if it exists
     try? FileManager.default.removeItem(at: url)

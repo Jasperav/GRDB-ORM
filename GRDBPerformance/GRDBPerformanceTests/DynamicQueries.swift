@@ -126,4 +126,63 @@ class DynamicQueryTest: XCTestCase {
             }
         }
     }
+
+    func testSimpleInQuery() {
+        let db = setupPool()
+
+        try! db.write { con in
+            let checkCount: (Int, [String]) -> () = {
+                XCTAssertEqual($0, try! DbUser.allWithProvidedFirstNames(db: con, firstName: $1).count)
+            }
+
+            checkCount(0, [])
+            checkCount(0, ["something"])
+
+            var user0 = DbUser.random()
+
+            user0.firstName = "something"
+
+            try! user0.genInsert(db: con)
+
+            checkCount(0, ["somethingelse"])
+            checkCount(1, [user0.firstName!])
+
+            var user1 = DbUser.random()
+
+            user1.firstName = "somethingelse"
+
+            try! user1.genInsert(db: con)
+
+            checkCount(1, [user0.firstName!])
+            checkCount(2, [user0.firstName!, user1.firstName!])
+        }
+    }
+
+    func testComplexInQuery() {
+        let db = setupPool()
+        
+        var user0 = DbUser.random()
+
+        user0.serializedInfoNullableAutoSet(serializedInfoNullable: .data("something"))
+        user0.jsonStructOptional = .init(age: 1)
+
+        try! db.write { con in
+            try! user0.genInsert(db: con)
+        }
+        
+        try! db.write { con in
+            let checkCount: (Int, [String], JsonType, [Int], SerializedInfo) -> () = { count, firstNames, jsonStructOptional, integer, serializedInfoNullable in
+                XCTAssertEqual(count, try! DbUser.complex(db: con, firstNames0: firstNames, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable).count)
+            }
+
+            checkCount(0, [], .init(age: 0), [], SerializedInfo.data("data"))
+            
+            checkCount(0, [user0.firstName!], user0.jsonStructOptional!, [user0.integer], .data("somethingelse"))
+            checkCount(0, [], user0.jsonStructOptional!, [user0.integer], .data("somethingelse"))
+            checkCount(0, [], user0.jsonStructOptional!, [], .data("somethingelse"))
+            checkCount(0, [user0.firstName!], user0.jsonStructOptional!, [], .data("somethingelse"))
+            checkCount(1, [user0.firstName!], user0.jsonStructOptional!, [user0.integer], user0.serializedInfoNullableAutoConvert()!)
+            checkCount(1, [user0.firstName!, user0.firstName!], user0.jsonStructOptional!, [user0.integer, user0.integer], user0.serializedInfoNullableAutoConvert()!)
+        }
+    }
 }
