@@ -44,7 +44,7 @@ fn validate(queries: &[DynamicQuery]) {
         assert!(dyn_query.return_types.iter().all(|r| !r.contains('?')));
 
         // Check if the amount of parameters query placeholders (?) equals the amount of Swift parameters
-        let occurrences_question_mark = dyn_query.query.matches("?").count();
+        let occurrences_question_mark = dyn_query.query.matches('?').count();
         let occurrences_parameterized_query =
             dyn_query.query.matches(PARAMETERIZED_IN_QUERY).count();
 

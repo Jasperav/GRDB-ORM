@@ -3,9 +3,7 @@ use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{
-    create_swift_type_name, encode_swift_properties, SwiftProperty,
-};
+use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
 
@@ -37,7 +35,7 @@ impl<'a> Parser<'a> {
 
             for (table, column, param_name) in &dynamic_query.parameter_types {
                 let default = usize::MAX;
-                let current_match = dynamic_query.query[prefix..].find("?").unwrap_or(default);
+                let current_match = dynamic_query.query[prefix..].find('?').unwrap_or(default);
                 let in_query = dynamic_query.query[prefix..]
                     .find(PARAMETERIZED_IN_QUERY)
                     .unwrap_or(default);
