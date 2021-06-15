@@ -131,7 +131,7 @@ impl<'a> Parser<'a> {
         ));
 
         if has_arguments {
-            self.add_line("var dbValues = [DatabaseValueConvertible]()");
+            self.add_line("var arguments = StatementArguments()");
         }
 
         for (is_array, swift_property) in swift_properties {
@@ -148,7 +148,7 @@ impl<'a> Parser<'a> {
                     }}
 
                     for v in {param} {{
-                        dbValues.append({})
+                        arguments += [{}]
                     }}
 
                     // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
@@ -173,7 +173,7 @@ impl<'a> Parser<'a> {
             } else {
                 let encode = encode_swift_properties(&[&swift_property]);
 
-                self.add_line(format!("dbValues.append({})", encode));
+                self.add_line(format!("arguments += [{}]", encode));
             }
         }
 
@@ -183,8 +183,6 @@ impl<'a> Parser<'a> {
         ));
 
         if has_arguments {
-            // TODO: find out why the unwrap is needed
-            self.add_line("let arguments = StatementArguments(dbValues)!");
             self.add_line("statement.setUncheckedArguments(arguments)");
         }
 

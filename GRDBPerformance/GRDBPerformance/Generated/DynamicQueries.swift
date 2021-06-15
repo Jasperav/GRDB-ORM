@@ -12,10 +12,9 @@ public extension DbBook {
                             join User on User.userUuid = Book.userUuid
                             where User.userUuid = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
-        dbValues.append(userUuid.uuidString)
+        var arguments = StatementArguments()
+        arguments += [userUuid.uuidString]
         let statement = try db.cachedSelectStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         let converted: [(DbBook, Int, [JsonType]?, Int)] = try Row.fetchAll(statement).map { row -> (DbBook, Int, [JsonType]?, Int) in
             (DbBook(row: row, startingIndex: 0), row[4], {
@@ -37,10 +36,9 @@ public extension DbUser {
         var query = """
         select * from User where firstName = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
-        dbValues.append(firstName)
+        var arguments = StatementArguments()
+        arguments += [firstName]
         let statement = try db.cachedSelectStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
             DbUser(row: row, startingIndex: 0)
@@ -57,10 +55,9 @@ public extension DbUser {
         var query = """
         select userUuid from User where firstName = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
-        dbValues.append(firstName)
+        var arguments = StatementArguments()
+        arguments += [firstName]
         let statement = try db.cachedSelectStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         let converted: [UUID] = try Row.fetchAll(statement).map { row -> UUID in
             row[0]
@@ -91,10 +88,9 @@ public extension DbBook {
         var query = """
         delete from Book where userUuid = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
-        dbValues.append(userUuid.uuidString)
+        var arguments = StatementArguments()
+        arguments += [userUuid.uuidString]
         let statement = try db.cachedUpdateStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         try statement.execute()
     }
@@ -164,12 +160,11 @@ public extension DbUser {
         var query = """
         update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
-        dbValues.append(try serializedInfo.serializedData())
-        dbValues.append(try serializedInfoNullable.serializedData())
-        dbValues.append(firstName)
+        var arguments = StatementArguments()
+        arguments += [try serializedInfo.serializedData()]
+        arguments += [try serializedInfoNullable.serializedData()]
+        arguments += [firstName]
         let statement = try db.cachedUpdateStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         try statement.execute()
     }
@@ -182,13 +177,13 @@ public extension DbUser {
         var query = """
         select * from user where firstName in %PARAM_IN%
         """
-        var dbValues = [DatabaseValueConvertible]()
+        var arguments = StatementArguments()
         if firstName.isEmpty {
             return []
         }
 
         for v in firstName {
-            dbValues.append(v)
+            arguments += [v]
         }
 
         // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
@@ -202,7 +197,6 @@ public extension DbUser {
         }()
 
         let statement = try db.cachedSelectStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
             DbUser(row: row, startingIndex: 0)
@@ -218,13 +212,13 @@ public extension DbUser {
         var query = """
         select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?
         """
-        var dbValues = [DatabaseValueConvertible]()
+        var arguments = StatementArguments()
         if firstNames0.isEmpty {
             return []
         }
 
         for v in firstNames0 {
-            dbValues.append(v)
+            arguments += [v]
         }
 
         // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
@@ -237,16 +231,16 @@ public extension DbUser {
             query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
         }()
 
-        dbValues.append(try {
+        arguments += [try {
             let data = try Shared.jsonEncoder.encode(jsonStructOptional)
             return String(data: data, encoding: .utf8)!
-        }())
+        }()]
         if integer.isEmpty {
             return []
         }
 
         for v in integer {
-            dbValues.append(v)
+            arguments += [v]
         }
 
         // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
@@ -259,9 +253,8 @@ public extension DbUser {
             query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
         }()
 
-        dbValues.append(try serializedInfoNullable.serializedData())
+        arguments += [try serializedInfoNullable.serializedData()]
         let statement = try db.cachedSelectStatement(sql: query)
-        let arguments = StatementArguments(dbValues)!
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
             DbUser(row: row, startingIndex: 0)
