@@ -104,4 +104,21 @@ class UpdatePrimaryKeyTest: XCTestCase {
             XCTAssertEqual(userBook, new)
         }
     }
+    
+    func testDynamicUpdate() throws {
+        let db = setupPool()
+        var user = DbUser.random()
+
+        try! db.write { con in
+            try! user.genInsert(db: con)
+            
+            let assertUser: () -> () = {
+                XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+            }
+            
+            user.bool = !user.bool
+            
+            //user.primaryKey().genUpdateDynamic(db: con, columns: [user.create])
+        }
+    }
 }

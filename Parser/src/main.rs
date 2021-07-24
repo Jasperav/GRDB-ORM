@@ -29,7 +29,6 @@ mod shared;
 mod swift_property;
 mod swift_struct;
 mod table_meta_data;
-mod upsert;
 
 #[cfg(test)]
 mod generate_generated_code;
@@ -67,7 +66,6 @@ fn main() {
     let custom_mapping =
         crate::custom_mapping::read(config_current_dir.join("custom_mapping.toml"));
     let dynamic_queries = crate::dynamic_queries::read(config_current_dir.join("dyn_queries.toml"));
-    let upserts = crate::upsert::read(config_current_dir.join("upserts.toml"));
     let sqlite_location = &*properties::SQLITE_LOCATION;
 
     assert!(
@@ -90,7 +88,6 @@ fn main() {
         output_dir: Path::new(&*properties::OUTPUT_DIR).to_owned(),
         custom_mapping,
         dynamic_queries,
-        upserts,
         suffix_swift_structs: &*properties::SUFFIX_SWIFT_STRUCTS,
         prefix_swift_structs: &*properties::PREFIX_SWIFT_STRUCTS,
         use_swiftformat: *properties::USE_SWIFTFORMAT,

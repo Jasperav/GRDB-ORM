@@ -24,7 +24,7 @@ pub fn write_default_initializer(
     let assign = swift_properties
         .iter()
         .map(|p| {
-            if let Some((serialize, _)) = p.serialize_deserialize_blob() {
+            if let Some((serialize, _)) = p.serialize_deserialize_blob(true) {
                 serialize
             } else {
                 format!("self.{a} = {a}", a = &p.swift_property_name)

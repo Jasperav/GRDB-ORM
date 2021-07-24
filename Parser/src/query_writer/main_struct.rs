@@ -244,6 +244,25 @@ impl<'a> QueryWriterMainStruct<'a> {
             cases_with_associated_values, column_name
         ));
 
+        // Create a simple mapper between struct and the enum
+        for sp in &updatable_columns {
+            let column_name = some_kind_of_uppercase_first_letter(&sp.swift_property_name);
+            let transformed = if sp.serialize_deserialize_blob(false).is_some() {
+                format!("{}AutoConvert()", sp.swift_property_name)
+            } else {
+                sp.swift_property_name.clone()
+            };
+
+            self.table_meta_data.line_writer.add_with_modifier(format!(
+                "
+                func createColumn{}() -> Self.UpdatableColumnWithValue {{
+                    return .{}({})
+                }}
+            ",
+                column_name, sp.swift_property_name, transformed
+            ))
+        }
+
         // Create a comma separated string of primary keys, used for ON CONFLICT clause in the query
         let pk_comma = self
             .table_meta_data
@@ -271,7 +290,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         // Write the dynamic upsert method
         self.table_meta_data.line_writer.add_with_modifier(format!(
-            "func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {{
+            "func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {{
                 assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
                 // Check for duplicates

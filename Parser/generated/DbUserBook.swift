@@ -151,7 +151,22 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         }
     }
 
-    public func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
+    public
+    func createColumnBookUuid() -> Self.UpdatableColumnWithValue {
+        return .bookUuid(bookUuid)
+    }
+
+    public
+    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+        return .userUuid(userUuid)
+    }
+
+    public
+    func createColumnRealToDouble() -> Self.UpdatableColumnWithValue {
+        return .realToDouble(realToDouble)
+    }
+
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
         assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
         // Check for duplicates
@@ -313,7 +328,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         }
 
         public
-        func update(db: Database, columns: [DbUserBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+        func genUpdateDynamic(db: Database, columns: [DbUserBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
             assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
             // Check for duplicates
@@ -330,7 +345,6 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             for column in columns {
                 switch column {
                 case let .bookUuid(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -339,7 +353,6 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
                     updateQuery += "set bookUuid = ?"
                 case let .userUuid(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -348,7 +361,6 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
                     updateQuery += "set userUuid = ?"
                 case let .realToDouble(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }

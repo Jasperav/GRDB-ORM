@@ -224,7 +224,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .table_meta_data
             .line_writer
             .add_with_modifier(format!("
-            func update(db: Database, columns: [{}.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {{
+            func genUpdateDynamic(db: Database, columns: [{}.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {{
                 assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
                 // Check for duplicates

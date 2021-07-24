@@ -139,8 +139,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -181,8 +181,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -218,8 +218,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -255,8 +255,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -292,8 +292,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -329,8 +329,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -366,8 +366,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -403,8 +403,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -440,8 +440,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -477,8 +477,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -514,8 +514,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -551,8 +551,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -593,8 +593,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
             userUuid.uuidString,
         ]
 
@@ -642,7 +642,57 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
-    public func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
+    public
+    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+        return .userUuid(userUuid)
+    }
+
+    public
+    func createColumnFirstName() -> Self.UpdatableColumnWithValue {
+        return .firstName(firstName)
+    }
+
+    public
+    func createColumnJsonStruct() -> Self.UpdatableColumnWithValue {
+        return .jsonStruct(jsonStruct)
+    }
+
+    public
+    func createColumnJsonStructOptional() -> Self.UpdatableColumnWithValue {
+        return .jsonStructOptional(jsonStructOptional)
+    }
+
+    public
+    func createColumnJsonStructArray() -> Self.UpdatableColumnWithValue {
+        return .jsonStructArray(jsonStructArray)
+    }
+
+    public
+    func createColumnJsonStructArrayOptional() -> Self.UpdatableColumnWithValue {
+        return .jsonStructArrayOptional(jsonStructArrayOptional)
+    }
+
+    public
+    func createColumnInteger() -> Self.UpdatableColumnWithValue {
+        return .integer(integer)
+    }
+
+    public
+    func createColumnBool() -> Self.UpdatableColumnWithValue {
+        return .bool(bool)
+    }
+
+    public
+    func createColumnSerializedInfo() -> Self.UpdatableColumnWithValue {
+        return .serializedInfo(serializedInfoAutoConvert())
+    }
+
+    public
+    func createColumnSerializedInfoNullable() -> Self.UpdatableColumnWithValue {
+        return .serializedInfoNullable(serializedInfoNullableAutoConvert())
+    }
+
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
         assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
         // Check for duplicates
@@ -737,8 +787,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         let statement = try db.cachedUpdateStatement(sql: upsertQuery)
@@ -955,7 +1005,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try serializedInfo.serializedData(),
+                try! serializedInfo.serializedData(),
                 userUuid.uuidString,
             ]
 
@@ -972,7 +1022,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try serializedInfoNullable?.serializedData(),
+                try! serializedInfoNullable?.serializedData(),
                 userUuid.uuidString,
             ]
 
@@ -988,7 +1038,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
 
         public
-        func update(db: Database, columns: [DbUser.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+        func genUpdateDynamic(db: Database, columns: [DbUser.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
             assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
             // Check for duplicates
@@ -1005,7 +1055,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             for column in columns {
                 switch column {
                 case let .userUuid(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1014,7 +1063,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set userUuid = ?"
                 case let .firstName(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1023,7 +1071,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set firstName = ?"
                 case let .jsonStruct(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1035,7 +1082,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set jsonStruct = ?"
                 case let .jsonStructOptional(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1049,7 +1095,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set jsonStructOptional = ?"
                 case let .jsonStructArray(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1061,7 +1106,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set jsonStructArray = ?"
                 case let .jsonStructArrayOptional(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1075,7 +1119,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set jsonStructArrayOptional = ?"
                 case let .integer(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1084,7 +1127,6 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set integer = ?"
                 case let .bool(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
@@ -1093,21 +1135,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     updateQuery += "set bool = ?"
                 case let .serializedInfo(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
 
-                    arguments += [try value.serializedData()]
+                    arguments += [try! value.serializedData()]
 
                     updateQuery += "set serializedInfo = ?"
                 case let .serializedInfoNullable(value):
-
                     if !arguments.isEmpty {
                         updateQuery += ", "
                     }
 
-                    arguments += [try value?.serializedData()]
+                    arguments += [try! value?.serializedData()]
 
                     updateQuery += "set serializedInfoNullable = ?"
                 }

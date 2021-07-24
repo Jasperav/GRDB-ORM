@@ -161,8 +161,8 @@ public extension DbUser {
         update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?
         """
         var arguments = StatementArguments()
-        arguments += [try serializedInfo.serializedData()]
-        arguments += [try serializedInfoNullable.serializedData()]
+        arguments += [try! serializedInfo.serializedData()]
+        arguments += [try! serializedInfoNullable.serializedData()]
         arguments += [firstName]
         let statement = try db.cachedUpdateStatement(sql: query)
         statement.setUncheckedArguments(arguments)
@@ -253,7 +253,7 @@ public extension DbUser {
             query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
         }()
 
-        arguments += [try serializedInfoNullable.serializedData()]
+        arguments += [try! serializedInfoNullable.serializedData()]
         let statement = try db.cachedSelectStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in

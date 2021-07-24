@@ -169,23 +169,23 @@ impl<'a> ReturnType<'a> {
                     let decoder = Decoder { index };
 
                     // Find out how to decode this property
-                    let decoded = if let Some((_, _)) = swift_property.serialize_deserialize_blob()
-                    {
-                        let row_index = create_row_index(&decoder.row_index());
-                        let decode = format!(
-                            "try! {}(serializedData: {})",
-                            swift_property.swift_type.type_name, row_index
-                        );
-                        let decode = wrap_null_check(
-                            swift_property.column.nullable,
-                            &decoder.row_index(),
-                            &decode,
-                        );
+                    let decoded =
+                        if let Some((_, _)) = swift_property.serialize_deserialize_blob(false) {
+                            let row_index = create_row_index(&decoder.row_index());
+                            let decode = format!(
+                                "try! {}(serializedData: {})",
+                                swift_property.swift_type.type_name, row_index
+                            );
+                            let decode = wrap_null_check(
+                                swift_property.column.nullable,
+                                &decoder.row_index(),
+                                &decode,
+                            );
 
-                        decoder.assign("", &decode)
-                    } else {
-                        decode_swift_property(&decoder, &swift_property)
-                    };
+                            decoder.assign("", &decode)
+                        } else {
+                            decode_swift_property(&decoder, &swift_property)
+                        };
 
                     // Just decoding 1 column
                     index += 1;
