@@ -143,62 +143,27 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
         // The ref makes it easier to call other functions
         let updatable_columns = updatable_columns.iter().collect::<Vec<_>>();
-
-        assert!(!updatable_columns.is_empty());
-
-        let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
-        let cases = updatable_columns
-            .iter()
-            .map(|t| t.swift_property_name.clone())
-            .collect::<Vec<_>>()
-            .join(", ");
-
-        let mut update_queries = vec![];
-
         let update = "update";
+        let primary_keys = self
+            .table_meta_data
+            .primary_keys()
+            .into_iter()
+            .cloned()
+            .map(|mut s| {
+                s.refers_to_self = true;
 
-        for column in &updatable_columns {
-            let update_query = format!(
-                "update {} set {} = ? where {}",
-                self.table_meta_data.table_name, column.column.name, pk_separated
-            );
-
-            update_queries.push(format!(
-                "{} static let {}{}Query = \"{}\"\n",
-                self.table_meta_data.line_writer.modifier,
-                update,
-                some_kind_of_uppercase_first_letter(&column.swift_property_name),
-                update_query
-            ));
-        }
-
-        self.table_meta_data.line_writer.add_with_modifier(format!(
-            "enum UpdatableColumn {{
-                case {}
-
-                {}
-             }}",
-            cases,
-            update_queries.join(""),
-        ));
+                s
+            })
+            .collect::<Vec<_>>();
 
         for property in &updatable_columns {
-            let mut values = self
-                .table_meta_data
-                .primary_keys()
-                .into_iter()
-                .cloned()
-                .map(|mut s| {
-                    s.refers_to_self = true;
-
-                    s
-                })
-                .collect::<Vec<_>>();
+            let mut values = primary_keys.clone();
 
             values.insert(0, <&SwiftProperty>::clone(property).clone());
 
             let query_name = format!(
-                "UpdatableColumn.update{}Query",
+                "{}.UpdatableColumn.update{}Query",
+                self.table_meta_data.struct_name,
                 some_kind_of_uppercase_first_letter(&property.swift_property_name),
             );
 
@@ -214,5 +179,91 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 true,
             );
         }
+
+        // Writes the dynamic updates
+        let update_query = format!("update {} ", self.table_meta_data.struct_name);
+        let pk = format!(
+            "where {}",
+            self.table_meta_data.primary_key_name_columns_separated()
+        );
+        let updatable_columns = self.table_meta_data.swift_properties.to_vec();
+        let switched = updatable_columns
+            .iter()
+            .map(|u| {
+                let mut for_encoding = u.clone();
+
+                // This is the name that is used for later
+                for_encoding.swift_property_name = "value".to_string();
+
+                let encoded = encode_swift_properties(&[&for_encoding]);
+
+                format!(
+                    "case let .{name}(value):
+                if !arguments.isEmpty {{
+                    updateQuery += \", \"
+                }}
+
+                arguments += [{}]
+
+                updateQuery += \"set {name} = ?\"\
+            ",
+                    encoded,
+                    name = u.swift_property_name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let pk_encoded = primary_keys
+            .iter()
+            .map(|p| format!("arguments += [{}]", encode_swift_properties(&[p])))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        self
+            .table_meta_data
+            .line_writer
+            .add_with_modifier(format!("
+            func update(db: Database, columns: [{}.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {{
+                assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+                // Check for duplicates
+                assert(Set(columns.map {{ $0.columnName }}).count == columns.count)
+
+                if columns.isEmpty {{
+                    return
+                }}
+
+                let pkQuery = \"{}\"
+                var updateQuery = \"{}\"
+                var arguments = StatementArguments()
+
+                for column in columns {{
+                    switch column {{
+                        {}
+                    }}
+                }}
+
+                {}
+
+                let finalQuery = updateQuery + pkQuery
+
+                let statement = try db.cachedUpdateStatement(sql: finalQuery)
+
+                statement.setUncheckedArguments(arguments)
+
+                try statement.execute()
+
+                if assertOneRowAffected {{
+                    assert(db.changesCount == 1)
+                }}
+            }}
+        ",
+                                       self.table_meta_data.struct_name,
+                                       pk,
+                                       update_query,
+                                       switched,
+                                       pk_encoded
+            ))
     }
 }

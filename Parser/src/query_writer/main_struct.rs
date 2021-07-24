@@ -145,6 +145,169 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write_insert();
         self.write_delete();
         self.write_update();
+        self.write_updatable_columns();
+    }
+
+    fn write_updatable_columns(&mut self) {
+        let db_values = encode_swift_properties(
+            self.table_meta_data
+                .swift_properties
+                .clone()
+                .iter_mut()
+                .map(|s| {
+                    s.refers_to_self = true;
+
+                    // lol https://stackoverflow.com/a/41367094/7715250
+                    &*s
+                })
+                .collect::<Vec<_>>()
+                .as_slice(),
+        );
+
+        // Write the updatable columns
+        let updatable_columns = self.table_meta_data.swift_properties.to_vec();
+
+        // The ref makes it easier to call other functions
+        let updatable_columns = updatable_columns.iter().collect::<Vec<_>>();
+
+        assert!(!updatable_columns.is_empty());
+
+        let pk_separated = self.table_meta_data.primary_key_name_columns_separated();
+        let cases = updatable_columns
+            .iter()
+            .map(|t| t.swift_property_name.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        let mut update_queries = vec![];
+
+        let update = "update";
+
+        for column in &updatable_columns {
+            let update_query = format!(
+                "update {} set {} = ? where {}",
+                self.table_meta_data.table_name, column.column.name, pk_separated
+            );
+
+            update_queries.push(format!(
+                "{} static let {}{}Query = \"{}\"\n",
+                self.table_meta_data.line_writer.modifier,
+                update,
+                some_kind_of_uppercase_first_letter(&column.swift_property_name),
+                update_query
+            ));
+        }
+
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "enum UpdatableColumn: String {{
+                case {}
+
+                {}
+             }}",
+            cases,
+            update_queries.join(""),
+        ));
+
+        let cases_with_associated_values = updatable_columns
+            .iter()
+            .map(|t| {
+                let pn = t.swift_property_name.clone();
+                let value = t.swift_type.type_name.clone();
+
+                format!("{}({})", pn, value)
+            })
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        let column_name = updatable_columns
+            .iter()
+            .map(|sp| {
+                format!(
+                    "case .{}: return \"{}\"",
+                    sp.swift_property_name, sp.swift_property_name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Write the enum with the associated values
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "enum UpdatableColumnWithValue {{
+                case {}
+
+                var columnName: String {{
+                    switch self {{
+                        {}
+                    }}
+                }}
+             }}",
+            cases_with_associated_values, column_name
+        ));
+
+        // Create a comma separated string of primary keys, used for ON CONFLICT clause in the query
+        let pk_comma = self
+            .table_meta_data
+            .primary_keys()
+            .into_iter()
+            .map(|t| t.column.name.clone())
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        let switch = updatable_columns
+            .iter()
+            .map(|t| {
+                format!(
+                    "case .{name}:
+                        if processedAtLeastOneColumns {{
+                            upsertQuery += \", \"
+                        }}
+                        upsertQuery += \"{name}=excluded.{name}\"\
+                    ",
+                    name = t.swift_property_name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        // Write the dynamic upsert method
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {{
+                assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+                // Check for duplicates
+                assert(Set(columns).count == columns.count)
+
+                if columns.isEmpty {{
+                    return
+                }}
+
+                var upsertQuery = {}.insertUniqueQuery + \"on conflict ({}) do update set \"
+                var processedAtLeastOneColumns = false
+
+                for column in columns {{
+                    switch column {{
+                        {}
+                    }}
+
+                    processedAtLeastOneColumns = true
+                }}
+
+                let arguments: StatementArguments = try [
+                    {}
+                ]
+
+                let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+
+                statement.setUncheckedArguments(arguments)
+
+                try statement.execute()
+            }}
+            ",
+            self.table_meta_data.struct_name,
+            pk_comma,
+            switch,
+            db_values,
+        ));
     }
 
     fn write_insert(&mut self) {

@@ -131,6 +131,74 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         }
     }
 
+    public enum UpdatableColumn: String {
+        case bookUuid, userUuid, realToDouble
+
+        public static let updateBookUuidQuery = "update UserBook set bookUuid = ? where bookUuid = ? and userUuid = ?"
+        public static let updateUserUuidQuery = "update UserBook set userUuid = ? where bookUuid = ? and userUuid = ?"
+        public static let updateRealToDoubleQuery = "update UserBook set realToDouble = ? where bookUuid = ? and userUuid = ?"
+    }
+
+    public enum UpdatableColumnWithValue {
+        case bookUuid(UUID), userUuid(UUID), realToDouble(Double?)
+
+        var columnName: String {
+            switch self {
+            case .bookUuid: return "bookUuid"
+            case .userUuid: return "userUuid"
+            case .realToDouble: return "realToDouble"
+            }
+        }
+    }
+
+    public func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
+        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+        // Check for duplicates
+        assert(Set(columns).count == columns.count)
+
+        if columns.isEmpty {
+            return
+        }
+
+        var upsertQuery = DbUserBook.insertUniqueQuery + "on conflict (bookUuid, userUuid) do update set "
+        var processedAtLeastOneColumns = false
+
+        for column in columns {
+            switch column {
+            case .bookUuid:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "bookUuid=excluded.bookUuid"
+            case .userUuid:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "userUuid=excluded.userUuid"
+            case .realToDouble:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "realToDouble=excluded.realToDouble"
+            }
+
+            processedAtLeastOneColumns = true
+        }
+
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid.uuidString,
+            realToDouble,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries
@@ -190,14 +258,6 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             }
         }
 
-        public enum UpdatableColumn {
-            case bookUuid, userUuid, realToDouble
-
-            public static let updateBookUuidQuery = "update UserBook set bookUuid = ? where bookUuid = ? and userUuid = ?"
-            public static let updateUserUuidQuery = "update UserBook set userUuid = ? where bookUuid = ? and userUuid = ?"
-            public static let updateRealToDoubleQuery = "update UserBook set realToDouble = ? where bookUuid = ? and userUuid = ?"
-        }
-
         public func genUpdateBookUuid(db: Database, bookUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bookUuid.uuidString,
@@ -205,7 +265,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateBookUuidQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateBookUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -223,7 +283,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 self.userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateUserUuidQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateUserUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -241,7 +301,70 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateRealToDoubleQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateRealToDoubleQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public
+        func update(db: Database, columns: [DbUserBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+            assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+            // Check for duplicates
+            assert(Set(columns.map { $0.columnName }).count == columns.count)
+
+            if columns.isEmpty {
+                return
+            }
+
+            let pkQuery = "where bookUuid = ? and userUuid = ?"
+            var updateQuery = "update DbUserBook "
+            var arguments = StatementArguments()
+
+            for column in columns {
+                switch column {
+                case let .bookUuid(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value.uuidString]
+
+                    updateQuery += "set bookUuid = ?"
+                case let .userUuid(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value.uuidString]
+
+                    updateQuery += "set userUuid = ?"
+                case let .realToDouble(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "set realToDouble = ?"
+                }
+            }
+
+            arguments += [bookUuid.uuidString]
+            arguments += [userUuid.uuidString]
+
+            let finalQuery = updateQuery + pkQuery
+
+            let statement = try db.cachedUpdateStatement(sql: finalQuery)
 
             statement.setUncheckedArguments(arguments)
 

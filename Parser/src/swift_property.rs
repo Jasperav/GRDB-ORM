@@ -249,7 +249,14 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
 
                         if is_optional {
                             // Only remove the first dot, because else optional uuid's will result in compile errors
-                            db_value.replacen('.', "?.", 1)
+                            // but skip self. if it exists
+                            if property.refers_to_self {
+                                let without_self = db_value.strip_prefix("self.").unwrap();
+
+                                format!("self.{}", without_self.replacen('.', "?.", 1))
+                            } else {
+                                db_value.replacen('.', "?.", 1)
+                            }
                         } else {
                             db_value
                         }

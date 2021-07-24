@@ -172,6 +172,82 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         }
     }
 
+    public enum UpdatableColumn: String {
+        case bookUuid, userUuid, integerOptional, tsCreated
+
+        public static let updateBookUuidQuery = "update Book set bookUuid = ? where bookUuid = ?"
+        public static let updateUserUuidQuery = "update Book set userUuid = ? where bookUuid = ?"
+        public static let updateIntegerOptionalQuery = "update Book set integerOptional = ? where bookUuid = ?"
+        public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
+    }
+
+    public enum UpdatableColumnWithValue {
+        case bookUuid(UUID), userUuid(UUID?), integerOptional(Int?), tsCreated(Int64)
+
+        var columnName: String {
+            switch self {
+            case .bookUuid: return "bookUuid"
+            case .userUuid: return "userUuid"
+            case .integerOptional: return "integerOptional"
+            case .tsCreated: return "tsCreated"
+            }
+        }
+    }
+
+    public func upsert(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
+        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+        // Check for duplicates
+        assert(Set(columns).count == columns.count)
+
+        if columns.isEmpty {
+            return
+        }
+
+        var upsertQuery = DbBook.insertUniqueQuery + "on conflict (bookUuid) do update set "
+        var processedAtLeastOneColumns = false
+
+        for column in columns {
+            switch column {
+            case .bookUuid:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "bookUuid=excluded.bookUuid"
+            case .userUuid:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "userUuid=excluded.userUuid"
+            case .integerOptional:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "integerOptional=excluded.integerOptional"
+            case .tsCreated:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "tsCreated=excluded.tsCreated"
+            }
+
+            processedAtLeastOneColumns = true
+        }
+
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+            userUuid?.uuidString,
+            integerOptional,
+            tsCreated,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries
@@ -225,22 +301,13 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public enum UpdatableColumn {
-            case bookUuid, userUuid, integerOptional, tsCreated
-
-            public static let updateBookUuidQuery = "update Book set bookUuid = ? where bookUuid = ?"
-            public static let updateUserUuidQuery = "update Book set userUuid = ? where bookUuid = ?"
-            public static let updateIntegerOptionalQuery = "update Book set integerOptional = ? where bookUuid = ?"
-            public static let updateTsCreatedQuery = "update Book set tsCreated = ? where bookUuid = ?"
-        }
-
         public func genUpdateBookUuid(db: Database, bookUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bookUuid.uuidString,
                 self.bookUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateBookUuidQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbBook.UpdatableColumn.updateBookUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -257,7 +324,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
                 bookUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateUserUuidQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbBook.UpdatableColumn.updateUserUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -274,7 +341,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
                 bookUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateIntegerOptionalQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbBook.UpdatableColumn.updateIntegerOptionalQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -291,7 +358,78 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
                 bookUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateTsCreatedQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbBook.UpdatableColumn.updateTsCreatedQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public
+        func update(db: Database, columns: [DbBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+            assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+            // Check for duplicates
+            assert(Set(columns.map { $0.columnName }).count == columns.count)
+
+            if columns.isEmpty {
+                return
+            }
+
+            let pkQuery = "where bookUuid = ?"
+            var updateQuery = "update DbBook "
+            var arguments = StatementArguments()
+
+            for column in columns {
+                switch column {
+                case let .bookUuid(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value.uuidString]
+
+                    updateQuery += "set bookUuid = ?"
+                case let .userUuid(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value?.uuidString]
+
+                    updateQuery += "set userUuid = ?"
+                case let .integerOptional(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "set integerOptional = ?"
+                case let .tsCreated(value):
+
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "set tsCreated = ?"
+                }
+            }
+
+            arguments += [bookUuid.uuidString]
+
+            let finalQuery = updateQuery + pkQuery
+
+            let statement = try db.cachedUpdateStatement(sql: finalQuery)
 
             statement.setUncheckedArguments(arguments)
 

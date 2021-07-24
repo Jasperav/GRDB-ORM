@@ -71,8 +71,9 @@ impl LineWriter {
         self.lines.push("}\n".to_string());
     }
 
-    pub fn add_with_modifier(&mut self, t: String) {
-        self.lines.push(format!("{} {}", self.modifier, t));
+    pub fn add_with_modifier<T: ToString>(&mut self, t: T) {
+        self.lines
+            .push(format!("{} {}", self.modifier, t.to_string()));
     }
 
     pub fn write_to_file(self, file_name: &str) {
