@@ -139,8 +139,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -181,8 +181,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -218,8 +218,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -255,8 +255,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -292,8 +292,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -329,8 +329,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -366,8 +366,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -403,8 +403,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -440,8 +440,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -477,8 +477,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -514,8 +514,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -551,8 +551,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -593,8 +593,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }(),
             integer,
             bool,
-            try serializedInfo.serializedData(),
-            try serializedInfoNullable?.serializedData(),
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
             userUuid.uuidString,
         ]
 
@@ -606,6 +606,196 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             // Only 1 row should be affected
             assert(db.changesCount == 1)
         }
+    }
+
+    public enum UpdatableColumn: String {
+        case userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
+
+        public static let updateUserUuidQuery = "update User set userUuid = ? where userUuid = ?"
+        public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
+        public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
+        public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
+        public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
+        public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
+        public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
+        public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
+        public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
+        public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
+    }
+
+    public enum UpdatableColumnWithValue {
+        case userUuid(UUID), firstName(String?), jsonStruct(JsonType), jsonStructOptional(JsonType?), jsonStructArray([JsonType]), jsonStructArrayOptional([JsonType]?), integer(Int), bool(Bool), serializedInfo(SerializedInfo), serializedInfoNullable(SerializedInfo?)
+
+        var columnName: String {
+            switch self {
+            case .userUuid: return "userUuid"
+            case .firstName: return "firstName"
+            case .jsonStruct: return "jsonStruct"
+            case .jsonStructOptional: return "jsonStructOptional"
+            case .jsonStructArray: return "jsonStructArray"
+            case .jsonStructArrayOptional: return "jsonStructArrayOptional"
+            case .integer: return "integer"
+            case .bool: return "bool"
+            case .serializedInfo: return "serializedInfo"
+            case .serializedInfoNullable: return "serializedInfoNullable"
+            }
+        }
+    }
+
+    public
+    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+        return .userUuid(userUuid)
+    }
+
+    public
+    func createColumnFirstName() -> Self.UpdatableColumnWithValue {
+        return .firstName(firstName)
+    }
+
+    public
+    func createColumnJsonStruct() -> Self.UpdatableColumnWithValue {
+        return .jsonStruct(jsonStruct)
+    }
+
+    public
+    func createColumnJsonStructOptional() -> Self.UpdatableColumnWithValue {
+        return .jsonStructOptional(jsonStructOptional)
+    }
+
+    public
+    func createColumnJsonStructArray() -> Self.UpdatableColumnWithValue {
+        return .jsonStructArray(jsonStructArray)
+    }
+
+    public
+    func createColumnJsonStructArrayOptional() -> Self.UpdatableColumnWithValue {
+        return .jsonStructArrayOptional(jsonStructArrayOptional)
+    }
+
+    public
+    func createColumnInteger() -> Self.UpdatableColumnWithValue {
+        return .integer(integer)
+    }
+
+    public
+    func createColumnBool() -> Self.UpdatableColumnWithValue {
+        return .bool(bool)
+    }
+
+    public
+    func createColumnSerializedInfo() -> Self.UpdatableColumnWithValue {
+        return .serializedInfo(serializedInfoAutoConvert())
+    }
+
+    public
+    func createColumnSerializedInfoNullable() -> Self.UpdatableColumnWithValue {
+        return .serializedInfoNullable(serializedInfoNullableAutoConvert())
+    }
+
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
+        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+        // Check for duplicates
+        assert(Set(columns).count == columns.count)
+
+        if columns.isEmpty {
+            return
+        }
+
+        var upsertQuery = DbUser.insertUniqueQuery + "on conflict (userUuid) do update set "
+        var processedAtLeastOneColumns = false
+
+        for column in columns {
+            switch column {
+            case .userUuid:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "userUuid=excluded.userUuid"
+            case .firstName:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "firstName=excluded.firstName"
+            case .jsonStruct:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "jsonStruct=excluded.jsonStruct"
+            case .jsonStructOptional:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "jsonStructOptional=excluded.jsonStructOptional"
+            case .jsonStructArray:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "jsonStructArray=excluded.jsonStructArray"
+            case .jsonStructArrayOptional:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "jsonStructArrayOptional=excluded.jsonStructArrayOptional"
+            case .integer:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "integer=excluded.integer"
+            case .bool:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "bool=excluded.bool"
+            case .serializedInfo:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "serializedInfo=excluded.serializedInfo"
+            case .serializedInfoNullable:
+                if processedAtLeastOneColumns {
+                    upsertQuery += ", "
+                }
+                upsertQuery += "serializedInfoNullable=excluded.serializedInfoNullable"
+            }
+
+            processedAtLeastOneColumns = true
+        }
+
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+            firstName,
+            try {
+                let data = try Shared.jsonEncoder.encode(self.jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            try {
+                try self.jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            try {
+                let data = try Shared.jsonEncoder.encode(self.jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+            try {
+                try self.jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+            integer,
+            bool,
+            try! serializedInfo.serializedData(),
+            try! serializedInfoNullable?.serializedData(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
     }
 
     // Write the primary key struct, useful for selecting or deleting a unique row
@@ -661,28 +851,13 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
         }
 
-        public enum UpdatableColumn {
-            case userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable
-
-            public static let updateUserUuidQuery = "update User set userUuid = ? where userUuid = ?"
-            public static let updateFirstNameQuery = "update User set firstName = ? where userUuid = ?"
-            public static let updateJsonStructQuery = "update User set jsonStruct = ? where userUuid = ?"
-            public static let updateJsonStructOptionalQuery = "update User set jsonStructOptional = ? where userUuid = ?"
-            public static let updateJsonStructArrayQuery = "update User set jsonStructArray = ? where userUuid = ?"
-            public static let updateJsonStructArrayOptionalQuery = "update User set jsonStructArrayOptional = ? where userUuid = ?"
-            public static let updateIntegerQuery = "update User set integer = ? where userUuid = ?"
-            public static let updateBoolQuery = "update User set bool = ? where userUuid = ?"
-            public static let updateSerializedInfoQuery = "update User set serializedInfo = ? where userUuid = ?"
-            public static let updateSerializedInfoNullableQuery = "update User set serializedInfoNullable = ? where userUuid = ?"
-        }
-
         public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 userUuid.uuidString,
                 self.userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateUserUuidQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateUserUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -699,7 +874,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateFirstNameQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateFirstNameQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -719,7 +894,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateJsonStructQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -741,7 +916,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateJsonStructOptionalQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructOptionalQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -761,7 +936,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateJsonStructArrayQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -783,7 +958,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateJsonStructArrayOptionalQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayOptionalQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -800,7 +975,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateIntegerQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateIntegerQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -817,7 +992,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateBoolQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateBoolQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -830,11 +1005,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try serializedInfo.serializedData(),
+                try! serializedInfo.serializedData(),
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateSerializedInfoQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -847,11 +1022,142 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
         public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try serializedInfoNullable?.serializedData(),
+                try! serializedInfoNullable?.serializedData(),
                 userUuid.uuidString,
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: UpdatableColumn.updateSerializedInfoNullableQuery)
+            let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoNullableQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            try statement.execute()
+
+            if assertOneRowAffected {
+                assert(db.changesCount == 1)
+            }
+        }
+
+        public
+        func genUpdateDynamic(db: Database, columns: [DbUser.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+            assert(!assertAtLeastOneUpdate || !columns.isEmpty)
+
+            // Check for duplicates
+            assert(Set(columns.map { $0.columnName }).count == columns.count)
+
+            if columns.isEmpty {
+                return
+            }
+
+            let pkQuery = "where userUuid = ?"
+            var updateQuery = "update User set "
+            var arguments = StatementArguments()
+
+            for column in columns {
+                switch column {
+                case let .userUuid(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value.uuidString]
+
+                    updateQuery += "userUuid = ?"
+                case let .firstName(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "firstName = ?"
+                case let .jsonStruct(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try {
+                        let data = try Shared.jsonEncoder.encode(value)
+                        return String(data: data, encoding: .utf8)!
+                    }()]
+
+                    updateQuery += "jsonStruct = ?"
+                case let .jsonStructOptional(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try {
+                        try value.map {
+                            let data = try Shared.jsonEncoder.encode($0)
+                            return String(data: data, encoding: .utf8)!
+                        }
+                    }()]
+
+                    updateQuery += "jsonStructOptional = ?"
+                case let .jsonStructArray(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try {
+                        let data = try Shared.jsonEncoder.encode(value)
+                        return String(data: data, encoding: .utf8)!
+                    }()]
+
+                    updateQuery += "jsonStructArray = ?"
+                case let .jsonStructArrayOptional(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try {
+                        try value.map {
+                            let data = try Shared.jsonEncoder.encode($0)
+                            return String(data: data, encoding: .utf8)!
+                        }
+                    }()]
+
+                    updateQuery += "jsonStructArrayOptional = ?"
+                case let .integer(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "integer = ?"
+                case let .bool(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [value]
+
+                    updateQuery += "bool = ?"
+                case let .serializedInfo(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try! value.serializedData()]
+
+                    updateQuery += "serializedInfo = ?"
+                case let .serializedInfoNullable(value):
+                    if !arguments.isEmpty {
+                        updateQuery += ", "
+                    }
+
+                    arguments += [try! value?.serializedData()]
+
+                    updateQuery += "serializedInfoNullable = ?"
+                }
+            }
+
+            arguments += [userUuid.uuidString]
+
+            let finalQuery = updateQuery + " " + pkQuery
+
+            let statement = try db.cachedUpdateStatement(sql: finalQuery)
 
             statement.setUncheckedArguments(arguments)
 

@@ -26,7 +26,7 @@ impl<'a> PropertyWriter<'a> {
         };
 
         for property in properties {
-            if let Some((serialize, deserialize)) = property.serialize_deserialize_blob() {
+            if let Some((serialize, deserialize)) = property.serialize_deserialize_blob(true) {
                 let w = &mut self.table_meta_data.line_writer;
 
                 w.add_with_modifier(format!(

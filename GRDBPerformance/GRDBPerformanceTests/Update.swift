@@ -104,4 +104,30 @@ class UpdatePrimaryKeyTest: XCTestCase {
             XCTAssertEqual(userBook, new)
         }
     }
+    
+    func testDynamicUpdate() throws {
+        let db = setupPool()
+        var user = DbUser.random()
+
+        try! db.write { con in
+            try! user.genInsert(db: con)
+            
+            let assertUser: () -> () = {
+                XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
+            }
+            
+            user.bool = !user.bool
+            
+            try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnBool()])
+            
+            assertUser()
+            
+            user.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
+            user.serializedInfoAutoSet(serializedInfo: .data("test"))
+            
+            try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnSerializedInfo(), user.createColumnSerializedInfoNullable()])
+            
+            assertUser()
+        }
+    }
 }

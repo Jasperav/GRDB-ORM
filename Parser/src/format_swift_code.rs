@@ -14,7 +14,9 @@ pub fn format_swift_code(config: &Config, safe_output_dir: &Path) {
             .output()
             .unwrap();
 
-        assert!(output.status.success());
+        if !output.status.success() {
+            panic!("{}", String::from_utf8(output.stderr).unwrap())
+        }
     } else {
         println!("Not formatting Swift code due to configuration");
     }

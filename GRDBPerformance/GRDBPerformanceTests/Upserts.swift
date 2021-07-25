@@ -13,14 +13,22 @@ class UpsertTest: XCTestCase {
             try! user.genInsert(db: con)
 
             user.integer += 1
-
-            // Upsert the whole user
-            try! user.upsertExample(db: con)
-
+            
             let assertUser: () -> () = {
                 XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
             }
 
+            // Update the just-upserted column
+            try! user.genUpsertDynamic(db: con, columns: [.integer])
+
+            assertUser()
+            
+            // Let's try two columns
+            user.bool = !user.bool
+            user.jsonStructArray += [.init(age: 1)]
+            
+            try! user.genUpsertDynamic(db: con, columns: [.bool, .jsonStructArray])
+            
             assertUser()
 
             // Upsert single column
@@ -34,6 +42,13 @@ class UpsertTest: XCTestCase {
 
             upsertSingleColumn(nil)
             upsertSingleColumn("Something")
+            
+            // upsert a whole new user
+            user.userUuid = UUID()
+            
+            try! user.genUpsertDynamic(db: con, columns: [.bool])
+            
+            assertUser()
         }
     }
 }

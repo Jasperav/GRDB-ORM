@@ -2,7 +2,6 @@ use crate::configuration::{Config, Visibility};
 use crate::custom_mapping::CustomMapping;
 use crate::dynamic_queries::DynamicQuery;
 use crate::parse::parse;
-use crate::upsert::Upsert;
 use regex::Regex;
 use sqlite_parser::Metadata;
 use std::env::current_dir;
@@ -175,15 +174,6 @@ fn update_generated_code() {
                 query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
             },
         ],
-        upserts: vec![Upsert {
-            table: "User".to_string(),
-            columns_to_update: vec![
-                "jsonStruct".to_string(),
-                "jsonStructOptional".to_string(),
-                "integer".to_string(),
-            ],
-            func_name: "upsertExample".to_string(),
-        }],
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",
         use_swiftformat: true,

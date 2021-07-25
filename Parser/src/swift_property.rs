@@ -47,7 +47,7 @@ impl SwiftProperty {
         }
     }
 
-    pub fn serialize_deserialize_blob(&self) -> Option<(String, String)> {
+    pub fn serialize_deserialize_blob(&self, assign_to_self: bool) -> Option<(String, String)> {
         if !is_mapped_blob_type(self.column.the_type, &self.swift_type.type_name) {
             return None;
         }
@@ -63,10 +63,15 @@ impl SwiftProperty {
         } else {
             ("", "".to_string())
         };
+        let prefix = if assign_to_self {
+            format!("self.{} = ", self.swift_property_name)
+        } else {
+            "".to_string()
+        };
+
         let serialize = format!(
-            "self.{a} = try! {a}{}.serializedData()",
-            serialize_question_mark,
-            a = self.swift_property_name
+            "{}try! {}{}.serializedData()",
+            prefix, self.swift_property_name, serialize_question_mark,
         );
         let deserialize = format!(
             "{}try! {}(serializedData: {})",
@@ -231,12 +236,8 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
 
             match property.swift_type.swift_type {
                 SwiftType::NoJson => {
-                    if property.serialize_deserialize_blob().is_some() {
-                        format!(
-                            "try {}{}.serializedData()",
-                            property.property_name(),
-                            property.optional_question_mark()
-                        )
+                    if let Some((serialize, _)) = property.serialize_deserialize_blob(false) {
+                        serialize
                     } else {
                         let database_value = if removed_optional == "UUID" {
                             // Currently always the uuid string property is used, no data
@@ -249,7 +250,14 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
 
                         if is_optional {
                             // Only remove the first dot, because else optional uuid's will result in compile errors
-                            db_value.replacen('.', "?.", 1)
+                            // but skip self. if it exists
+                            if property.refers_to_self {
+                                let without_self = db_value.strip_prefix("self.").unwrap();
+
+                                format!("self.{}", without_self.replacen('.', "?.", 1))
+                            } else {
+                                db_value.replacen('.', "?.", 1)
+                            }
                         } else {
                             db_value
                         }

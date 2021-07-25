@@ -44,8 +44,6 @@ The queries are validated when generating a Swift `func` for them
    Json types* or `UUID`s
 3. Add custom queries by adding them to [dyn_queries](Parser/config/dyn_queries.toml). Maybe more queries will
 be added over time that are commonly used to the standard generated output.
-4. Add upsert queries by adding them to [upserts](Parser/config/upserts.toml). It generated upserts according to
-https://www.sqlite.org/lang_UPSERT.html
    
 * Values with database type 'TEXT' should conform to protocol Codable. If your type can for some reason not conform to this protocol,
 change the database type to 'BLOB' and make sure your type has the following methods:

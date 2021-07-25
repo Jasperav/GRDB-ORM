@@ -43,7 +43,7 @@ fn main() {
             "-scheme",
             "GRDBPerformanceTests",
             "-destination",
-            "platform=iOS Simulator,name=iPhone 8,OS=14.4"
+            "platform=iOS Simulator,name=iPhone 8,OS=14.5"
         ])
         .current_dir(root!().join("GRDBPerformance"))
         .status()
