@@ -1049,7 +1049,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
 
             let pkQuery = "where userUuid = ?"
-            var updateQuery = "update DbUser "
+            var updateQuery = "update User set "
             var arguments = StatementArguments()
 
             for column in columns {
@@ -1061,7 +1061,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value.uuidString]
 
-                    updateQuery += "set userUuid = ?"
+                    updateQuery += "userUuid = ?"
                 case let .firstName(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1069,7 +1069,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value]
 
-                    updateQuery += "set firstName = ?"
+                    updateQuery += "firstName = ?"
                 case let .jsonStruct(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1080,7 +1080,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         return String(data: data, encoding: .utf8)!
                     }()]
 
-                    updateQuery += "set jsonStruct = ?"
+                    updateQuery += "jsonStruct = ?"
                 case let .jsonStructOptional(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1093,7 +1093,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         }
                     }()]
 
-                    updateQuery += "set jsonStructOptional = ?"
+                    updateQuery += "jsonStructOptional = ?"
                 case let .jsonStructArray(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1104,7 +1104,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         return String(data: data, encoding: .utf8)!
                     }()]
 
-                    updateQuery += "set jsonStructArray = ?"
+                    updateQuery += "jsonStructArray = ?"
                 case let .jsonStructArrayOptional(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1117,7 +1117,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         }
                     }()]
 
-                    updateQuery += "set jsonStructArrayOptional = ?"
+                    updateQuery += "jsonStructArrayOptional = ?"
                 case let .integer(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1125,7 +1125,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value]
 
-                    updateQuery += "set integer = ?"
+                    updateQuery += "integer = ?"
                 case let .bool(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1133,7 +1133,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value]
 
-                    updateQuery += "set bool = ?"
+                    updateQuery += "bool = ?"
                 case let .serializedInfo(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1141,7 +1141,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [try! value.serializedData()]
 
-                    updateQuery += "set serializedInfo = ?"
+                    updateQuery += "serializedInfo = ?"
                 case let .serializedInfoNullable(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -1149,13 +1149,13 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [try! value?.serializedData()]
 
-                    updateQuery += "set serializedInfoNullable = ?"
+                    updateQuery += "serializedInfoNullable = ?"
                 }
             }
 
             arguments += [userUuid.uuidString]
 
-            let finalQuery = updateQuery + pkQuery
+            let finalQuery = updateQuery + " " + pkQuery
 
             let statement = try db.cachedUpdateStatement(sql: finalQuery)
 

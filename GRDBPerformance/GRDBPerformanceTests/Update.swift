@@ -118,7 +118,16 @@ class UpdatePrimaryKeyTest: XCTestCase {
             
             user.bool = !user.bool
             
-            //user.primaryKey().genUpdateDynamic(db: con, columns: [user.create])
+            try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnBool()])
+            
+            assertUser()
+            
+            user.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
+            user.serializedInfoAutoSet(serializedInfo: .data("test"))
+            
+            try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnSerializedInfo(), user.createColumnSerializedInfoNullable()])
+            
+            assertUser()
         }
     }
 }

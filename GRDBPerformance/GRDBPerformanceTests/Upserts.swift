@@ -19,7 +19,7 @@ class UpsertTest: XCTestCase {
             }
 
             // Update the just-upserted column
-            try! user.upsert(db: con, columns: [.integer])
+            try! user.genUpsertDynamic(db: con, columns: [.integer])
 
             assertUser()
             
@@ -27,7 +27,7 @@ class UpsertTest: XCTestCase {
             user.bool = !user.bool
             user.jsonStructArray += [.init(age: 1)]
             
-            try! user.upsert(db: con, columns: [.bool, .jsonStructArray])
+            try! user.genUpsertDynamic(db: con, columns: [.bool, .jsonStructArray])
             
             assertUser()
 
@@ -46,7 +46,7 @@ class UpsertTest: XCTestCase {
             // upsert a whole new user
             user.userUuid = UUID()
             
-            try! user.upsert(db: con, columns: [.bool])
+            try! user.genUpsertDynamic(db: con, columns: [.bool])
             
             assertUser()
         }

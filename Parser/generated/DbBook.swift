@@ -401,7 +401,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
             }
 
             let pkQuery = "where bookUuid = ?"
-            var updateQuery = "update DbBook "
+            var updateQuery = "update Book set "
             var arguments = StatementArguments()
 
             for column in columns {
@@ -413,7 +413,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value.uuidString]
 
-                    updateQuery += "set bookUuid = ?"
+                    updateQuery += "bookUuid = ?"
                 case let .userUuid(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -421,7 +421,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value?.uuidString]
 
-                    updateQuery += "set userUuid = ?"
+                    updateQuery += "userUuid = ?"
                 case let .integerOptional(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -429,7 +429,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value]
 
-                    updateQuery += "set integerOptional = ?"
+                    updateQuery += "integerOptional = ?"
                 case let .tsCreated(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -437,13 +437,13 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
 
                     arguments += [value]
 
-                    updateQuery += "set tsCreated = ?"
+                    updateQuery += "tsCreated = ?"
                 }
             }
 
             arguments += [bookUuid.uuidString]
 
-            let finalQuery = updateQuery + pkQuery
+            let finalQuery = updateQuery + " " + pkQuery
 
             let statement = try db.cachedUpdateStatement(sql: finalQuery)
 

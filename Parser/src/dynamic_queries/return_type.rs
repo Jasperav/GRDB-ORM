@@ -195,10 +195,10 @@ impl<'a> ReturnType<'a> {
             })
             .unzip();
 
+        assert!(!return_types_swift_struct.is_empty());
+
         // Create the return value to return from query method
         let return_value = if self.return_type_is_array {
-            assert!(!return_types_swift_struct.is_empty());
-
             let separated = return_types_swift_struct.join(", ");
 
             if return_types_swift_struct.len() == 1 {
@@ -206,16 +206,12 @@ impl<'a> ReturnType<'a> {
             } else {
                 format!("[({})]", separated)
             }
+        } else if return_types_swift_struct.len() == 1 {
+            let rt = return_types_swift_struct[0].to_string();
+
+            format!("{}?", rt)
         } else {
-            assert!(!return_types_swift_struct.is_empty());
-
-            if return_types_swift_struct.len() == 1 {
-                let rt = return_types_swift_struct[0].to_string();
-
-                format!("{}?", rt)
-            } else {
-                format!("({})?", return_types_swift_struct.join(", "))
-            }
+            format!("({})?", return_types_swift_struct.join(", "))
         };
 
         Query::Select {

@@ -339,7 +339,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             }
 
             let pkQuery = "where bookUuid = ? and userUuid = ?"
-            var updateQuery = "update DbUserBook "
+            var updateQuery = "update UserBook set "
             var arguments = StatementArguments()
 
             for column in columns {
@@ -351,7 +351,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
                     arguments += [value.uuidString]
 
-                    updateQuery += "set bookUuid = ?"
+                    updateQuery += "bookUuid = ?"
                 case let .userUuid(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -359,7 +359,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
                     arguments += [value.uuidString]
 
-                    updateQuery += "set userUuid = ?"
+                    updateQuery += "userUuid = ?"
                 case let .realToDouble(value):
                     if !arguments.isEmpty {
                         updateQuery += ", "
@@ -367,14 +367,14 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
                     arguments += [value]
 
-                    updateQuery += "set realToDouble = ?"
+                    updateQuery += "realToDouble = ?"
                 }
             }
 
             arguments += [bookUuid.uuidString]
             arguments += [userUuid.uuidString]
 
-            let finalQuery = updateQuery + pkQuery
+            let finalQuery = updateQuery + " " + pkQuery
 
             let statement = try db.cachedUpdateStatement(sql: finalQuery)
 

@@ -181,7 +181,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         }
 
         // Writes the dynamic updates
-        let update_query = format!("update {} ", self.table_meta_data.struct_name);
+        let update_query = format!("update {} set ", self.table_meta_data.table_name);
         let pk = format!(
             "where {}",
             self.table_meta_data.primary_key_name_columns_separated()
@@ -205,7 +205,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 arguments += [{}]
 
-                updateQuery += \"set {name} = ?\"\
+                updateQuery += \"{name} = ?\"\
             ",
                     encoded,
                     name = u.swift_property_name
@@ -246,7 +246,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 {}
 
-                let finalQuery = updateQuery + pkQuery
+                let finalQuery = updateQuery + \" \" + pkQuery
 
                 let statement = try db.cachedUpdateStatement(sql: finalQuery)
 
