@@ -146,6 +146,41 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write_delete();
         self.write_update();
         self.write_updatable_columns();
+        self.write_updatable_all();
+    }
+
+    /// Writes the static update queries that hits all rows in the table
+    fn write_updatable_all(&mut self) {
+        for column in self.table_meta_data.swift_properties {
+            let capitalized_name = some_kind_of_uppercase_first_letter(&column.swift_property_name);
+            let encoded = encode_swift_properties(&[column]);
+            let query = format!(
+                "\"update {} set {} = ?\"",
+                self.table_meta_data.table_name, column.column.name
+            );
+
+            self.table_meta_data.line_writer.add_with_modifier(format!(
+                "
+                static func genUpdate{}AllRows(db: Database, {}: {}) throws {{
+                    let arguments: StatementArguments = try [
+                        {},
+                    ]
+
+
+                    let statement = try db.cachedUpdateStatement(sql: {})
+
+                    statement.setUncheckedArguments(arguments)
+
+                    try statement.execute()
+                }}
+            ",
+                capitalized_name,
+                column.swift_property_name,
+                column.swift_type.type_name,
+                encoded,
+                query
+            ));
+        }
     }
 
     fn write_updatable_columns(&mut self) {

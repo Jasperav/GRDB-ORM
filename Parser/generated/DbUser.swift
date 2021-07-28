@@ -798,6 +798,152 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         try statement.execute()
     }
 
+    public
+    static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            userUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateFirstNameAllRows(db: Database, firstName: String?) throws {
+        let arguments: StatementArguments = try [
+            firstName,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set firstName = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateJsonStructAllRows(db: Database, jsonStruct: JsonType) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set jsonStruct = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateJsonStructOptionalAllRows(db: Database, jsonStructOptional: JsonType?) throws {
+        let arguments: StatementArguments = try [
+            try {
+                try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateJsonStructArrayAllRows(db: Database, jsonStructArray: [JsonType]) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructArray = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateJsonStructArrayOptionalAllRows(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
+        let arguments: StatementArguments = try [
+            try {
+                try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                }
+            }(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructArrayOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateIntegerAllRows(db: Database, integer: Int) throws {
+        let arguments: StatementArguments = try [
+            integer,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set integer = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateBoolAllRows(db: Database, bool: Bool) throws {
+        let arguments: StatementArguments = try [
+            bool,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set bool = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateSerializedInfoAllRows(db: Database, serializedInfo: SerializedInfo) throws {
+        let arguments: StatementArguments = try [
+            try! serializedInfo.serializedData(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set serializedInfo = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateSerializedInfoNullableAllRows(db: Database, serializedInfoNullable: SerializedInfo?) throws {
+        let arguments: StatementArguments = try [
+            try! serializedInfoNullable?.serializedData(),
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update User set serializedInfoNullable = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries

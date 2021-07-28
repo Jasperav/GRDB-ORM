@@ -268,6 +268,58 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         try statement.execute()
     }
 
+    public
+    static func genUpdateBookUuidAllRows(db: Database, bookUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update Book set bookUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
+        let arguments: StatementArguments = try [
+            userUuid?.uuidString,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update Book set userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateIntegerOptionalAllRows(db: Database, integerOptional: Int?) throws {
+        let arguments: StatementArguments = try [
+            integerOptional,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update Book set integerOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genUpdateTsCreatedAllRows(db: Database, tsCreated: Int64) throws {
+        let arguments: StatementArguments = try [
+            tsCreated,
+        ]
+
+        let statement = try db.cachedUpdateStatement(sql: "update Book set tsCreated = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     // Write the primary key struct, useful for selecting or deleting a unique row
     public struct PrimaryKey {
         // Static queries

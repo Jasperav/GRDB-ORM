@@ -130,4 +130,34 @@ class UpdatePrimaryKeyTest: XCTestCase {
             assertUser()
         }
     }
+    
+    func testAllRows() throws {
+        let db = setupPool()
+
+        try! db.write { con in
+            let users: [DbUser] = [.random(), .random()]
+            
+            for user in users {
+                try! user.genInsert(db: con)
+            }
+            
+            let newFirstName = "new"
+            
+            try! DbUser.genUpdateFirstNameAllRows(db: con, firstName: newFirstName)
+            
+            XCTAssertEqual(2, con.changesCount)
+            
+            for user in users {
+                XCTAssertEqual(try! user.primaryKey().genSelectExpect(db: con).firstName, newFirstName)
+            }
+            
+            try! DbUser.genUpdateFirstNameAllRows(db: con, firstName: nil)
+            
+            XCTAssertEqual(2, con.changesCount)
+            
+            for user in users {
+                XCTAssertNil(try! user.primaryKey().genSelectExpect(db: con).firstName)
+            }
+        }
+    }
 }
