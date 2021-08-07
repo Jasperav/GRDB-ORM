@@ -14,6 +14,7 @@ pub struct Config {
     pub suffix_swift_structs: &'static str,
     pub prefix_swift_structs: &'static str,
     pub use_swiftformat: bool,
+    pub use_swiftlint: bool,
     pub sqlite_location: String,
     pub all_immutable: bool,
     pub imports: String,

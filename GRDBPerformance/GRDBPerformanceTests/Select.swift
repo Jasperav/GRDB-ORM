@@ -16,4 +16,16 @@ class SelectPerformanceTest: XCTestCase {
             let _ = try! User.fetchOne(db, key: uuid.uuidString)!
         })
     }
+
+    func testSelectCount() throws {
+        let db = setupPool()
+
+        try db.write { con in
+            XCTAssertEqual(0, try DbUser.genSelectCount(db: con))
+
+            try DbUser.random().genInsert(db: con)
+
+            XCTAssertEqual(1, try DbUser.genSelectCount(db: con))
+        }
+    }
 }

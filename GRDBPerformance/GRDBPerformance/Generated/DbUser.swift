@@ -62,8 +62,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                 integer: Int,
                 bool: Bool,
                 serializedInfo: SerializedInfo,
-                serializedInfoNullable: SerializedInfo?)
-    {
+                serializedInfoNullable: SerializedInfo?) {
         self.userUuid = userUuid
         self.firstName = firstName
         self.jsonStruct = jsonStruct
@@ -141,7 +140,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -183,7 +182,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -220,7 +219,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -257,7 +256,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -294,7 +293,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -331,7 +330,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -368,7 +367,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -405,7 +404,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -442,7 +441,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -479,7 +478,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -516,7 +515,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -553,7 +552,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -596,7 +595,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             bool,
             try! serializedInfo.serializedData(),
             try! serializedInfoNullable?.serializedData(),
-            userUuid.uuidString,
+            userUuid.uuidString
         ]
 
         statement.setUncheckedArguments(arguments)
@@ -789,7 +788,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: upsertQuery)
@@ -802,7 +801,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            userUuid.uuidString,
+            userUuid.uuidString
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set userUuid = ?")
@@ -815,7 +814,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateFirstNameAllRows(db: Database, firstName: String?) throws {
         let arguments: StatementArguments = try [
-            firstName,
+            firstName
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set firstName = ?")
@@ -831,7 +830,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set jsonStruct = ?")
@@ -849,7 +848,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 }
-            }(),
+            }()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructOptional = ?")
@@ -865,7 +864,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructArray = ?")
@@ -883,7 +882,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 }
-            }(),
+            }()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set jsonStructArrayOptional = ?")
@@ -896,7 +895,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateIntegerAllRows(db: Database, integer: Int) throws {
         let arguments: StatementArguments = try [
-            integer,
+            integer
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set integer = ?")
@@ -909,7 +908,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateBoolAllRows(db: Database, bool: Bool) throws {
         let arguments: StatementArguments = try [
-            bool,
+            bool
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set bool = ?")
@@ -922,7 +921,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateSerializedInfoAllRows(db: Database, serializedInfo: SerializedInfo) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfo.serializedData(),
+            try! serializedInfo.serializedData()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set serializedInfo = ?")
@@ -935,7 +934,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public
     static func genUpdateSerializedInfoNullableAllRows(db: Database, serializedInfoNullable: SerializedInfo?) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         let statement = try db.cachedUpdateStatement(sql: "update User set serializedInfoNullable = ?")
@@ -969,7 +968,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         // Queries a unique row in the database, the row may or may not exist
         public func genSelect(db: Database) throws -> DbUser? {
             let arguments: StatementArguments = try [
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
@@ -991,7 +990,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         // Deletes a unique row, asserts that the row actually existed
         public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
@@ -1008,7 +1007,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 userUuid.uuidString,
-                self.userUuid.uuidString,
+                self.userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateUserUuidQuery)
@@ -1025,7 +1024,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 firstName,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateFirstNameQuery)
@@ -1045,7 +1044,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                     let data = try Shared.jsonEncoder.encode(jsonStruct)
                     return String(data: data, encoding: .utf8)!
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructQuery)
@@ -1067,7 +1066,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         return String(data: data, encoding: .utf8)!
                     }
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructOptionalQuery)
@@ -1087,7 +1086,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                     let data = try Shared.jsonEncoder.encode(jsonStructArray)
                     return String(data: data, encoding: .utf8)!
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayQuery)
@@ -1109,7 +1108,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
                         return String(data: data, encoding: .utf8)!
                     }
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayOptionalQuery)
@@ -1126,7 +1125,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 integer,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateIntegerQuery)
@@ -1143,7 +1142,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bool,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateBoolQuery)
@@ -1160,7 +1159,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try! serializedInfo.serializedData(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoQuery)
@@ -1177,7 +1176,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try! serializedInfoNullable?.serializedData(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedUpdateStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoNullableQuery)
