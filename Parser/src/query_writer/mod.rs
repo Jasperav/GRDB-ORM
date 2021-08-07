@@ -1,4 +1,4 @@
-mod main_struct;
+pub(crate) mod main_struct;
 mod primary_key;
 
 use crate::line_writer::LineWriter;

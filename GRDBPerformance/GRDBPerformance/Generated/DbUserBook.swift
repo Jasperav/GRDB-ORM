@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable {
+public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable, GenDbTable {
     // Static queries
     public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
     public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"

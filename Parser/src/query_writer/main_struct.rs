@@ -8,8 +8,10 @@ pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
 pub const INSERT_OR_IGNORE_QUERY: &str = "insertOrIgnoreUniqueQuery";
 pub const REPLACE_UNIQUE_QUERY: &str = "replaceUniqueQuery";
 pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
+pub const DELETE_ALL_METHOD: &str = "genDeleteAll";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
-pub const SELECT_COUNT: &str = "selectCountQuery";
+pub const SELECT_COUNT_QUERY: &str = "selectCountQuery";
+pub const SELECT_COUNT_METHOD: &str = "genSelectCount";
 
 /// Writes the static queries for the main struct
 pub struct QueryWriterMainStruct<'a> {
@@ -93,7 +95,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
     fn static_select_count_query(&mut self) -> WriteResult {
         (
-            SELECT_COUNT.to_string(),
+            SELECT_COUNT_QUERY.to_string(),
             format!("select count(*) from {}", self.table_meta_data.table_name),
         )
     }
@@ -377,13 +379,13 @@ impl<'a> QueryWriterMainStruct<'a> {
     fn write_select_count(&mut self) {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
-            static func genSelectCount(db: Database) throws -> Int {{
+            static func {}(db: Database) throws -> Int {{
                 let statement = try db.cachedSelectStatement(sql: {})
 
                 return try Int.fetchOne(statement)!
             }}
         ",
-            SELECT_COUNT
+            SELECT_COUNT_METHOD, SELECT_COUNT_QUERY
         ));
     }
 

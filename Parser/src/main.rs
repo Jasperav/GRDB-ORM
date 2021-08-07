@@ -21,6 +21,7 @@ mod custom_mapping;
 mod dynamic_queries;
 mod format_swift_code;
 mod line_writer;
+mod metadata;
 mod output_dir_initializer;
 mod parse;
 mod properties;
