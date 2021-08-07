@@ -9,6 +9,7 @@ pub const INSERT_OR_IGNORE_QUERY: &str = "insertOrIgnoreUniqueQuery";
 pub const REPLACE_UNIQUE_QUERY: &str = "replaceUniqueQuery";
 pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
+pub const SELECT_COUNT: &str = "selectCountQuery";
 
 /// Writes the static queries for the main struct
 pub struct QueryWriterMainStruct<'a> {
@@ -45,6 +46,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             self.static_unique_replace_query(),
             self.static_insert_or_ignore_query(),
             self.static_delete_all_query(),
+            self.static_select_count_query(),
         ];
 
         if !self.non_pk.is_empty() {
@@ -86,6 +88,13 @@ impl<'a> QueryWriterMainStruct<'a> {
         (
             DELETE_ALL_QUERY.to_string(),
             format!("delete from {}", self.table_meta_data.table_name),
+        )
+    }
+
+    fn static_select_count_query(&mut self) -> WriteResult {
+        (
+            SELECT_COUNT.to_string(),
+            format!("select count(*) from {}", self.table_meta_data.table_name),
         )
     }
 
@@ -147,6 +156,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write_update();
         self.write_updatable_columns();
         self.write_updatable_all();
+        self.write_select_count();
     }
 
     /// Writes the static update queries that hits all rows in the table
@@ -361,6 +371,19 @@ impl<'a> QueryWriterMainStruct<'a> {
             pk_comma,
             switch,
             db_values,
+        ));
+    }
+
+    fn write_select_count(&mut self) {
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "
+            static func genSelectCount(db: Database) throws -> Int {{
+                let statement = try db.cachedSelectStatement(sql: {})
+
+                return try Int.fetchOne(statement)!
+            }}
+        ",
+            SELECT_COUNT
         ));
     }
 

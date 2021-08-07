@@ -10,6 +10,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
     public static let replaceUniqueQuery = "replace into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     public static let insertOrIgnoreUniqueQuery = "insert or ignore into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from User"
+    public static let selectCountQuery = "select count(*) from User"
     public static let updateUniqueQuery = "update User set firstName = ?, jsonStruct = ?, jsonStructOptional = ?, jsonStructArray = ?, jsonStructArrayOptional = ?, integer = ?, bool = ?, serializedInfo = ?, serializedInfoNullable = ? where userUuid = ?"
     public static let upsertFirstNameQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set firstName=excluded.firstName"
     public static let upsertJsonStructQuery = "insert into User (userUuid, firstName, jsonStruct, jsonStructOptional, jsonStructArray, jsonStructArrayOptional, integer, bool, serializedInfo, serializedInfoNullable) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) on conflict (userUuid) do update set jsonStruct=excluded.jsonStruct"
@@ -942,6 +943,13 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable {
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public
+    static func genSelectCount(db: Database) throws -> Int {
+        let statement = try db.cachedSelectStatement(sql: selectCountQuery)
+
+        return try Int.fetchOne(statement)!
     }
 
     // Write the primary key struct, useful for selecting or deleting a unique row

@@ -10,6 +10,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
     public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let insertOrIgnoreUniqueQuery = "insert or ignore into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from Book"
+    public static let selectCountQuery = "select count(*) from Book"
     public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
     public static let upsertUserUuidQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?) on conflict (bookUuid) do update set userUuid=excluded.userUuid"
     public static let upsertIntegerOptionalQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?) on conflict (bookUuid) do update set integerOptional=excluded.integerOptional"
@@ -318,6 +319,13 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable {
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public
+    static func genSelectCount(db: Database) throws -> Int {
+        let statement = try db.cachedSelectStatement(sql: selectCountQuery)
+
+        return try Int.fetchOne(statement)!
     }
 
     // Write the primary key struct, useful for selecting or deleting a unique row
