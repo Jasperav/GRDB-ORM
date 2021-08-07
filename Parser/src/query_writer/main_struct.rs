@@ -34,7 +34,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 fn create_upsert_query_name(column_name: &str) -> String {
     format!(
         "upsert{}Query",
-        some_kind_of_uppercase_first_letter(&column_name)
+        some_kind_of_uppercase_first_letter(column_name)
     )
 }
 
@@ -421,7 +421,7 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write_delete(&mut self) {
-        self.write("DeleteAll", DELETE_ALL_QUERY, &"", true);
+        self.write("DeleteAll", DELETE_ALL_QUERY, "", true);
     }
 
     fn write_update(&mut self) {
