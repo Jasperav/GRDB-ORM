@@ -1,0 +1,56 @@
+use crate::configuration::Config;
+use crate::query_writer::main_struct::{DELETE_ALL_METHOD, SELECT_COUNT_METHOD};
+use crate::swift_property::create_swift_type_name;
+use sqlite_parser::Metadata;
+
+pub const PROTOCOL_NAME: &str = "GenDbTable";
+
+pub(crate) fn write(config: &Config, metadata: &Metadata) {
+    write_protocol(config);
+    write_metadata(config, metadata);
+}
+
+fn write_metadata(config: &Config, metadata: &Metadata) {
+    let mut line_writer = config.create_line_writer();
+
+    let mut tables = metadata.tables.values().cloned().collect::<Vec<_>>();
+
+    tables.sort_by(|a, b| a.table_name.cmp(&b.table_name));
+
+    let types = tables
+        .into_iter()
+        .map(|t| create_swift_type_name(&t.table_name, config))
+        .map(|struct_name| format!("{}.self", struct_name))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    line_writer.add_with_modifier(format!(
+        "enum DbMetadata {{
+        {}static func tables() -> [{}.Type] {{
+            [{}]
+        }}
+    }}",
+        config.visibility.modifier(),
+        PROTOCOL_NAME,
+        types
+    ));
+
+    line_writer.write_to_file("GenMetadata");
+}
+
+fn write_protocol(config: &Config) {
+    let mut line_writer = config.create_line_writer();
+
+    // Add more methods if needed
+    line_writer.add_with_modifier(format!(
+        "
+    protocol {} {{
+        static func {}(db: Database) throws -> Int
+        static func {}(db: Database) throws
+    }}
+    ",
+        PROTOCOL_NAME, SELECT_COUNT_METHOD, DELETE_ALL_METHOD
+    ));
+
+    line_writer.write_to_file(PROTOCOL_NAME);
+}

@@ -121,7 +121,7 @@ impl<'a> ReturnType<'a> {
                 } else if let Some(table) = self.tables.table(&without_question_mark) {
                     // The return type is a table
                     let swift_struct_name =
-                        create_swift_type_name(&without_question_mark, &self.config);
+                        create_swift_type_name(&without_question_mark, self.config);
 
                     // Now the startingIndex initializer is useful
                     let format =

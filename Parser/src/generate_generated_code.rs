@@ -177,6 +177,7 @@ fn update_generated_code() {
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",
         use_swiftformat: true,
+        use_swiftlint: true,
         sqlite_location: path.clone(),
         all_immutable: false,
         imports: "import Foundation\nimport GRDB".to_string(),

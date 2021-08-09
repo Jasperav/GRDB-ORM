@@ -18,6 +18,9 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     // Write the shared enum
     crate::shared::write(&config);
 
+    // Write the metadata
+    crate::metadata::write(&config, &tables);
+
     // Write the tables
     TableWriter {
         tables: &tables,

@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use sqlite_parser::Metadata;
 
 use crate::configuration::Config;
+use crate::metadata::PROTOCOL_NAME;
 use crate::query_writer::{QueryWriterMainStruct, QueryWriterPrimaryKey};
 use crate::swift_property::{create_swift_properties, create_swift_type_name};
 use crate::swift_struct::property_writer::{Location, PropertyWriter};
@@ -33,7 +34,7 @@ impl<'a> TableWriter<'a> {
             let swift_properties = create_swift_properties(table, &self.config.custom_mapping);
 
             // The struct name to write
-            let struct_name = create_swift_type_name(table_name, &self.config);
+            let struct_name = create_swift_type_name(table_name, self.config);
 
             // The primary key struct name to write
             let primary_key_struct_name = "PrimaryKey";
@@ -41,8 +42,8 @@ impl<'a> TableWriter<'a> {
             // Start the actual writing
             line_writer.add_comment("Mapped table to struct");
             line_writer.add_with_modifier(format!(
-                "struct {}: FetchableRecord, PersistableRecord, Codable, Equatable {{\n",
-                struct_name
+                "struct {}: FetchableRecord, PersistableRecord, Codable, Equatable, {} {{\n",
+                struct_name, PROTOCOL_NAME,
             ));
 
             // Pretty complicated macro, but ensures no duplicate code is written

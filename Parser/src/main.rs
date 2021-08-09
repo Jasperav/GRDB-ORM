@@ -21,6 +21,7 @@ mod custom_mapping;
 mod dynamic_queries;
 mod format_swift_code;
 mod line_writer;
+mod metadata;
 mod output_dir_initializer;
 mod parse;
 mod properties;
@@ -91,6 +92,7 @@ fn main() {
         suffix_swift_structs: &*properties::SUFFIX_SWIFT_STRUCTS,
         prefix_swift_structs: &*properties::PREFIX_SWIFT_STRUCTS,
         use_swiftformat: *properties::USE_SWIFTFORMAT,
+        use_swiftlint: *properties::USE_SWIFTLINT,
         sqlite_location: properties::SQLITE_LOCATION.to_owned(),
         all_immutable: *properties::ALL_IMMUTABLE,
         imports: packages,

@@ -71,7 +71,7 @@ impl<'a> Parser<'a> {
             }
             .parse();
 
-            self.write_extension(&dynamic_query);
+            self.write_extension(dynamic_query);
             let capitalized_func_name =
                 some_kind_of_uppercase_first_letter(&dynamic_query.func_name);
 
@@ -95,7 +95,7 @@ impl<'a> Parser<'a> {
                 func_return_type
             ));
 
-            self.write_body(&dynamic_query, parameters, &query, &func_return_type);
+            self.write_body(dynamic_query, parameters, &query, &func_return_type);
 
             self.add_closing_brackets();
         }
@@ -171,7 +171,7 @@ impl<'a> Parser<'a> {
                     param = swift_property.swift_property_name,
                 ));
             } else {
-                let encode = encode_swift_properties(&[&swift_property]);
+                let encode = encode_swift_properties(&[swift_property]);
 
                 self.add_line(format!("arguments += [{}]", encode));
             }
