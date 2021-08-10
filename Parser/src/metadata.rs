@@ -35,7 +35,7 @@ fn write_metadata(config: &Config, metadata: &Metadata) {
         types
     ));
 
-    line_writer.write_to_file("GenMetadata");
+    line_writer.write_to_file("GenDbMetadata");
 }
 
 fn write_protocol(config: &Config) {
