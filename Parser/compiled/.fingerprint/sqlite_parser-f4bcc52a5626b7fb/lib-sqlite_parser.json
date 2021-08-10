@@ -1,1 +1,0 @@
-{"rustc":2624477146670686978,"features":"[]","target":124566940370097559,"profile":10796641224631929329,"path":13649740034069326683,"deps":[[15262011628677876543,"rusqlite",false,3521403187579958103]],"local":[{"CheckDepInfo":{"dep_info":"release/.fingerprint/sqlite_parser-f4bcc52a5626b7fb/dep-lib-sqlite_parser"}}],"rustflags":[],"metadata":17093294150443695970,"config":0}
