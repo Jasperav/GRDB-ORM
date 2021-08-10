@@ -17,16 +17,16 @@ CFLAGS = None
 CRATE_CC_NO_DEFAULTS = None
 DEBUG = Some("false")
 CARGO_CFG_TARGET_FEATURE = Some("fxsr,sse,sse2,sse3,ssse3")
-running: "cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-arch" "x86_64" "-DSQLITE_CORE" "-DSQLITE_DEFAULT_FOREIGN_KEYS=1" "-DSQLITE_ENABLE_API_ARMOR" "-DSQLITE_ENABLE_COLUMN_METADATA" "-DSQLITE_ENABLE_DBSTAT_VTAB" "-DSQLITE_ENABLE_FTS3" "-DSQLITE_ENABLE_FTS3_PARENTHESIS" "-DSQLITE_ENABLE_FTS5" "-DSQLITE_ENABLE_JSON1" "-DSQLITE_ENABLE_LOAD_EXTENSION=1" "-DSQLITE_ENABLE_MEMORY_MANAGEMENT" "-DSQLITE_ENABLE_RTREE" "-DSQLITE_ENABLE_STAT2" "-DSQLITE_ENABLE_STAT4" "-DSQLITE_SOUNDEX" "-DSQLITE_THREADSAFE=1" "-DSQLITE_USE_URI" "-DHAVE_USLEEP=1" "-D_POSIX_THREAD_SAFE_FUNCTIONS" "-DHAVE_ISNAN" "-DHAVE_LOCALTIME_R" "-o" "/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/sqlite3/sqlite3.o" "-c" "sqlite3/sqlite3.c"
+running: "cc" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "-m64" "-arch" "x86_64" "-DSQLITE_CORE" "-DSQLITE_DEFAULT_FOREIGN_KEYS=1" "-DSQLITE_ENABLE_API_ARMOR" "-DSQLITE_ENABLE_COLUMN_METADATA" "-DSQLITE_ENABLE_DBSTAT_VTAB" "-DSQLITE_ENABLE_FTS3" "-DSQLITE_ENABLE_FTS3_PARENTHESIS" "-DSQLITE_ENABLE_FTS5" "-DSQLITE_ENABLE_JSON1" "-DSQLITE_ENABLE_LOAD_EXTENSION=1" "-DSQLITE_ENABLE_MEMORY_MANAGEMENT" "-DSQLITE_ENABLE_RTREE" "-DSQLITE_ENABLE_STAT2" "-DSQLITE_ENABLE_STAT4" "-DSQLITE_SOUNDEX" "-DSQLITE_THREADSAFE=1" "-DSQLITE_USE_URI" "-DHAVE_USLEEP=1" "-D_POSIX_THREAD_SAFE_FUNCTIONS" "-DHAVE_ISNAN" "-DHAVE_LOCALTIME_R" "-o" "/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/sqlite3/sqlite3.o" "-c" "sqlite3/sqlite3.c"
 exit status: 0
 AR_x86_64-apple-darwin = None
 AR_x86_64_apple_darwin = None
 HOST_AR = None
 AR = None
-running: "ar" "cq" "/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/libsqlite3.a" "/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/sqlite3/sqlite3.o"
+running: "ar" "cq" "/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/libsqlite3.a" "/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/sqlite3/sqlite3.o"
 exit status: 0
-running: "ar" "s" "/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/libsqlite3.a"
+running: "ar" "s" "/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out/libsqlite3.a"
 exit status: 0
 cargo:rustc-link-lib=static=sqlite3
-cargo:rustc-link-search=native=/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out
-cargo:lib_dir=/Users/jaspervisser/CLionProjects/SQLiteParserGRDB/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out
+cargo:rustc-link-search=native=/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out
+cargo:lib_dir=/Users/jaspervisser/CLionProjects/GRDB-ORM/Parser/target/release/build/libsqlite3-sys-4b0dd712c4394e3d/out

@@ -3,7 +3,7 @@
 import Foundation
 import GRDB
 
-public enum DbMetadata {
+public enum GenDbMetadata {
     public static func tables() -> [GenDbTable.Type] {
         [DbBook.self, DbUser.self, DbUserBook.self]
     }
