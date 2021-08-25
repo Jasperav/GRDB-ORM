@@ -264,6 +264,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     public struct PrimaryKey {
         // Static queries
         public static let selectQuery = "select * from UserBook where bookUuid = ? and userUuid = ?"
+        public static let selectExistsQuery = "select exists(select 1 from UserBook where bookUuid = ? and userUuid = ?)"
         public static let deleteQuery = "delete from UserBook where bookUuid = ? and userUuid = ?"
 
         // Mapped columns to properties
@@ -298,6 +299,21 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             } else {
                 throw DatabaseError(message: "Didn't found a record for \(self)")
             }
+        }
+
+        // Checks if a row exists
+        public func genSelectExists(db: Database) throws -> Bool {
+            let arguments: StatementArguments = try [
+                bookUuid.uuidString,
+                userUuid.uuidString
+            ]
+
+            let statement = try db.cachedSelectStatement(sql: Self.selectExistsQuery)
+
+            statement.setUncheckedArguments(arguments)
+
+            // This always returns a row
+            return try Bool.fetchOne(statement)!
         }
 
         // Deletes a unique row, asserts that the row actually existed

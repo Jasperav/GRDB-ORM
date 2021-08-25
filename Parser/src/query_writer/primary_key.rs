@@ -4,6 +4,7 @@ use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
 
 pub const SELECT_QUERY: &str = "selectQuery";
+pub const SELECT_EXISTS_QUERY: &str = "selectExistsQuery";
 pub const DELETE_QUERY: &str = "deleteQuery";
 
 /// Writes the unique queries for the primary key
@@ -14,7 +15,11 @@ pub struct QueryWriterPrimaryKey<'a> {
 // Static queries
 impl<'a> QueryWriterPrimaryKey<'a> {
     pub(crate) fn write_static_queries(mut self) {
-        let static_queries = vec![self.static_select_query(), self.static_delete_query()];
+        let static_queries = vec![
+            self.static_select_query(),
+            self.static_select_exists_query(),
+            self.static_delete_query(),
+        ];
 
         write_static_queries(&mut self.table_meta_data.line_writer, static_queries);
     }
@@ -24,6 +29,17 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             SELECT_QUERY.to_string(),
             format!(
                 "select * from {}{}",
+                self.table_meta_data.table_name,
+                self.table_meta_data.where_clause()
+            ),
+        )
+    }
+
+    fn static_select_exists_query(&mut self) -> WriteResult {
+        (
+            SELECT_EXISTS_QUERY.to_string(),
+            format!(
+                "select exists(select 1 from {}{})",
                 self.table_meta_data.table_name,
                 self.table_meta_data.where_clause()
             ),
@@ -47,6 +63,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
     pub(crate) fn write_method(mut self) {
         self.write_select_query();
         self.write_select_query_expect();
+        self.write_select_exists_query();
         self.write_delete_query();
         self.write_updatable_columns();
 
@@ -93,6 +110,30 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         }}
         ",
             self.table_meta_data.struct_name
+        ));
+    }
+
+    fn write_select_exists_query(&mut self) {
+        let values = encode_swift_properties(&self.table_meta_data.primary_keys());
+
+        self.table_meta_data
+            .line_writer
+            .add_comment("Checks if a row exists");
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "func genSelectExists(db: Database) throws -> Bool {{
+            let arguments: StatementArguments = try [
+                {}
+            ]
+
+            let statement = try db.cachedSelectStatement(sql: Self.{})
+
+            statement.setUncheckedArguments(arguments)
+
+            // This always returns a row
+            return try Bool.fetchOne(statement)!
+        }}
+        ",
+            values, SELECT_EXISTS_QUERY,
         ));
     }
 
