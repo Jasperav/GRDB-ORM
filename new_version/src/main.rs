@@ -26,8 +26,18 @@ fn main() {
     run!("rm", ["-rf", "./compiled/"]);
     run!("cargo", ["build", "--release"]);
     run!("cp", ["-a", "target/release/.", "./compiled"]);
-    run!("rm", ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]);
-    run!("cp", ["-a", "generated/.", "../GRDBPerformance/GRDBPerformance/Generated"]);
+    run!(
+        "rm",
+        ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]
+    );
+    run!(
+        "cp",
+        [
+            "-a",
+            "generated/.",
+            "../GRDBPerformance/GRDBPerformance/Generated"
+        ]
+    );
     run!("cargo", ["fmt"]);
     run!("cargo", ["fmt", "--all", "--", "--check"]);
 

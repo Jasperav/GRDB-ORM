@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "new_version",
+    "Parser",
+]
