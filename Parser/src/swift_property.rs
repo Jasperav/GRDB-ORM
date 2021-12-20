@@ -304,7 +304,8 @@ pub fn is_build_in_type(check: &str, t: Type) -> bool {
 }
 
 pub fn is_mapped_blob_type(t: Type, swift_type_name: &str) -> bool {
-    t == Type::Blob && swift_type_name != "Data"
+    // Also allow optional data fields
+    t == Type::Blob && swift_type_name.replace("?", "") != "Data"
 }
 
 /// Creates a Swift type from a [&str]
