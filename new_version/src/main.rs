@@ -10,14 +10,14 @@ fn main() {
 
     macro_rules! run {
         ($program: expr, $args: expr) => {
-            let success = Command::new($program)
+            let output = Command::new($program)
                 .args(&$args)
                 .current_dir(&parser_dir)
                 .status()
                 .unwrap();
 
-            if !success.success() {
-                panic!("{:#?}", success);
+            if !output.success() {
+                panic!("Ran: {}, {:#?}", stringify!($program), output);
             }
         };
     }
@@ -25,9 +25,19 @@ fn main() {
     run!("cargo", ["test", "--verbose", "--", "--test-threads=1"]);
     run!("rm", ["-rf", "./compiled/"]);
     run!("cargo", ["build", "--release"]);
-    run!("cp", ["-a", "target/release/.", "./compiled"]);
-    run!("rm", ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]);
-    run!("cp", ["-a", "generated/.", "../GRDBPerformance/GRDBPerformance/Generated"]);
+    run!("cp", ["-a", "../target/release/.", "./compiled"]);
+    run!(
+        "rm",
+        ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]
+    );
+    run!(
+        "cp",
+        [
+            "-a",
+            "generated/.",
+            "../GRDBPerformance/GRDBPerformance/Generated"
+        ]
+    );
     run!("cargo", ["fmt"]);
     run!("cargo", ["fmt", "--all", "--", "--check"]);
 
@@ -43,7 +53,7 @@ fn main() {
             "-scheme",
             "GRDBPerformanceTests",
             "-destination",
-            "platform=iOS Simulator,name=iPhone 8,OS=14.5"
+            "platform=iOS Simulator,name=iPhone 8,OS=15.0"
         ])
         .current_dir(root!().join("GRDBPerformance"))
         .status()

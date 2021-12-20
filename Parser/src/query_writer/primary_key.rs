@@ -21,7 +21,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             self.static_delete_query(),
         ];
 
-        write_static_queries(&mut self.table_meta_data.line_writer, static_queries);
+        write_static_queries(self.table_meta_data.line_writer, static_queries);
     }
 
     fn static_select_query(&mut self) -> WriteResult {
