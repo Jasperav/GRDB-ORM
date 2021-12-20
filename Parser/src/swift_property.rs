@@ -292,6 +292,8 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
 
 /// A type is 'build-in' when the type is standard Swift type and does not need JSON en/de-coding
 pub fn is_build_in_type(check: &str, t: Type) -> bool {
+    let check = without_optional(check);
+
     check == "String"
         || check == "Int"
         || check == "UUID"
@@ -300,12 +302,16 @@ pub fn is_build_in_type(check: &str, t: Type) -> bool {
         || check == "Bool"
         || check == "Data"
         || check == "Double"
-        || is_mapped_blob_type(t, check)
+        || is_mapped_blob_type(t, &check)
 }
 
 pub fn is_mapped_blob_type(t: Type, swift_type_name: &str) -> bool {
     // Also allow optional data fields
-    t == Type::Blob && swift_type_name.replace("?", "") != "Data"
+    t == Type::Blob && without_optional(swift_type_name) != "Data"
+}
+
+pub fn without_optional(t: &str) -> String {
+    t.replace("?", "")
 }
 
 /// Creates a Swift type from a [&str]

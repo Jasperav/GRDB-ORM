@@ -58,7 +58,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         // The first static query is always the insert query
         static_queries.extend_from_slice(&self.static_upsert_queries(&static_queries[0].1));
 
-        write_static_queries(&mut self.table_meta_data.line_writer, static_queries);
+        write_static_queries(self.table_meta_data.line_writer, static_queries);
     }
 
     fn static_upsert_queries(&self, insert_query: &str) -> Vec<WriteResult> {
