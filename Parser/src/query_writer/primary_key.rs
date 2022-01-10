@@ -6,6 +6,7 @@ use crate::table_meta_data::TableMetaData;
 pub const SELECT_QUERY: &str = "selectQuery";
 pub const SELECT_EXISTS_QUERY: &str = "selectExistsQuery";
 pub const DELETE_QUERY: &str = "deleteQuery";
+pub const DELETE_METHOD: &str = "Delete";
 
 /// Writes the unique queries for the primary key
 pub struct QueryWriterPrimaryKey<'a> {
@@ -170,7 +171,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         assert!(!values.is_empty());
 
         self.execute_update_statement(
-            "Delete",
+            DELETE_METHOD,
             &[],
             &values.iter().collect::<Vec<_>>(),
             &format!("Self.{}", DELETE_QUERY),

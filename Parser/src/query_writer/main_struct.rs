@@ -1,4 +1,5 @@
 use crate::line_writer::StaticInstance;
+use crate::query_writer::primary_key::DELETE_METHOD;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
@@ -397,8 +398,9 @@ impl<'a> QueryWriterMainStruct<'a> {
                 .collect::<Vec<_>>()
                 .as_slice(),
         );
+        let insert_method = "Insert";
 
-        self.write("Insert", INSERT_UNIQUE_QUERY, &db_values, true);
+        self.write(insert_method, INSERT_UNIQUE_QUERY, &db_values, true);
         self.write("InsertOrIgnore", INSERT_OR_IGNORE_QUERY, &db_values, false);
         self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, false);
 
@@ -420,6 +422,18 @@ impl<'a> QueryWriterMainStruct<'a> {
                 false,
             );
         }
+
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "func gen{}(db: Database, insert: Bool, assertOneRowAffected: Bool = true) throws {{
+                if insert {{
+                    try gen{}(db: db, assertOneRowAffected: assertOneRowAffected)
+                }} else {{
+                    try primaryKey().gen{}(db: db, assertOneRowAffected: assertOneRowAffected)
+                }}
+            }}
+            ",
+            "InsertOrDelete", insert_method, DELETE_METHOD,
+        ));
     }
 
     fn write_delete(&mut self) {
