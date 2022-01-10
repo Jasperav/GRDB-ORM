@@ -106,6 +106,14 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         try statement.execute()
     }
 
+    public func genInsertOrDelete(db: Database, insert: Bool, assertOneRowAffected: Bool = true) throws {
+        if insert {
+            try genInsert(db: db, assertOneRowAffected: assertOneRowAffected)
+        } else {
+            try primaryKey().genDelete(db: db, assertOneRowAffected: assertOneRowAffected)
+        }
+    }
+
     public static func genDeleteAll(db: Database) throws {
         let statement = try db.cachedUpdateStatement(sql: Self.deleteAllQuery)
 
