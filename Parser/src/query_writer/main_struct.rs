@@ -414,15 +414,15 @@ impl<'a> QueryWriterMainStruct<'a> {
             self.table_meta_data.struct_name, pk_comma, switch, db_values,
         ));
 
-        self.table_meta_data.line_writer.add_with_modifier(format!(
-            "mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {{
-                for column in columns {{
+        self.table_meta_data.line_writer.add_with_modifier(
+            "mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {
+                for column in columns {
                     column.update(entity: &self)
-                }}
+                }
 
-                try genUpsertDynamic(db: db, columns: columns.map {{ $0.toUpdatableColumn() }})
-            }}"
-        ));
+                try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
+            }"
+        );
     }
 
     fn write_select_count(&mut self) {
