@@ -200,6 +200,24 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             case .tsCreated: return "tsCreated"
             }
         }
+
+        func toUpdatableColumn() -> UpdatableColumn {
+            switch self {
+            case .bookUuid: return .bookUuid
+            case .userUuid: return .userUuid
+            case .integerOptional: return .integerOptional
+            case .tsCreated: return .tsCreated
+            }
+        }
+
+        func update(entity: inout DbBook) {
+            switch self {
+            case let .bookUuid(value): entity.bookUuid = value
+            case let .userUuid(value): entity.userUuid = value
+            case let .integerOptional(value): entity.integerOptional = value
+            case let .tsCreated(value): entity.tsCreated = value
+            }
+        }
     }
 
     public
@@ -222,9 +240,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         return .tsCreated(tsCreated)
     }
 
-    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
-        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
-
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn]) throws {
         // Check for duplicates
         assert(Set(columns).count == columns.count)
 
@@ -274,6 +290,14 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {
+        for column in columns {
+            column.update(entity: &self)
+        }
+
+        try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
     public

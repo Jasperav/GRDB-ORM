@@ -157,6 +157,22 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             case .realToDouble: return "realToDouble"
             }
         }
+
+        func toUpdatableColumn() -> UpdatableColumn {
+            switch self {
+            case .bookUuid: return .bookUuid
+            case .userUuid: return .userUuid
+            case .realToDouble: return .realToDouble
+            }
+        }
+
+        func update(entity: inout DbUserBook) {
+            switch self {
+            case let .bookUuid(value): entity.bookUuid = value
+            case let .userUuid(value): entity.userUuid = value
+            case let .realToDouble(value): entity.realToDouble = value
+            }
+        }
     }
 
     public
@@ -174,9 +190,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         return .realToDouble(realToDouble)
     }
 
-    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
-        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
-
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn]) throws {
         // Check for duplicates
         assert(Set(columns).count == columns.count)
 
@@ -220,6 +234,14 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {
+        for column in columns {
+            column.update(entity: &self)
+        }
+
+        try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
     public

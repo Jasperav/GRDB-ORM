@@ -648,6 +648,36 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             case .serializedInfoNullable: return "serializedInfoNullable"
             }
         }
+
+        func toUpdatableColumn() -> UpdatableColumn {
+            switch self {
+            case .userUuid: return .userUuid
+            case .firstName: return .firstName
+            case .jsonStruct: return .jsonStruct
+            case .jsonStructOptional: return .jsonStructOptional
+            case .jsonStructArray: return .jsonStructArray
+            case .jsonStructArrayOptional: return .jsonStructArrayOptional
+            case .integer: return .integer
+            case .bool: return .bool
+            case .serializedInfo: return .serializedInfo
+            case .serializedInfoNullable: return .serializedInfoNullable
+            }
+        }
+
+        func update(entity: inout DbUser) {
+            switch self {
+            case let .userUuid(value): entity.userUuid = value
+            case let .firstName(value): entity.firstName = value
+            case let .jsonStruct(value): entity.jsonStruct = value
+            case let .jsonStructOptional(value): entity.jsonStructOptional = value
+            case let .jsonStructArray(value): entity.jsonStructArray = value
+            case let .jsonStructArrayOptional(value): entity.jsonStructArrayOptional = value
+            case let .integer(value): entity.integer = value
+            case let .bool(value): entity.bool = value
+            case let .serializedInfo(value): entity.serializedInfo = try! entity.serializedInfo.serializedData()
+            case let .serializedInfoNullable(value): entity.serializedInfoNullable = try! entity.serializedInfoNullable?.serializedData()
+            }
+        }
     }
 
     public
@@ -700,9 +730,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         return .serializedInfoNullable(serializedInfoNullableAutoConvert())
     }
 
-    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {
-        assert(!assertAtLeastOneUpdate || !columns.isEmpty)
-
+    public func genUpsertDynamic(db: Database, columns: [UpdatableColumn]) throws {
         // Check for duplicates
         assert(Set(columns).count == columns.count)
 
@@ -804,6 +832,14 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {
+        for column in columns {
+            column.update(entity: &self)
+        }
+
+        try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
     public
