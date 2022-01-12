@@ -271,8 +271,35 @@ impl<'a> QueryWriterMainStruct<'a> {
             .iter()
             .map(|sp| {
                 format!(
-                    "case .{}: return \"{}\"",
-                    sp.swift_property_name, sp.swift_property_name
+                    "case .{column}: return \"{column}\"",
+                    column = sp.swift_property_name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let to_updatable_column = updatable_columns
+            .iter()
+            .map(|sp| {
+                format!(
+                    "case .{column}: return .{column}",
+                    column = sp.swift_property_name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let update = updatable_columns
+            .iter()
+            .map(|sp| {
+                let serialize = if let Some((x, _)) = sp.serialize_deserialize_blob(false) {
+                    x.replace("try! ", "try! entity.")
+                } else {
+                    "value".to_string()
+                };
+
+                format!(
+                    "case .{column}(let value): entity.{column} = {}",
+                    serialize,
+                    column = sp.swift_property_name
                 )
             })
             .collect::<Vec<_>>()
@@ -288,8 +315,24 @@ impl<'a> QueryWriterMainStruct<'a> {
                         {}
                     }}
                 }}
+
+                func toUpdatableColumn() -> UpdatableColumn {{
+                    switch self {{
+                        {}
+                    }}
+                }}
+
+                func update(entity: inout {}) {{
+                    switch self {{
+                        {}
+                    }}
+                }}
              }}",
-            cases_with_associated_values, column_name
+            cases_with_associated_values,
+            column_name,
+            to_updatable_column,
+            self.table_meta_data.struct_name,
+            update
         ));
 
         // Create a simple mapper between struct and the enum
@@ -338,9 +381,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         // Write the dynamic upsert method
         self.table_meta_data.line_writer.add_with_modifier(format!(
-            "func genUpsertDynamic(db: Database, columns: [UpdatableColumn], assertAtLeastOneUpdate: Bool = true) throws {{
-                assert(!assertAtLeastOneUpdate || !columns.isEmpty)
-
+            "func genUpsertDynamic(db: Database, columns: [UpdatableColumn]) throws {{
                 // Check for duplicates
                 assert(Set(columns).count == columns.count)
 
@@ -370,11 +411,18 @@ impl<'a> QueryWriterMainStruct<'a> {
                 try statement.execute()
             }}
             ",
-            self.table_meta_data.struct_name,
-            pk_comma,
-            switch,
-            db_values,
+            self.table_meta_data.struct_name, pk_comma, switch, db_values,
         ));
+
+        self.table_meta_data.line_writer.add_with_modifier(
+            "mutating func genUpsertDynamicMutate(db: Database, columns: [UpdatableColumnWithValue]) throws {
+                for column in columns {
+                    column.update(entity: &self)
+                }
+
+                try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
+            }"
+        );
     }
 
     fn write_select_count(&mut self) {

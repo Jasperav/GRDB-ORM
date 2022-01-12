@@ -51,4 +51,21 @@ class UpsertTest: XCTestCase {
             assertUser()
         }
     }
+    
+    func testUpsertMutate() {
+        let db = setupPool()
+        var user = DbUser.random()
+        
+        try! db.write { con in
+            let firstName = "SomeFirstName"
+            
+            try user.genUpsertDynamicMutate(db: con, columns: [.firstName(firstName)])
+            
+            XCTAssertEqual(firstName, user.firstName!)
+            
+            let updatedUser = try user.primaryKey().genSelectExpect(db: con)
+            
+            XCTAssertEqual(firstName, updatedUser.firstName!)
+        }
+    }
 }
