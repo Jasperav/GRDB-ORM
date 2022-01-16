@@ -42,4 +42,19 @@ class SelectPerformanceTest: XCTestCase {
             XCTAssert(try user.primaryKey().genSelectExists(db: con))
         }
     }
+    
+    func testSelectAll() throws {
+        let db = setupPool()
+
+        try db.write { con in
+            let user = DbUser.random()
+            
+            try user.genInsert(db: con)
+            
+            let users = try DbUser.genSelectAll(db: con)
+            
+            XCTAssertEqual(1, users.count)
+            XCTAssertEqual(user, users[0])
+        }
+    }
 }
