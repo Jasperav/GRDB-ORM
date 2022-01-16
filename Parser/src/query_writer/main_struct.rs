@@ -11,6 +11,8 @@ pub const REPLACE_UNIQUE_QUERY: &str = "replaceUniqueQuery";
 pub const DELETE_ALL_QUERY: &str = "deleteAllQuery";
 pub const DELETE_ALL_METHOD: &str = "genDeleteAll";
 pub const UPDATE_UNIQUE_QUERY: &str = "updateUniqueQuery";
+pub const SELECT_ALL_QUERY: &str = "selectAllQuery";
+pub const SELECT_ALL_METHOD: &str = "genSelectAll";
 pub const SELECT_COUNT_QUERY: &str = "selectCountQuery";
 pub const SELECT_COUNT_METHOD: &str = "genSelectCount";
 
@@ -49,6 +51,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             self.static_unique_replace_query(),
             self.static_insert_or_ignore_query(),
             self.static_delete_all_query(),
+            self.static_select_all_query(),
             self.static_select_count_query(),
         ];
 
@@ -94,6 +97,17 @@ impl<'a> QueryWriterMainStruct<'a> {
         )
     }
 
+    fn static_select_all_query(&mut self) -> WriteResult {
+        (
+            SELECT_ALL_QUERY.to_string(),
+            format!(
+                "select {} from {}",
+                self.column_names().join(", "),
+                self.table_meta_data.table_name
+            ),
+        )
+    }
+
     fn static_select_count_query(&mut self) -> WriteResult {
         (
             SELECT_COUNT_QUERY.to_string(),
@@ -101,13 +115,16 @@ impl<'a> QueryWriterMainStruct<'a> {
         )
     }
 
-    fn columns_question_marks(&self, query: &'static str, prefix: &str) -> WriteResult {
-        let separated_columns = self
-            .table_meta_data
+    fn column_names(&self) -> Vec<String> {
+        self.table_meta_data
             .swift_properties
             .iter()
             .map(|c| c.column.name.clone())
-            .collect::<Vec<_>>();
+            .collect::<Vec<_>>()
+    }
+
+    fn columns_question_marks(&self, query: &'static str, prefix: &str) -> WriteResult {
+        let separated_columns = self.column_names();
         let question_marks = separated_columns
             .iter()
             .map(|_| "?")
@@ -159,6 +176,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.write_update();
         self.write_updatable_columns();
         self.write_updatable_all();
+        self.write_select_all();
         self.write_select_count();
     }
 
@@ -423,6 +441,21 @@ impl<'a> QueryWriterMainStruct<'a> {
                 try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
             }"
         );
+    }
+
+    fn write_select_all(&mut self) {
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "
+            static func {}(db: Database) throws -> [{struct_name}] {{
+                let statement = try db.cachedSelectStatement(sql: {})
+
+                return try {struct_name}.fetchAll(statement)
+            }}
+        ",
+            SELECT_ALL_METHOD,
+            SELECT_ALL_QUERY,
+            struct_name = self.table_meta_data.struct_name
+        ));
     }
 
     fn write_select_count(&mut self) {

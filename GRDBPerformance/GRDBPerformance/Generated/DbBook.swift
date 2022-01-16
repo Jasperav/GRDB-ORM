@@ -10,6 +10,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
     public static let replaceUniqueQuery = "replace into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let insertOrIgnoreUniqueQuery = "insert or ignore into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?)"
     public static let deleteAllQuery = "delete from Book"
+    public static let selectAllQuery = "select bookUuid, userUuid, integerOptional, tsCreated from Book"
     public static let selectCountQuery = "select count(*) from Book"
     public static let updateUniqueQuery = "update Book set userUuid = ?, integerOptional = ?, tsCreated = ? where bookUuid = ?"
     public static let upsertUserUuidQuery = "insert into Book (bookUuid, userUuid, integerOptional, tsCreated) values (?, ?, ?, ?) on conflict (bookUuid) do update set userUuid=excluded.userUuid"
@@ -350,6 +351,13 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         statement.setUncheckedArguments(arguments)
 
         try statement.execute()
+    }
+
+    public
+    static func genSelectAll(db: Database) throws -> [DbBook] {
+        let statement = try db.cachedSelectStatement(sql: selectAllQuery)
+
+        return try DbBook.fetchAll(statement)
     }
 
     public
