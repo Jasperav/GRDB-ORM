@@ -334,13 +334,13 @@ impl<'a> QueryWriterMainStruct<'a> {
                     }}
                 }}
 
-                func toUpdatableColumn() -> UpdatableColumn {{
+                public func toUpdatableColumn() -> UpdatableColumn {{
                     switch self {{
                         {}
                     }}
                 }}
 
-                func update(entity: inout {}) {{
+                public func update(entity: inout {}) {{
                     switch self {{
                         {}
                     }}

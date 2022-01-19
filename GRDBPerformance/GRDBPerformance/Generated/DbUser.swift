@@ -650,7 +650,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             }
         }
 
-        func toUpdatableColumn() -> UpdatableColumn {
+        public func toUpdatableColumn() -> UpdatableColumn {
             switch self {
             case .userUuid: return .userUuid
             case .firstName: return .firstName
@@ -665,7 +665,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             }
         }
 
-        func update(entity: inout DbUser) {
+        public func update(entity: inout DbUser) {
             switch self {
             case let .userUuid(value): entity.userUuid = value
             case let .firstName(value): entity.firstName = value

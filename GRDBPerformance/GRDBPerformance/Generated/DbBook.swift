@@ -202,7 +202,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             }
         }
 
-        func toUpdatableColumn() -> UpdatableColumn {
+        public func toUpdatableColumn() -> UpdatableColumn {
             switch self {
             case .bookUuid: return .bookUuid
             case .userUuid: return .userUuid
@@ -211,7 +211,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
             }
         }
 
-        func update(entity: inout DbBook) {
+        public func update(entity: inout DbBook) {
             switch self {
             case let .bookUuid(value): entity.bookUuid = value
             case let .userUuid(value): entity.userUuid = value
