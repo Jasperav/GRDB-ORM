@@ -569,5 +569,15 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
                 assert(db.changesCount == 1)
             }
         }
+
+        public
+        func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
+            switch column {
+            case let .bookUuid(val): try genUpdateBookUuid(db: db, bookUuid: val, assertOneRowAffected: assertOneRowAffected)
+            case let .userUuid(val): try genUpdateUserUuid(db: db, userUuid: val, assertOneRowAffected: assertOneRowAffected)
+            case let .integerOptional(val): try genUpdateIntegerOptional(db: db, integerOptional: val, assertOneRowAffected: assertOneRowAffected)
+            case let .tsCreated(val): try genUpdateTsCreated(db: db, tsCreated: val, assertOneRowAffected: assertOneRowAffected)
+            }
+        }
     }
 }
