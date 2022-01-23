@@ -7,6 +7,7 @@ pub const SELECT_QUERY: &str = "selectQuery";
 pub const SELECT_EXISTS_QUERY: &str = "selectExistsQuery";
 pub const DELETE_QUERY: &str = "deleteQuery";
 pub const DELETE_METHOD: &str = "Delete";
+pub const UPDATE_METHOD: &str = "genUpdate";
 
 /// Writes the unique queries for the primary key
 pub struct QueryWriterPrimaryKey<'a> {
@@ -67,6 +68,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.write_select_exists_query();
         self.write_delete_query();
         self.write_updatable_columns();
+        self.write_update_column();
 
         self.table_meta_data.line_writer.add_closing_brackets();
     }
@@ -177,6 +179,34 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             &format!("Self.{}", DELETE_QUERY),
             true,
         )
+    }
+
+    fn write_update_column(&mut self) {
+        let switch = self
+            .table_meta_data
+            .swift_properties
+            .to_vec()
+            .into_iter()
+            .map(|s| {
+                format!(
+                    "case .{p}(let val): try genUpdate{}(db: db, {p}: val, assertOneRowAffected: assertOneRowAffected)",
+                    some_kind_of_uppercase_first_letter(&s.swift_property_name),
+                    p = s.swift_property_name,
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        self
+            .table_meta_data
+            .line_writer
+            .add_with_modifier(format!("
+            func {}(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {{
+                switch column {{
+                    {}
+                }}
+            }}
+            ", UPDATE_METHOD, switch));
     }
 
     fn write_updatable_columns(&mut self) {
