@@ -1387,5 +1387,21 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
                 assert(db.changesCount == 1)
             }
         }
+
+        public
+        func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
+            switch column {
+            case let .userUuid(val): try genUpdateUserUuid(db: db, userUuid: val, assertOneRowAffected: assertOneRowAffected)
+            case let .firstName(val): try genUpdateFirstName(db: db, firstName: val, assertOneRowAffected: assertOneRowAffected)
+            case let .jsonStruct(val): try genUpdateJsonStruct(db: db, jsonStruct: val, assertOneRowAffected: assertOneRowAffected)
+            case let .jsonStructOptional(val): try genUpdateJsonStructOptional(db: db, jsonStructOptional: val, assertOneRowAffected: assertOneRowAffected)
+            case let .jsonStructArray(val): try genUpdateJsonStructArray(db: db, jsonStructArray: val, assertOneRowAffected: assertOneRowAffected)
+            case let .jsonStructArrayOptional(val): try genUpdateJsonStructArrayOptional(db: db, jsonStructArrayOptional: val, assertOneRowAffected: assertOneRowAffected)
+            case let .integer(val): try genUpdateInteger(db: db, integer: val, assertOneRowAffected: assertOneRowAffected)
+            case let .bool(val): try genUpdateBool(db: db, bool: val, assertOneRowAffected: assertOneRowAffected)
+            case let .serializedInfo(val): try genUpdateSerializedInfo(db: db, serializedInfo: val, assertOneRowAffected: assertOneRowAffected)
+            case let .serializedInfoNullable(val): try genUpdateSerializedInfoNullable(db: db, serializedInfoNullable: val, assertOneRowAffected: assertOneRowAffected)
+            }
+        }
     }
 }
