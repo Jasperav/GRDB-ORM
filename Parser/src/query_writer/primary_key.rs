@@ -85,7 +85,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            let statement = try db.cachedSelectStatement(sql: Self.{})
+            let statement = try db.cachedStatement(sql: Self.{})
 
             statement.setUncheckedArguments(arguments)
 
@@ -128,7 +128,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            let statement = try db.cachedSelectStatement(sql: Self.{})
+            let statement = try db.cachedStatement(sql: Self.{})
 
             statement.setUncheckedArguments(arguments)
 
@@ -320,7 +320,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 let finalQuery = updateQuery + \" \" + pkQuery
 
-                let statement = try db.cachedUpdateStatement(sql: finalQuery)
+                let statement = try db.cachedStatement(sql: finalQuery)
 
                 statement.setUncheckedArguments(arguments)
 

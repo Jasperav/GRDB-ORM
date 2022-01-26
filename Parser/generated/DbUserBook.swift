@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable, GenDbTable {
+public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable, GenDbTable, GenDbTableWithSelf {
     // Static queries
     public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
     public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
@@ -47,7 +47,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.insertUniqueQuery)
+        let statement = try db.cachedStatement(sql: Self.insertUniqueQuery)
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
@@ -66,7 +66,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genInsertOrIgnore(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.insertOrIgnoreUniqueQuery)
+        let statement = try db.cachedStatement(sql: Self.insertOrIgnoreUniqueQuery)
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
@@ -80,7 +80,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genReplace(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.replaceUniqueQuery)
+        let statement = try db.cachedStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
@@ -94,7 +94,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genUpsertRealToDouble(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.upsertRealToDoubleQuery)
+        let statement = try db.cachedStatement(sql: Self.upsertRealToDoubleQuery)
 
         let arguments: StatementArguments = try [
             bookUuid.uuidString,
@@ -116,13 +116,13 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public static func genDeleteAll(db: Database) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.deleteAllQuery)
+        let statement = try db.cachedStatement(sql: Self.deleteAllQuery)
 
         try statement.execute()
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
-        let statement = try db.cachedUpdateStatement(sql: Self.updateUniqueQuery)
+        let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
         let arguments: StatementArguments = try [
             realToDouble,
@@ -230,7 +230,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+        let statement = try db.cachedStatement(sql: upsertQuery)
 
         statement.setUncheckedArguments(arguments)
 
@@ -251,7 +251,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             bookUuid.uuidString
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: "update UserBook set bookUuid = ?")
+        let statement = try db.cachedStatement(sql: "update UserBook set bookUuid = ?")
 
         statement.setUncheckedArguments(arguments)
 
@@ -264,7 +264,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             userUuid.uuidString
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: "update UserBook set userUuid = ?")
+        let statement = try db.cachedStatement(sql: "update UserBook set userUuid = ?")
 
         statement.setUncheckedArguments(arguments)
 
@@ -277,7 +277,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        let statement = try db.cachedUpdateStatement(sql: "update UserBook set realToDouble = ?")
+        let statement = try db.cachedStatement(sql: "update UserBook set realToDouble = ?")
 
         statement.setUncheckedArguments(arguments)
 
@@ -286,14 +286,14 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
     public
     static func genSelectAll(db: Database) throws -> [DbUserBook] {
-        let statement = try db.cachedSelectStatement(sql: selectAllQuery)
+        let statement = try db.cachedStatement(sql: selectAllQuery)
 
         return try DbUserBook.fetchAll(statement)
     }
 
     public
     static func genSelectCount(db: Database) throws -> Int {
-        let statement = try db.cachedSelectStatement(sql: selectCountQuery)
+        let statement = try db.cachedStatement(sql: selectCountQuery)
 
         return try Int.fetchOne(statement)!
     }
@@ -323,7 +323,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            let statement = try db.cachedSelectStatement(sql: Self.selectQuery)
+            let statement = try db.cachedStatement(sql: Self.selectQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -346,7 +346,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            let statement = try db.cachedSelectStatement(sql: Self.selectExistsQuery)
+            let statement = try db.cachedStatement(sql: Self.selectExistsQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -361,7 +361,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: Self.deleteQuery)
+            let statement = try db.cachedStatement(sql: Self.deleteQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -379,7 +379,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateBookUuidQuery)
+            let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateBookUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -397,7 +397,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 self.userUuid.uuidString
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateUserUuidQuery)
+            let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateUserUuidQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -415,7 +415,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: DbUserBook.UpdatableColumn.updateRealToDoubleQuery)
+            let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateRealToDoubleQuery)
 
             statement.setUncheckedArguments(arguments)
 
@@ -475,7 +475,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             let finalQuery = updateQuery + " " + pkQuery
 
-            let statement = try db.cachedUpdateStatement(sql: finalQuery)
+            let statement = try db.cachedStatement(sql: finalQuery)
 
             statement.setUncheckedArguments(arguments)
 

@@ -1,13 +1,15 @@
 use crate::configuration::Config;
-use crate::query_writer::main_struct::{DELETE_ALL_METHOD, SELECT_COUNT_METHOD};
+use crate::query_writer::main_struct::{DELETE_ALL_METHOD, SELECT_ALL_METHOD, SELECT_COUNT_METHOD};
 use crate::swift_property::create_swift_type_name;
 use sqlite_parser::Metadata;
 
 pub const PROTOCOL_NAME: &str = "GenDbTable";
+pub const PROTOCOL_WITH_SELF_NAME: &str = "GenDbTableWithSelf";
 
 pub(crate) fn write(config: &Config, metadata: &Metadata) {
     write_protocol(config);
     write_metadata(config, metadata);
+    write_protocol_with_self(config);
 }
 
 fn write_metadata(config: &Config, metadata: &Metadata) {
@@ -38,6 +40,27 @@ fn write_metadata(config: &Config, metadata: &Metadata) {
     line_writer.write_to_file("GenDbMetadata");
 }
 
+fn write_protocol_with_self(config: &Config) {
+    let mut line_writer = config.create_line_writer();
+
+    // Add more methods if needed
+    line_writer.add_with_modifier(format!(
+        "
+    protocol {}: {} {{
+        associatedtype {table}
+
+        static func {}(db: Database) throws -> [{table}]
+    }}
+    ",
+        PROTOCOL_WITH_SELF_NAME,
+        PROTOCOL_NAME,
+        SELECT_ALL_METHOD,
+        table = "Table"
+    ));
+
+    line_writer.write_to_file(PROTOCOL_WITH_SELF_NAME);
+}
+
 fn write_protocol(config: &Config) {
     let mut line_writer = config.create_line_writer();
 
@@ -49,7 +72,7 @@ fn write_protocol(config: &Config) {
         static func {}(db: Database) throws
     }}
     ",
-        PROTOCOL_NAME, SELECT_COUNT_METHOD, DELETE_ALL_METHOD
+        PROTOCOL_NAME, SELECT_COUNT_METHOD, DELETE_ALL_METHOD,
     ));
 
     line_writer.write_to_file(PROTOCOL_NAME);
