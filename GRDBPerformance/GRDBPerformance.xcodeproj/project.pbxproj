@@ -14,6 +14,7 @@
 		691DEBA2264566EC00B7271B /* DbUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEB9E264566EC00B7271B /* DbUser.swift */; };
 		691DEBB52649F16300B7271B /* EqualsCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 691DEBB42649F16300B7271B /* EqualsCheck.swift */; };
 		69260EC825D68AE700647E4C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 69260EC725D68AE700647E4C /* GRDB */; };
+		6965525527A16A32009A2110 /* GenDbTableWithSelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6965525427A16A32009A2110 /* GenDbTableWithSelf.swift */; };
 		6999B02A26BEC65400026294 /* GenDbTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B02826BEC65400026294 /* GenDbTable.swift */; };
 		6999B02B26BEC65400026294 /* GenDbMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B02926BEC65400026294 /* GenDbMetadata.swift */; };
 		6999B02D26BECD0700026294 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B02C26BECD0700026294 /* Metadata.swift */; };
@@ -51,6 +52,7 @@
 		691DEB9D264566EC00B7271B /* Shared.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 		691DEB9E264566EC00B7271B /* DbUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbUser.swift; sourceTree = "<group>"; };
 		691DEBB42649F16300B7271B /* EqualsCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EqualsCheck.swift; sourceTree = "<group>"; };
+		6965525427A16A32009A2110 /* GenDbTableWithSelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenDbTableWithSelf.swift; sourceTree = "<group>"; };
 		6999B02826BEC65400026294 /* GenDbTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenDbTable.swift; sourceTree = "<group>"; };
 		6999B02926BEC65400026294 /* GenDbMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenDbMetadata.swift; sourceTree = "<group>"; };
 		6999B02C26BECD0700026294 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 				691DEB9E264566EC00B7271B /* DbUser.swift */,
 				691DEB9C264566EC00B7271B /* DynamicQueries.swift */,
 				691DEB9D264566EC00B7271B /* Shared.swift */,
+				6965525427A16A32009A2110 /* GenDbTableWithSelf.swift */,
 			);
 			path = Generated;
 			sourceTree = "<group>";
@@ -227,7 +230,7 @@
 			);
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
-				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
 			projectDirPath = "";
@@ -286,6 +289,7 @@
 				8EDB24E7EA5EA20A7782DE10 /* SceneDelegate.swift in Sources */,
 				8EDB216D5C236DF0F4E7A9B7 /* ViewController.swift in Sources */,
 				6907215D264FED0100E87BF2 /* DbUserBook.swift in Sources */,
+				6965525527A16A32009A2110 /* GenDbTableWithSelf.swift in Sources */,
 				69B541CF25C5700500EDE898 /* User.swift in Sources */,
 				691DEBA1264566EC00B7271B /* Shared.swift in Sources */,
 				6999B02A26BEC65400026294 /* GenDbTable.swift in Sources */,
@@ -544,12 +548,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.8.0;
+				minimumVersion = 5.19.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -557,7 +561,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		69260EC725D68AE700647E4C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

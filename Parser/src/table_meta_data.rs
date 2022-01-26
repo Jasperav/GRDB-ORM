@@ -26,7 +26,7 @@ impl<'a> TableMetaData<'a> {
                 {}
             ]
 
-            let statement = try db.cachedUpdateStatement(sql: {})
+            let statement = try db.cachedStatement(sql: {})
 
             statement.setUncheckedArguments(arguments)
 

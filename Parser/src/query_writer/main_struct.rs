@@ -198,7 +198,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                     ]
 
 
-                    let statement = try db.cachedUpdateStatement(sql: {})
+                    let statement = try db.cachedStatement(sql: {})
 
                     statement.setUncheckedArguments(arguments)
 
@@ -422,7 +422,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                     {}
                 ]
 
-                let statement = try db.cachedUpdateStatement(sql: upsertQuery)
+                let statement = try db.cachedStatement(sql: upsertQuery)
 
                 statement.setUncheckedArguments(arguments)
 
@@ -447,7 +447,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> [{struct_name}] {{
-                let statement = try db.cachedSelectStatement(sql: {})
+                let statement = try db.cachedStatement(sql: {})
 
                 return try {struct_name}.fetchAll(statement)
             }}
@@ -462,7 +462,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> Int {{
-                let statement = try db.cachedSelectStatement(sql: {})
+                let statement = try db.cachedStatement(sql: {})
 
                 return try Int.fetchOne(statement)!
             }}
@@ -560,7 +560,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "{}func gen{}(db: Database{}) throws {{
-                let statement = try db.cachedUpdateStatement(sql: Self.{})
+                let statement = try db.cachedStatement(sql: Self.{})
 
                 {}
 
