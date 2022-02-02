@@ -3,6 +3,7 @@
 import Foundation
 import GRDB
 
+import Combine
 public extension DbBook {
     typealias BooksForUserWithSpecificUuidType = [(DbBook, Int, [JsonType]?, Int)]
 
@@ -27,6 +28,27 @@ public extension DbBook {
         }
         return converted
     }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct BooksForUserWithSpecificUuidQueryable: Queryable {
+        public let userUuid: UUID
+        public init(
+            userUuid: UUID
+        ) {
+            self.userUuid = userUuid
+        }
+
+        static let defaultValue: BooksForUserWithSpecificUuidType = []
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<BooksForUserWithSpecificUuidType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
+    }
 }
 
 public extension DbUser {
@@ -45,6 +67,27 @@ public extension DbUser {
         }
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct FindByUsernameQueryable: Queryable {
+        public let firstName: String
+        public init(
+            firstName: String
+        ) {
+            self.firstName = firstName
+        }
+
+        static let defaultValue: FindByUsernameType = nil
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindByUsernameType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try findByUsername(db: db, firstName: firstName)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
     }
 }
 
@@ -65,6 +108,27 @@ public extension DbUser {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct FindUserUuidByUsernameQueryable: Queryable {
+        public let firstName: String
+        public init(
+            firstName: String
+        ) {
+            self.firstName = firstName
+        }
+
+        static let defaultValue: FindUserUuidByUsernameType = nil
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindUserUuidByUsernameType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try findUserUuidByUsername(db: db, firstName: firstName)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
+    }
 }
 
 public extension DbUser {
@@ -80,6 +144,20 @@ public extension DbUser {
         }
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct AmountOfUsersQueryable: Queryable {
+        static let defaultValue: AmountOfUsersType = nil
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AmountOfUsersType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try amountOfUsers(db: db)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
     }
 }
 
@@ -110,6 +188,20 @@ public extension DbBook {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct HasAtLeastOneBookQueryable: Queryable {
+        static let defaultValue: HasAtLeastOneBookType = nil
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<HasAtLeastOneBookType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try hasAtLeastOneBook(db: db)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
+    }
 }
 
 public extension DbUser {
@@ -132,6 +224,20 @@ public extension DbUser {
         assert(converted.count <= 1, "Expected 1 or zero rows")
         return converted.first
     }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct SerializeInfoSingleQueryable: Queryable {
+        static let defaultValue: SerializeInfoSingleType = nil
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<SerializeInfoSingleType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try serializeInfoSingle(db: db)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
+    }
 }
 
 public extension DbUser {
@@ -152,6 +258,20 @@ public extension DbUser {
             }())
         }
         return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct SerializeInfoArrayQueryable: Queryable {
+        static let defaultValue: SerializeInfoArrayType = []
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<SerializeInfoArrayType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try serializeInfoArray(db: db)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
     }
 }
 
@@ -202,6 +322,27 @@ public extension DbUser {
             DbUser(row: row, startingIndex: 0)
         }
         return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct AllWithProvidedFirstNamesQueryable: Queryable {
+        public let firstName: [String]
+        public init(
+            firstName: [String]
+        ) {
+            self.firstName = firstName
+        }
+
+        static let defaultValue: AllWithProvidedFirstNamesType = []
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AllWithProvidedFirstNamesType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try allWithProvidedFirstNames(db: db, firstName: firstName)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
     }
 }
 
@@ -260,5 +401,35 @@ public extension DbUser {
             DbUser(row: row, startingIndex: 0)
         }
         return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct ComplexQueryable: Queryable {
+        public let firstNames0: [String]
+        public let jsonStructOptional: JsonType
+        public let integer: [Int]
+        public let serializedInfoNullable: SerializedInfo
+        public init(
+            firstNames0: [String],
+            jsonStructOptional: JsonType,
+            integer: [Int],
+            serializedInfoNullable: SerializedInfo
+        ) {
+            self.firstNames0 = firstNames0
+            self.jsonStructOptional = jsonStructOptional
+            self.integer = integer
+            self.serializedInfoNullable = serializedInfoNullable
+        }
+
+        static let defaultValue: ComplexType = []
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<ComplexType, Error> {
+            ValueObservation
+                .tracking { db in
+                    try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
+                }
+                .publisher(in: dbQueue)
+                .eraseToAnyPublisher()
+        }
     }
 }

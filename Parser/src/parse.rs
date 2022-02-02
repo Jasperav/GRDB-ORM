@@ -29,10 +29,8 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     }
     .write();
 
-    let create_parser = || Parser::new(&config, &tables);
-
     // Write the dynamic queries
-    create_parser().parse_dyn_queries();
+    Parser::new(&config, &tables).parse_dyn_queries();
 
     // For the Swift code
     crate::format_swift_code::format_swift_code(&config, &safe_output_dir);

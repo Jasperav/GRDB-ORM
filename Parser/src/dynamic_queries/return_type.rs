@@ -30,7 +30,11 @@ pub enum Query {
 
 impl Query {
     /// Writes a Swift type alias for a select query return type, which makes it easy for the user to reuse the type
-    pub fn write_type_alias(&self, line_writer: &mut LineWriter, capitalized_func_name: &str) {
+    pub fn write_type_alias(
+        &self,
+        line_writer: &mut LineWriter,
+        capitalized_func_name: &str,
+    ) -> (String, String) {
         match &self {
             Query::Select {
                 return_type,
@@ -39,9 +43,12 @@ impl Query {
                 let type_alias_name = format!("{}Type", capitalized_func_name);
 
                 line_writer.add_line(format!("typealias {} = {}", type_alias_name, &return_type));
+
+                (type_alias_name, return_type.to_string())
             }
             Query::UpdateOrDelete => {
                 // Don't do anything
+                ("".to_string(), "".to_string())
             }
         }
     }
