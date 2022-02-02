@@ -177,10 +177,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        self.add_line(format!(
-            "let statement = try db.cached{}Statement(sql: query)",
-            query.statement()
-        ));
+        self.add_line("let statement = try db.cachedStatement(sql: query)");
 
         if has_arguments {
             self.add_line("statement.setUncheckedArguments(arguments)");

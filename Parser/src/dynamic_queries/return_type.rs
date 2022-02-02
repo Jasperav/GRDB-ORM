@@ -77,13 +77,6 @@ impl Query {
             Query::UpdateOrDelete => panic!(),
         }
     }
-
-    pub fn statement(&self) -> &'static str {
-        match self {
-            Query::Select { .. } => "Select",
-            Query::UpdateOrDelete => "Update",
-        }
-    }
 }
 
 impl<'a> ReturnType<'a> {
