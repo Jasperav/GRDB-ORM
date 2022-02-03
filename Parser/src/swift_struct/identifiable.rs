@@ -10,7 +10,7 @@ impl<'a> IdentifiableConformance<'a> {
 
         // Check if the properties contain an 'id' property
         // If that property is absent, create a new one for the Identifiable protocol
-        let has_id_property = pk.iter().find(|p| p.swift_property_name == "id").is_some();
+        let has_id_property = pk.iter().any(|p| p.swift_property_name == "id");
         let content = if has_id_property {
             // Nothing has to be in the body
             "".to_string()
