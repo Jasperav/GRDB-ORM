@@ -132,12 +132,17 @@ class DynamicQueryTest: XCTestCase {
         let toSearchFor = "first"
         let publisher = DbUser.FindByUsernameQueryable(firstName: toSearchFor).publisher(in: db)
         var count = 0
+        let exp = expectation(description: "count")
 
         let cancellable = publisher
                 .sink(receiveCompletion: { _ in
                     XCTFail("Should not complete")
                 }, receiveValue: { _ in
                     count += 1
+
+                    if count == 2 {
+                        exp.fulfill()
+                    }
                 })
 
         try db.write { con in
@@ -156,7 +161,7 @@ class DynamicQueryTest: XCTestCase {
             user.firstName = toSearchFor
         }
 
-        XCTAssertEqual(2, count)
+        waitForExpectations(timeout: 3)
     }
 
     func testSimpleInQuery() {
