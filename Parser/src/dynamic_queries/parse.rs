@@ -18,6 +18,7 @@ impl<'a> Parser<'a> {
         }
 
         self.add_line("import Combine".to_string());
+        self.add_line("import GRDBQuery".to_string());
 
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
@@ -133,9 +134,24 @@ impl<'a> Parser<'a> {
 
             return;
         };
+        let modifier = self.modifier;
+        let scheduler_parameter = "scheduler: ValueObservationScheduler = .async(onQueue: .main)";
+        let assign_scheduler = "self.scheduler = scheduler";
 
-        let (to_add, call_method) = if parameters.is_empty() {
-            ("".to_string(), "db: db".to_string())
+        let (to_add, call_method, equatable) = if parameters.is_empty() {
+            (
+                format!(
+                    "
+                {modifier}init(
+            {scheduler_parameter}
+            ) {{
+            {assign_scheduler}
+            }}
+            "
+                ),
+                "db: db".to_string(),
+                "// TODO: not sure if this is correct\ntrue".to_string(),
+            )
         } else {
             let property_type = parameters
                 .iter()
@@ -149,7 +165,7 @@ impl<'a> Parser<'a> {
                 .join("\n");
             let properties = property_type
                 .iter()
-                .map(|p| format!("public let {p}"))
+                .map(|p| format!("{modifier}let {p}"))
                 .collect::<Vec<_>>()
                 .join("\n");
             let call_method = "db: db, ".to_string()
@@ -160,31 +176,41 @@ impl<'a> Parser<'a> {
                     .join(", ");
             let extra_init = format!(
                 "{properties}
-            public init(
-            {init}
+            {modifier}init(
+            {init},
+            {scheduler_parameter}
             ) {{
             {assign}
+            {assign_scheduler}
             }}"
             );
+            let equatable = parameters
+                .iter()
+                .map(|p| format!("lhs.{a} == rhs.{a}", a = p.swift_property_name))
+                .collect::<Vec<_>>()
+                .join(" && ");
 
-            (extra_init, call_method)
+            (extra_init, call_method, equatable)
         };
-
-        let modifier = self.modifier;
 
         self.add_comment("Very basic Queryable struct, create a PR if you want more customization");
         // Write the Queryable type
         self.add_with_modifier(format!(
-            "struct {}Queryable: Queryable {{
+            "struct {}Queryable: Queryable, Equatable {{
+            {modifier}let scheduler: ValueObservationScheduler
             {to_add}
-            static let defaultValue: {type_alias} = {default_value}
+            {modifier}static let defaultValue: {type_alias} = {default_value}
+
+            {modifier}static func == (lhs: Self, rhs: Self) -> Bool {{
+                {equatable}
+            }}
 
             {modifier}func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<{type_alias}, Error> {{
                     ValueObservation
                             .tracking({{ db in
                                 try {}({call_method})
                             }})
-                            .publisher(in: dbQueue)
+                            .publisher(in: dbQueue, scheduling: scheduler)
                             .eraseToAnyPublisher()
                 }}
             }}",

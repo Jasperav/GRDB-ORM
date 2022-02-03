@@ -4,6 +4,7 @@ import Foundation
 import GRDB
 
 import Combine
+import GRDBQuery
 public extension DbBook {
     typealias BooksForUserWithSpecificUuidType = [(DbBook, Int, [JsonType]?, Int)]
 
@@ -30,22 +31,29 @@ public extension DbBook {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct BooksForUserWithSpecificUuidQueryable: Queryable {
+    struct BooksForUserWithSpecificUuidQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
         public let userUuid: UUID
         public init(
-            userUuid: UUID
+            userUuid: UUID,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
         ) {
             self.userUuid = userUuid
+            self.scheduler = scheduler
         }
 
-        static let defaultValue: BooksForUserWithSpecificUuidType = []
+        public static let defaultValue: BooksForUserWithSpecificUuidType = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.userUuid == rhs.userUuid
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<BooksForUserWithSpecificUuidType, Error> {
             ValueObservation
                 .tracking { db in
                     try booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -70,22 +78,29 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct FindByUsernameQueryable: Queryable {
+    struct FindByUsernameQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
         public let firstName: String
         public init(
-            firstName: String
+            firstName: String,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
         ) {
             self.firstName = firstName
+            self.scheduler = scheduler
         }
 
-        static let defaultValue: FindByUsernameType = nil
+        public static let defaultValue: FindByUsernameType = nil
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.firstName == rhs.firstName
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindByUsernameType, Error> {
             ValueObservation
                 .tracking { db in
                     try findByUsername(db: db, firstName: firstName)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -110,22 +125,29 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct FindUserUuidByUsernameQueryable: Queryable {
+    struct FindUserUuidByUsernameQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
         public let firstName: String
         public init(
-            firstName: String
+            firstName: String,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
         ) {
             self.firstName = firstName
+            self.scheduler = scheduler
         }
 
-        static let defaultValue: FindUserUuidByUsernameType = nil
+        public static let defaultValue: FindUserUuidByUsernameType = nil
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.firstName == rhs.firstName
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindUserUuidByUsernameType, Error> {
             ValueObservation
                 .tracking { db in
                     try findUserUuidByUsername(db: db, firstName: firstName)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -147,15 +169,28 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct AmountOfUsersQueryable: Queryable {
-        static let defaultValue: AmountOfUsersType = nil
+    struct AmountOfUsersQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+
+        public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: AmountOfUsersType = nil
+
+        public static func == (_: Self, _: Self) -> Bool {
+            // TODO: not sure if this is correct
+            true
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AmountOfUsersType, Error> {
             ValueObservation
                 .tracking { db in
                     try amountOfUsers(db: db)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -190,15 +225,28 @@ public extension DbBook {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct HasAtLeastOneBookQueryable: Queryable {
-        static let defaultValue: HasAtLeastOneBookType = nil
+    struct HasAtLeastOneBookQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+
+        public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: HasAtLeastOneBookType = nil
+
+        public static func == (_: Self, _: Self) -> Bool {
+            // TODO: not sure if this is correct
+            true
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<HasAtLeastOneBookType, Error> {
             ValueObservation
                 .tracking { db in
                     try hasAtLeastOneBook(db: db)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -226,15 +274,28 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct SerializeInfoSingleQueryable: Queryable {
-        static let defaultValue: SerializeInfoSingleType = nil
+    struct SerializeInfoSingleQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+
+        public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: SerializeInfoSingleType = nil
+
+        public static func == (_: Self, _: Self) -> Bool {
+            // TODO: not sure if this is correct
+            true
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<SerializeInfoSingleType, Error> {
             ValueObservation
                 .tracking { db in
                     try serializeInfoSingle(db: db)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -261,15 +322,28 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct SerializeInfoArrayQueryable: Queryable {
-        static let defaultValue: SerializeInfoArrayType = []
+    struct SerializeInfoArrayQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+
+        public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: SerializeInfoArrayType = []
+
+        public static func == (_: Self, _: Self) -> Bool {
+            // TODO: not sure if this is correct
+            true
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<SerializeInfoArrayType, Error> {
             ValueObservation
                 .tracking { db in
                     try serializeInfoArray(db: db)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -325,22 +399,29 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct AllWithProvidedFirstNamesQueryable: Queryable {
+    struct AllWithProvidedFirstNamesQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
         public let firstName: [String]
         public init(
-            firstName: [String]
+            firstName: [String],
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
         ) {
             self.firstName = firstName
+            self.scheduler = scheduler
         }
 
-        static let defaultValue: AllWithProvidedFirstNamesType = []
+        public static let defaultValue: AllWithProvidedFirstNamesType = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.firstName == rhs.firstName
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AllWithProvidedFirstNamesType, Error> {
             ValueObservation
                 .tracking { db in
                     try allWithProvidedFirstNames(db: db, firstName: firstName)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }
@@ -404,7 +485,8 @@ public extension DbUser {
     }
 
     // Very basic Queryable struct, create a PR if you want more customization
-    struct ComplexQueryable: Queryable {
+    struct ComplexQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
         public let firstNames0: [String]
         public let jsonStructOptional: JsonType
         public let integer: [Int]
@@ -413,22 +495,28 @@ public extension DbUser {
             firstNames0: [String],
             jsonStructOptional: JsonType,
             integer: [Int],
-            serializedInfoNullable: SerializedInfo
+            serializedInfoNullable: SerializedInfo,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
         ) {
             self.firstNames0 = firstNames0
             self.jsonStructOptional = jsonStructOptional
             self.integer = integer
             self.serializedInfoNullable = serializedInfoNullable
+            self.scheduler = scheduler
         }
 
-        static let defaultValue: ComplexType = []
+        public static let defaultValue: ComplexType = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.firstNames0 == rhs.firstNames0 && lhs.jsonStructOptional == rhs.jsonStructOptional && lhs.integer == rhs.integer && lhs.serializedInfoNullable == rhs.serializedInfoNullable
+        }
 
         public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<ComplexType, Error> {
             ValueObservation
                 .tracking { db in
                     try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
                 }
-                .publisher(in: dbQueue)
+                .publisher(in: dbQueue, scheduling: scheduler)
                 .eraseToAnyPublisher()
         }
     }

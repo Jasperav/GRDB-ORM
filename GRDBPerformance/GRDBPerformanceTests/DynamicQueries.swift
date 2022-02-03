@@ -127,6 +127,38 @@ class DynamicQueryTest: XCTestCase {
         }
     }
 
+    func testValueObservation() throws {
+        let db = setupPool()
+        let toSearchFor = "first"
+        let publisher = DbUser.FindByUsernameQueryable(firstName: toSearchFor).publisher(in: db)
+        var count = 0
+
+        let cancellable = publisher
+                .sink(receiveCompletion: { _ in
+                    XCTFail("Should not complete")
+                }, receiveValue: { _ in
+                    count += 1
+                })
+
+        try db.write { con in
+            var user = DbUser.random()
+
+            user.firstName = toSearchFor
+
+            try user.genInsert(db: con)
+
+            user.userUuid = UUID()
+            user.firstName = "somethingdifferent"
+
+            try user.genInsert(db: con)
+
+            user.userUuid = UUID()
+            user.firstName = toSearchFor
+        }
+
+        XCTAssertEqual(2, count)
+    }
+
     func testSimpleInQuery() {
         let db = setupPool()
 

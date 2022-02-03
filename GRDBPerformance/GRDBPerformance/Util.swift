@@ -15,17 +15,17 @@ public enum SerializedInfo: Equatable {
     }
 }
 
-public func setupPool() -> DatabasePool {
+public func setupPool() -> DatabaseQueue {
     let url = try! FileManager.default
             .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("db.sqlite")
-    
+
     print("Database location: \(url)")
 
     // Remove the DB if it exists
     try? FileManager.default.removeItem(at: url)
 
-    let dbPool = try! DatabasePool(path: url.path)
+    let dbPool = try! DatabaseQueue(path: url.path)
 
     try! dbPool.write { db in
         try! db.execute(sql:
