@@ -496,3 +496,14 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         }
     }
 }
+
+extension DbUserBook: Identifiable {
+    public var id: Int {
+        var hasher = Hasher()
+
+        hasher.combine(bookUuid)
+        hasher.combine(userUuid)
+
+        return hasher.finalize()
+    }
+}

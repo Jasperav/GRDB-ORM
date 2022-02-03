@@ -6,6 +6,7 @@ use crate::configuration::Config;
 use crate::metadata::{PROTOCOL_NAME, PROTOCOL_WITH_SELF_NAME};
 use crate::query_writer::{QueryWriterMainStruct, QueryWriterPrimaryKey};
 use crate::swift_property::{create_swift_properties, create_swift_type_name};
+use crate::swift_struct::identifiable::IdentifiableConformance;
 use crate::swift_struct::property_writer::{Location, PropertyWriter};
 use crate::table_meta_data::TableMetaData;
 
@@ -106,6 +107,12 @@ impl<'a> TableWriter<'a> {
             });
 
             line_writer.add_closing_brackets();
+
+            // Auto conform to the Identifiable protocol
+            IdentifiableConformance {
+                table_meta_data: &mut qw!(),
+            }
+            .write();
 
             line_writer.write_to_file(&struct_name);
         }

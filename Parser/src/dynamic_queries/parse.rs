@@ -17,6 +17,9 @@ impl<'a> Parser<'a> {
             return;
         }
 
+        self.add_line("import Combine".to_string());
+        self.add_line("import GRDBQuery".to_string());
+
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
             test_query(
@@ -75,7 +78,7 @@ impl<'a> Parser<'a> {
             let capitalized_func_name =
                 some_kind_of_uppercase_first_letter(&dynamic_query.func_name);
 
-            query.write_type_alias(&mut self, &capitalized_func_name);
+            let type_alias_with_type = query.write_type_alias(&mut self, &capitalized_func_name);
 
             self.new_line();
 
@@ -95,12 +98,126 @@ impl<'a> Parser<'a> {
                 func_return_type
             ));
 
-            self.write_body(dynamic_query, parameters, &query, &func_return_type);
+            self.write_body(dynamic_query, parameters.clone(), &query, &func_return_type);
+            self.write_queryable_type(
+                dynamic_query,
+                type_alias_with_type,
+                parameters.iter().map(|(_, b)| b).collect(),
+            );
 
             self.add_closing_brackets();
         }
 
         self.write("DynamicQueries");
+    }
+
+    fn write_queryable_type(
+        &mut self,
+        dynamic_query: &DynamicQuery,
+        type_alias_with_type: (String, String),
+        parameters: Vec<&SwiftProperty>,
+    ) {
+        let (type_alias, the_type) = type_alias_with_type;
+
+        if type_alias.is_empty() {
+            return;
+        }
+
+        assert!(!the_type.is_empty());
+
+        let default_value = if the_type.ends_with('?') {
+            "nil"
+        } else if the_type.ends_with(']') {
+            "[]"
+        } else {
+            println!("Could not determine default value for query, therefore there is no Queryable type: {}", dynamic_query.query);
+
+            return;
+        };
+        let modifier = self.modifier;
+        let scheduler_parameter = "scheduler: ValueObservationScheduler = .async(onQueue: .main)";
+        let assign_scheduler = "self.scheduler = scheduler";
+
+        let (to_add, call_method, equatable) = if parameters.is_empty() {
+            (
+                format!(
+                    "
+                {modifier}init(
+            {scheduler_parameter}
+            ) {{
+            {assign_scheduler}
+            }}
+            "
+                ),
+                "db: db".to_string(),
+                "// TODO: not sure if this is correct\ntrue".to_string(),
+            )
+        } else {
+            let property_type = parameters
+                .iter()
+                .map(|p| format!("{}: {}", p.swift_property_name, p.swift_type.type_name))
+                .collect::<Vec<_>>();
+            let init = property_type.join(",\n");
+            let assign = parameters
+                .iter()
+                .map(|p| format!("self.{t} = {t}", t = p.swift_property_name))
+                .collect::<Vec<_>>()
+                .join("\n");
+            let properties = property_type
+                .iter()
+                .map(|p| format!("{modifier}let {p}"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            let call_method = "db: db, ".to_string()
+                + &parameters
+                    .iter()
+                    .map(|p| format!("{n}: {n}", n = p.swift_property_name))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+            let extra_init = format!(
+                "{properties}
+            {modifier}init(
+            {init},
+            {scheduler_parameter}
+            ) {{
+            {assign}
+            {assign_scheduler}
+            }}"
+            );
+            let equatable = parameters
+                .iter()
+                .map(|p| format!("lhs.{a} == rhs.{a}", a = p.swift_property_name))
+                .collect::<Vec<_>>()
+                .join(" && ");
+
+            (extra_init, call_method, equatable)
+        };
+
+        self.add_comment("Very basic Queryable struct, create a PR if you want more customization");
+        // Write the Queryable type
+        self.add_with_modifier(format!(
+            "struct {}Queryable: Queryable, Equatable {{
+            {modifier}let scheduler: ValueObservationScheduler
+            {to_add}
+            {modifier}static let defaultValue: {type_alias} = {default_value}
+
+            {modifier}static func == (lhs: Self, rhs: Self) -> Bool {{
+                {equatable}
+            }}
+
+            {modifier}func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<{type_alias}, Error> {{
+                    ValueObservation
+                            .tracking({{ db in
+                                try {}({call_method})
+                            }})
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }}
+            }}",
+            some_kind_of_uppercase_first_letter(&dynamic_query.func_name),
+            dynamic_query.func_name,
+            type_alias = type_alias,
+        ));
     }
 
     /// Writes the extension to add the methods to
@@ -177,10 +294,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        self.add_line(format!(
-            "let statement = try db.cached{}Statement(sql: query)",
-            query.statement()
-        ));
+        self.add_line("let statement = try db.cachedStatement(sql: query)");
 
         if has_arguments {
             self.add_line("statement.setUncheckedArguments(arguments)");

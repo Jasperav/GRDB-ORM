@@ -581,3 +581,9 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         }
     }
 }
+
+extension DbBook: Identifiable {
+    public var id: UUID {
+        bookUuid
+    }
+}
