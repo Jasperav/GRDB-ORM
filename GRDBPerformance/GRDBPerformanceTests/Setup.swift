@@ -6,7 +6,7 @@ import GRDBPerformance
 let amountToGenerate = 10_000
 
 struct TestRunner {
-    static func setupDb() -> (DatabasePool, [UUID]) {
+    static func setupDb() -> (DatabaseQueue, [UUID]) {
         let db = setupPool()
         var uuids = [UUID]()
 

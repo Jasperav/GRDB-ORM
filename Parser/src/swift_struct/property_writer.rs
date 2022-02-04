@@ -1,5 +1,5 @@
 use crate::configuration::Config;
-use crate::swift_property::{swift_property_and_type, SwiftProperty};
+use crate::swift_property::swift_property_and_type;
 use crate::table_meta_data::TableMetaData;
 
 /// Writes the properties to the LineWriter
@@ -15,14 +15,14 @@ impl<'a> PropertyWriter<'a> {
             .line_writer
             .add_comment("Mapped columns to properties");
 
-        let properties: Vec<SwiftProperty> = match self.location {
+        let properties = match self.location {
             Location::MainStruct => self.table_meta_data.swift_properties.to_vec(),
             Location::PrimaryKeyStruct => self
                 .table_meta_data
                 .primary_keys()
                 .iter()
                 .map(|m| (*m).clone())
-                .collect(),
+                .collect::<Vec<_>>(),
         };
 
         for property in properties {

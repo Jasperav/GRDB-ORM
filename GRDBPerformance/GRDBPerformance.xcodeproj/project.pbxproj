@@ -20,6 +20,7 @@
 		6999B02D26BECD0700026294 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6999B02C26BECD0700026294 /* Metadata.swift */; };
 		69B541C025C565FB00EDE898 /* Update.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69B541BF25C565FB00EDE898 /* Update.swift */; };
 		69B541CF25C5700500EDE898 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF468425C463B100BA57ED /* User.swift */; };
+		69BAF49027ABCE0600452053 /* GRDBQuery in Frameworks */ = {isa = PBXBuildFile; productRef = 69BAF48F27ABCE0600452053 /* GRDBQuery */; };
 		69DF467125C45F8D00BA57ED /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF467025C45F8D00BA57ED /* Setup.swift */; };
 		69DF468D25C47E7100BA57ED /* Select.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF468C25C47E7100BA57ED /* Select.swift */; };
 		69DF469C25C490EA00BA57ED /* Delete.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69DF469B25C490EA00BA57ED /* Delete.swift */; };
@@ -82,6 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69BAF49027ABCE0600452053 /* GRDBQuery in Frameworks */,
 				69260EC825D68AE700647E4C /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -207,6 +209,7 @@
 			name = GRDBPerformance;
 			packageProductDependencies = (
 				69260EC725D68AE700647E4C /* GRDB */,
+				69BAF48F27ABCE0600452053 /* GRDBQuery */,
 			);
 			productName = GRDBPerformance;
 			productReference = 8EDB2D725E2FB79679BB9F4E /* GRDBPerformance.app */;
@@ -231,6 +234,7 @@
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
 				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
 			projectDirPath = "";
@@ -556,6 +560,14 @@
 				minimumVersion = 5.19.0;
 			};
 		};
+		69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDBQuery";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -563,6 +575,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		69BAF48F27ABCE0600452053 /* GRDBQuery */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */;
+			productName = GRDBQuery;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1405,3 +1405,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ge
         }
     }
 }
+
+extension DbUser: Identifiable {
+    public var id: UUID {
+        userUuid
+    }
+}
