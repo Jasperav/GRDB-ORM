@@ -105,6 +105,7 @@ pub(crate) fn test_query(
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query
         .replace(" ?", " '1'")
+        .replace("(?", " ('1'")
         .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
     println!("Validating query '{}'", query_for_validation);
@@ -112,14 +113,6 @@ pub(crate) fn test_query(
     // Check if the query starts with select, delete or update. Insert and anything else are illegal
     // This is because insert queries are already generated expect if the insert also contains an ON CONFLICT clause
     let lowercased = query.to_lowercase();
-
-    if !lowercased.starts_with("update ")
-        && !lowercased.starts_with("select ")
-        && !lowercased.starts_with("delete from ")
-        && !lowercased.contains(" on conflict ")
-    {
-        panic!("Query should start with update, select, delete from or insert with on conflict");
-    }
 
     if lowercased.starts_with("select ") {
         assert!(!return_types_is_empty)
