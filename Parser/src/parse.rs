@@ -113,14 +113,6 @@ pub(crate) fn test_query(
     // This is because insert queries are already generated expect if the insert also contains an ON CONFLICT clause
     let lowercased = query.to_lowercase();
 
-    if !lowercased.starts_with("update ")
-        && !lowercased.starts_with("select ")
-        && !lowercased.starts_with("delete from ")
-        && !lowercased.contains(" on conflict ")
-    {
-        panic!("Query should start with update, select, delete from or insert with on conflict");
-    }
-
     if lowercased.starts_with("select ") {
         assert!(!return_types_is_empty)
     } else {
