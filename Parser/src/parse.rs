@@ -105,6 +105,7 @@ pub(crate) fn test_query(
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query
         .replace(" ?", " '1'")
+        .replace("(?", " ('1'")
         .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
     println!("Validating query '{}'", query_for_validation);
