@@ -1,5 +1,5 @@
 use crate::dynamic_queries::reader::DynamicQuery;
-use crate::dynamic_queries::return_type::{Query, ReturnType};
+use crate::dynamic_queries::return_type::{Query, QuerySelectDecoding, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
@@ -64,21 +64,16 @@ impl<'a> Parser<'a> {
             }
 
             let parameters = parameters.iter().collect::<Vec<_>>();
+            self.write_extension(dynamic_query);
 
             // Find out the return type
             let query = ReturnType {
-                return_types: &dynamic_query.return_types,
-                return_type_is_array: dynamic_query.return_types_is_array,
+                dynamic_query,
+                line_writer: &mut self.line_writer,
                 tables: self.tables,
                 config: self.config,
             }
             .parse();
-
-            self.write_extension(dynamic_query);
-            let capitalized_func_name =
-                some_kind_of_uppercase_first_letter(&dynamic_query.func_name);
-
-            let type_alias_with_type = query.write_type_alias(&mut self, &capitalized_func_name);
 
             self.new_line();
 
@@ -99,9 +94,10 @@ impl<'a> Parser<'a> {
             ));
 
             self.write_body(dynamic_query, parameters.clone(), &query, &func_return_type);
+
             self.write_queryable_type(
                 dynamic_query,
-                type_alias_with_type,
+                &query,
                 parameters.iter().map(|(_, b)| b).collect(),
             );
 
@@ -114,26 +110,23 @@ impl<'a> Parser<'a> {
     fn write_queryable_type(
         &mut self,
         dynamic_query: &DynamicQuery,
-        type_alias_with_type: (String, String),
+        query: &Query,
         parameters: Vec<&SwiftProperty>,
     ) {
-        let (type_alias, the_type) = type_alias_with_type;
+        let the_type = match query {
+            Query::Select {
+                return_type: val,
+                decoding: _,
+            } => val,
+            Query::UpdateOrDelete => return,
+        };
 
-        if type_alias.is_empty() {
-            return;
-        }
-
-        assert!(!the_type.is_empty());
-
-        let default_value = if the_type.ends_with('?') {
-            "nil"
-        } else if the_type.ends_with(']') {
+        let default_value = if dynamic_query.return_types_is_array {
             "[]"
         } else {
-            println!("Could not determine default value for query, therefore there is no Queryable type: {}", dynamic_query.query);
-
-            return;
+            "nil"
         };
+
         let modifier = self.modifier;
         let scheduler_parameter = "scheduler: ValueObservationScheduler = .async(onQueue: .main)";
         let assign_scheduler = "self.scheduler = scheduler";
@@ -199,13 +192,13 @@ impl<'a> Parser<'a> {
             "struct {}Queryable: Queryable, Equatable {{
             {modifier}let scheduler: ValueObservationScheduler
             {to_add}
-            {modifier}static let defaultValue: {type_alias} = {default_value}
+            {modifier}static let defaultValue: {the_type} = {default_value}
 
             {modifier}static func == (lhs: Self, rhs: Self) -> Bool {{
                 {equatable}
             }}
 
-            {modifier}func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<{type_alias}, Error> {{
+            {modifier}func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<{the_type}, Error> {{
                     ValueObservation
                             .tracking({{ db in
                                 try {}({call_method})
@@ -216,7 +209,6 @@ impl<'a> Parser<'a> {
             }}",
             some_kind_of_uppercase_first_letter(&dynamic_query.func_name),
             dynamic_query.func_name,
-            type_alias = type_alias,
         ));
     }
 
@@ -302,7 +294,7 @@ impl<'a> Parser<'a> {
 
         match &query {
             Query::Select {
-                return_type: _return_type,
+                return_type: _,
                 decoding,
             } => {
                 let return_value =
@@ -322,14 +314,20 @@ impl<'a> Parser<'a> {
                 } else {
                     (return_value.as_str(), format!("[{}]", return_value))
                 };
+                let decoding = match decoding {
+                    QuerySelectDecoding::NotNeeded => {
+                        format!("{return_value_closure}.init(row: row)")
+                    }
+                    QuerySelectDecoding::Decoding(decoding) => decoding.clone(),
+                };
 
                 // Add the converted property
                 self.add_line(format!(
-                    "let converted: {} = try Row.fetchAll(statement).map({{ row -> {} in",
-                    type_fetch_all, return_value_closure
+                    "let converted: {type_fetch_all} = try Row.fetchAll(statement).map({{ row -> {return_value_closure} in
+                        {decoding}
+                    }})
+                    "
                 ));
-                self.add_line(decoding.to_string());
-                self.add_line("})");
 
                 if dynamic_query.return_types_is_array {
                     // if the return type is an array, it can be returned directly, no need for checking the resultset
