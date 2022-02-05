@@ -52,15 +52,15 @@ class DynamicQueryTest: XCTestCase {
         // Assertion checks first row
         let firstRow = result[0]
 
-        XCTAssertEqual(book0.integerOptional, firstRow.0.integerOptional!)
-        XCTAssertEqual(user.integer, firstRow.1)
-        XCTAssertEqual(user.jsonStructArrayOptional, firstRow.2)
-        XCTAssertEqual(1, firstRow.3)
+        XCTAssertEqual(book0.integerOptional, firstRow.gen0.integerOptional!)
+        XCTAssertEqual(user.integer, firstRow.gen1)
+        XCTAssertEqual(user.jsonStructArrayOptional, firstRow.gen2)
+        XCTAssertEqual(1, firstRow.gen3)
 
         // Assertion checks second row
         let secondRow = result[1]
 
-        XCTAssertEqual(book1.integerOptional, secondRow.0.integerOptional)
+        XCTAssertEqual(book1.integerOptional, secondRow.gen0.integerOptional)
         // No need to check more I guess
     }
 
@@ -99,30 +99,30 @@ class DynamicQueryTest: XCTestCase {
 
             try! dbUser.genInsert(db: con)
 
-            let check: (SerializedInfo, SerializedInfo?) -> () = {
-                XCTAssertEqual($0, dbUser.serializedInfoAutoConvert())
-                XCTAssertEqual($1, dbUser.serializedInfoNullableAutoConvert())
+            let check: (DbUser.SerializeInfoSingleType) -> () = {
+                XCTAssertEqual($0.gen0, dbUser.serializedInfoAutoConvert())
+                XCTAssertEqual($0.gen1, dbUser.serializedInfoNullableAutoConvert())
             }
 
-            let (serialize, serializeNullable) = try! DbUser.serializeInfoSingle(db: con)!
+            let serializeInfo = try! DbUser.serializeInfoSingle(db: con)!
 
-            check(serialize, serializeNullable)
+            check(serializeInfo)
 
             dbUser.serializedInfoNullableAutoSet(serializedInfoNullable: .data("Something"))
 
             try! dbUser.primaryKey().genUpdateSerializedInfoNullable(db: con, serializedInfoNullable: dbUser.serializedInfoNullableAutoConvert())
 
-            let (serializeUpdated, serializeNullableUpdated) = try! DbUser.serializeInfoSingle(db: con)!
+            let updated = try! DbUser.serializeInfoSingle(db: con)!
 
-            check(serializeUpdated, serializeNullableUpdated)
+            check(updated)
 
             let array = try! DbUser.serializeInfoArray(db: con)
 
             XCTAssertEqual(1, array.count)
 
-            for (s, n) in array {
-                XCTAssertEqual(s, serializeUpdated)
-                XCTAssertEqual(n, serializeNullableUpdated)
+            for u in array {
+                XCTAssertEqual(u.gen0, updated.gen0)
+                XCTAssertEqual(u.gen1, updated.gen1)
             }
         }
     }
