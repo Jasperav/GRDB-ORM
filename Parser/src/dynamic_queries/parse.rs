@@ -68,7 +68,7 @@ impl<'a> Parser<'a> {
 
             // Find out the return type
             let query = ReturnType {
-                dynamic_query: &dynamic_query,
+                dynamic_query,
                 line_writer: &mut self.line_writer,
                 tables: self.tables,
                 config: self.config,
