@@ -64,6 +64,21 @@ fn update_generated_code() {
                     .to_string(),
             },
             DynamicQuery {
+                extension: "Book".to_string(),
+                func_name: "booksWithOptionalUser".to_string(),
+                parameter_types: vec![],
+                return_types: vec![
+                    "Book".to_string(),
+                    "User?".to_string(),
+                    "Bool?".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select Book.*, User.*, Book.integerOptional
+                    from Book
+                    left join User on User.userUuid = Book.userUuid"
+                    .to_string(),
+            },
+            DynamicQuery {
                 extension: "User".to_string(),
                 func_name: "findByUsername".to_string(),
                 parameter_types: vec![(

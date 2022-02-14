@@ -127,6 +127,23 @@ class DynamicQueryTest: XCTestCase {
         }
     }
 
+    func testOptionals() throws {
+        let db = setupPool()
+
+        try db.write { con in
+            let book = DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: nil, tsCreated: 0)
+
+            try book.genInsert(db: con)
+
+            let books = try DbBook.booksWithOptionalUser(db: con)
+
+            XCTAssertEqual(1, books.count)
+            XCTAssertEqual(book, books[0].gen0)
+            XCTAssertNil(books[0].gen1)
+            XCTAssertNil(books[0].gen2)
+        }
+    }
+
     func testValueObservation() throws {
         let db = setupPool()
         let toSearchFor = "first"

@@ -180,13 +180,12 @@ pub fn wrap_null_check(nullable: bool, row_index: &str, decode: &str) -> String 
         // Wrap it inside if let else block and remove the optional type
         format!(
             "{{
-                if row.hasNull(atIndex: {}) {{
+                if row.hasNull(atIndex: {row_index}) {{
                     return nil
                 }} else {{
                     return {}
                 }}
             }}()",
-            row_index,
             // Remove the optional type
             decode.replace('?', "")
         )

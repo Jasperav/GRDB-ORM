@@ -71,6 +71,66 @@ public extension DbBook {
     }
 }
 
+public extension DbBook {
+    struct BooksWithOptionalUserType: Equatable {
+        public let gen0: DbBook
+        public let gen1: DbUser?
+        public let gen2: Bool?
+        public init(row: Row) {
+            gen0 = DbBook(row: row, startingIndex: 0)
+            gen1 = {
+                if row.hasNull(atIndex: 4) {
+                    return nil
+                } else {
+                    return DbUser(row: row, startingIndex: 4)
+                }
+            }()
+            gen2 = row[14]
+        }
+    }
+
+    static func booksWithOptionalUser(db: Database) throws -> [BooksWithOptionalUserType] {
+        var query = """
+        select Book.*, User.*, Book.integerOptional
+                            from Book
+                            left join User on User.userUuid = Book.userUuid
+        """
+        let statement = try db.cachedStatement(sql: query)
+        let converted: [BooksWithOptionalUserType] = try Row.fetchAll(statement).map { row -> BooksWithOptionalUserType in
+            BooksWithOptionalUserType(row: row)
+        }
+
+        return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct BooksWithOptionalUserQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+
+        public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: [BooksWithOptionalUserType] = []
+
+        public static func == (_: Self, _: Self) -> Bool {
+            // TODO: not sure if this is correct
+            true
+        }
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[BooksWithOptionalUserType], Error> {
+            ValueObservation
+                .tracking { db in
+                    try booksWithOptionalUser(db: db)
+                }
+                .publisher(in: dbQueue, scheduling: scheduler)
+                .eraseToAnyPublisher()
+        }
+    }
+}
+
 public extension DbUser {
     static func findByUsername(db: Database, firstName: String) throws -> DbUser? {
         var query = """
