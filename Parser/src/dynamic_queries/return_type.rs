@@ -109,11 +109,12 @@ impl<'a> ReturnType<'a> {
 
                 // Now the startingIndex initializer is useful
                 let format = format!("{}(row: row, startingIndex: {})", swift_struct_name, index);
+                let decode = wrap_null_check(!suffix.is_empty(), &index.to_string(), &format);
 
                 // The index should be increased for the amount of columns
                 index += table.columns.len();
 
-                decoding.push(format);
+                decoding.push(decode);
                 return_types_swift_struct.push(swift_struct_name + suffix);
             } else {
                 // This is a column of a table, e.g.: User.userUuid
