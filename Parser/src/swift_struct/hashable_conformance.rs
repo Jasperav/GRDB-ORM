@@ -7,7 +7,7 @@ pub fn write(tmd: &mut TableMetaData) {
     for swift_property in tmd
         .primary_keys()
         .into_iter()
-        .map(|c| c.clone())
+        .cloned()
         .collect::<Vec<_>>()
     {
         tmd.line_writer.add_line(format!(
