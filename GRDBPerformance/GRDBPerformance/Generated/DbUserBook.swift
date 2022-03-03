@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 // Mapped table to struct
-public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable, GenDbTable, GenDbTableWithSelf {
+public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable, Hashable, GenDbTable, GenDbTableWithSelf {
     // Static queries
     public static let insertUniqueQuery = "insert into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
     public static let replaceUniqueQuery = "replace into UserBook (bookUuid, userUuid, realToDouble) values (?, ?, ?)"
@@ -44,6 +44,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     // Easy way to get the PrimaryKey from the table
     public func primaryKey() -> PrimaryKey {
         .init(bookUuid: bookUuid, userUuid: userUuid)
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(bookUuid)
+        hasher.combine(userUuid)
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
