@@ -46,7 +46,7 @@ fn write_row_initializer_with_starting_index(tmd: &mut TableMetaData) {
         .map(|(index, swift_property)| {
             let decoder = RowInitializerSwiftPropertyDecoder { index };
 
-            decode_swift_property(&decoder, swift_property)
+            decode_swift_property(&decoder, swift_property, false)
         })
         .collect::<Vec<_>>()
         .join("\n");

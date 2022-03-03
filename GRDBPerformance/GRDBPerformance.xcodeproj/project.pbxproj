@@ -29,6 +29,7 @@
 		8EDB216D5C236DF0F4E7A9B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB211838BFB5EBA7AF75AD /* ViewController.swift */; };
 		8EDB24E7EA5EA20A7782DE10 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB27517F72CCF30214969A /* SceneDelegate.swift */; };
 		8EDB2514FAB767ABAE46899C /* DynamicQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB20700B42A291685AFCDA /* DynamicQueries.swift */; };
+		8EDB252FEBE2C7F5D35FDDC1 /* DbParent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB25DAA2C195318432B649 /* DbParent.swift */; };
 		8EDB2958947EC267F3400DE3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2228146EE3529FC7AE14 /* Assets.xcassets */; };
 		8EDB2A6EFEC2CA05239A53CA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB2EA1B269369A06C0A189 /* LaunchScreen.storyboard */; };
 		8EDB2B9460A3CADF34315E80 /* Insert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB2A073F1F23BD634ADF13 /* Insert.swift */; };
@@ -68,6 +69,7 @@
 		8EDB2228146EE3529FC7AE14 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8EDB22E7D75A647FA0419D02 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
 		8EDB23D3877E6B3FA177082A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
+		8EDB25DAA2C195318432B649 /* DbParent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DbParent.swift; sourceTree = "<group>"; };
 		8EDB26890C6054582BDD1366 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8EDB27517F72CCF30214969A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		8EDB28AD4770B2C4FD45F50C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				691DEB9C264566EC00B7271B /* DynamicQueries.swift */,
 				691DEB9D264566EC00B7271B /* Shared.swift */,
 				6965525427A16A32009A2110 /* GenDbTableWithSelf.swift */,
+				8EDB25DAA2C195318432B649 /* DbParent.swift */,
 			);
 			path = Generated;
 			sourceTree = "<group>";
@@ -233,7 +236,7 @@
 			);
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
-				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
 				69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
@@ -300,6 +303,7 @@
 				691DEBA2264566EC00B7271B /* DbUser.swift in Sources */,
 				8EDB2DD4A368132DE1F052A4 /* Util.swift in Sources */,
 				6999B02B26BEC65400026294 /* GenDbMetadata.swift in Sources */,
+				8EDB252FEBE2C7F5D35FDDC1 /* DbParent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,7 +556,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -573,7 +577,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		69260EC725D68AE700647E4C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
 			productName = GRDB;
 		};
 		69BAF48F27ABCE0600452053 /* GRDBQuery */ = {

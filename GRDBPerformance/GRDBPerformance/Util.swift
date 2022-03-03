@@ -61,6 +61,14 @@ public func setupPool() -> DatabaseQueue {
                 FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
             );
+
+        create table Parent
+            (
+                parentUuid TEXT NOT NULL,
+                userUuid TEXT,
+                PRIMARY KEY (parentUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
         """)
     }
 

@@ -603,3 +603,73 @@ public extension DbUser {
         }
     }
 }
+
+public extension DbParent {
+    struct RetrieveOptionalUserValuesType: Equatable {
+        public let gen0: UUID
+        public let gen1: UUID?
+        public let gen2: [JsonType]?
+        public let gen3: [JsonType]?
+        public init(row: Row) {
+            gen0 = row[0]
+            gen1 = row[1]
+            gen2 = {
+                if row.hasNull(atIndex: 2) {
+                    return nil
+                } else {
+                    return try! Shared.jsonDecoder.decode([JsonType].self, from: row[2])
+                }
+            }()
+            gen3 = {
+                if row.hasNull(atIndex: 3) {
+                    return nil
+                } else {
+                    return try! Shared.jsonDecoder.decode([JsonType].self, from: row[3])
+                }
+            }()
+        }
+    }
+
+    static func retrieveOptionalUserValues(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
+        var query = """
+        select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?
+        """
+        var arguments = StatementArguments()
+        arguments += [parentUuid.uuidString]
+        let statement = try db.cachedStatement(sql: query)
+        statement.setUncheckedArguments(arguments)
+        let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in
+            RetrieveOptionalUserValuesType(row: row)
+        }
+
+        return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct RetrieveOptionalUserValuesQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+        public let parentUuid: UUID
+        public init(
+            parentUuid: UUID,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.parentUuid = parentUuid
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: [RetrieveOptionalUserValuesType] = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.parentUuid == rhs.parentUuid
+        }
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[RetrieveOptionalUserValuesType], Error> {
+            ValueObservation
+                .tracking { db in
+                    try retrieveOptionalUserValues(db: db, parentUuid: parentUuid)
+                }
+                .publisher(in: dbQueue, scheduling: scheduler)
+                .eraseToAnyPublisher()
+        }
+    }
+}

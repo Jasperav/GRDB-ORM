@@ -162,14 +162,14 @@ impl<'a> ReturnType<'a> {
                         swift_property.swift_type.type_name, row_index
                     );
                     let decode = wrap_null_check(
-                        swift_property.column.nullable,
+                        swift_property.column.nullable || !suffix.is_empty(),
                         &decoder.row_index(),
                         &decode,
                     );
 
                     decoder.assign("", &decode)
                 } else {
-                    decode_swift_property(&decoder, &swift_property)
+                    decode_swift_property(&decoder, &swift_property, !suffix.is_empty())
                 };
 
                 // Just decoding 1 column
