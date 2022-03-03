@@ -199,6 +199,7 @@ pub fn wrap_null_check(nullable: bool, row_index: &str, decode: &str) -> String 
 pub fn decode_swift_property<T: SwiftPropertyDecoder>(
     decoder: &T,
     property: &SwiftProperty,
+    extra_nullable_condition: bool,
 ) -> String {
     let row_index = decoder.row_index();
     // This is the correct row index for decoding the SwiftProperty
@@ -217,7 +218,11 @@ pub fn decode_swift_property<T: SwiftPropertyDecoder>(
                 &property.swift_type.type_name, row
             );
 
-            let decode = wrap_null_check(property.column.nullable, &row_index, &decode);
+            let decode = wrap_null_check(
+                property.column.nullable || extra_nullable_condition,
+                &row_index,
+                &decode,
+            );
 
             // Now the property can be assigned
             decoder.assign(&property.swift_property_name, &decode)

@@ -188,6 +188,21 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
             },
+            DynamicQuery {
+                extension: "Parent".to_string(),
+                func_name: "retrieveOptionalUserValues".to_string(),
+                parameter_types: vec![
+                    ("Parent".to_string(), "parentUuid".to_string(), "parentUuid".to_string()),
+                ],
+                return_types: vec![
+                    "Parent.parentUuid".to_string(),
+                    "User.userUuid?".to_string(),
+                    "User.jsonStructArray?".to_string(),
+                    "User.jsonStructArrayOptional".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?".to_string(),
+            },
         ],
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",
@@ -242,6 +257,14 @@ pub fn create_db() -> (Metadata, String) {
                 realToDouble REAL,
                 PRIMARY KEY (bookUuid, userUuid),
                 FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
+
+        create table Parent
+            (
+                parentUuid TEXT NOT NULL,
+                userUuid TEXT,
+                PRIMARY KEY (parentUuid),
                 FOREIGN KEY(userUuid) REFERENCES User(userUuid)
             );
         ",

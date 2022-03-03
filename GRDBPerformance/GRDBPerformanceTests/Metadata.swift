@@ -8,6 +8,6 @@ import XCTest
 
 class MetadataTest: XCTestCase {
     func testMetadata() throws {
-        XCTAssertEqual(3, GenDbMetadata.tables().count)
+        XCTAssertEqual(4, GenDbMetadata.tables().count)
     }
 }

@@ -131,17 +131,30 @@ class DynamicQueryTest: XCTestCase {
         let db = setupPool()
 
         try db.write { con in
-            let book = DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: nil, tsCreated: 0)
+                    let book = DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: nil, tsCreated: 0)
 
-            try book.genInsert(db: con)
+                    try book.genInsert(db: con)
 
-            let books = try DbBook.booksWithOptionalUser(db: con)
+                    let books = try DbBook.booksWithOptionalUser(db: con)
 
-            XCTAssertEqual(1, books.count)
-            XCTAssertEqual(book, books[0].gen0)
-            XCTAssertNil(books[0].gen1)
-            XCTAssertNil(books[0].gen2)
-        }
+                    XCTAssertEqual(1, books.count)
+                    XCTAssertEqual(book, books[0].gen0)
+                    XCTAssertNil(books[0].gen1)
+                    XCTAssertNil(books[0].gen2)
+
+                    let parent = DbParent(parentUuid: UUID(), userUuid: nil)
+
+                    try parent.genInsert(db: con)
+
+                    let parents = try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parent.parentUuid)
+
+                    XCTAssertEqual(1, parents.count)
+                    XCTAssertEqual(parents[0].gen0, parent.parentUuid)
+                    XCTAssertNil(parents[0].gen1)
+                    XCTAssertNil(parents[0].gen2)
+                    XCTAssertNil(parents[0].gen3)
+
+                }
     }
 
     func testValueObservation() throws {
