@@ -43,7 +43,7 @@ impl<'a> TableWriter<'a> {
             // Start the actual writing
             line_writer.add_comment("Mapped table to struct");
             line_writer.add_with_modifier(format!(
-                "struct {}: FetchableRecord, PersistableRecord, Codable, Equatable, {}, {} {{\n",
+                "struct {}: FetchableRecord, PersistableRecord, Codable, Equatable, Hashable, {}, {} {{\n",
                 struct_name, PROTOCOL_NAME, PROTOCOL_WITH_SELF_NAME
             ));
 
@@ -88,7 +88,8 @@ impl<'a> TableWriter<'a> {
             // Start of by writing the 'main struct'
             qw!(flow = MainStruct, {
                 crate::swift_struct::initializer::write_initializer(&mut qw!());
-                crate::swift_struct::main_struct_to_pk::write_main_struct_to_pk(&mut qw!())
+                crate::swift_struct::main_struct_to_pk::write_main_struct_to_pk(&mut qw!());
+                crate::swift_struct::hashable_conformance::write(&mut qw!());
             });
 
             // Now write the primary key struct
