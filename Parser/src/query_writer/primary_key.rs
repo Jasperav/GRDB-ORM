@@ -190,7 +190,6 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         let switch = self
             .table_meta_data
             .swift_properties
-            .to_vec()
             .into_iter()
             .map(|s| {
                 format!(

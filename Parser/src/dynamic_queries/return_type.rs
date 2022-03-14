@@ -88,7 +88,7 @@ impl<'a> ReturnType<'a> {
         // Find out how to decode the return types
         for rt in self.dynamic_query.return_types.iter() {
             // Remove the optional type for now, since else the table can not be found in the table array
-            let without_question_mark = rt.replace("?", "");
+            let without_question_mark = rt.replace('?', "");
             // If the rt was an optional, make sure to append it back to without_question_mark if needed
             let suffix = if rt.contains('?') { "?" } else { "" };
 

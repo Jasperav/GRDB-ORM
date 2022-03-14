@@ -28,7 +28,7 @@ impl SwiftProperty {
             return;
         }
 
-        self.swift_type.type_name = self.swift_type.type_name.replace("?", "");
+        self.swift_type.type_name = self.swift_type.type_name.replace('?', "");
         self.column.nullable = false;
     }
     pub fn property_name(&self) -> String {
@@ -76,7 +76,7 @@ impl SwiftProperty {
         let deserialize = format!(
             "{}try! {}(serializedData: {})",
             deserialize_return_if_nil,
-            self.swift_type.type_name.replace("?", ""),
+            self.swift_type.type_name.replace('?', ""),
             self.swift_property_name
         );
 
@@ -315,7 +315,7 @@ pub fn is_mapped_blob_type(t: Type, swift_type_name: &str) -> bool {
 }
 
 pub fn without_optional(t: &str) -> String {
-    t.replace("?", "")
+    t.replace('?', "")
 }
 
 /// Creates a Swift type from a [&str]
