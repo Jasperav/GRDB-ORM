@@ -37,3 +37,18 @@ public extension Data {
         self
     }
 }
+
+// Will log in debug mode only
+import OSLog
+
+struct Logging {
+    #if DEBUG
+        private static let logger = Logger(subsystem: "GRDB-ORM", category: "Query logging")
+    #endif
+
+    public static func log(_ query: String) {
+        #if DEBUG
+            logger.debug("Executing: \(query)")
+        #endif
+    }
+}

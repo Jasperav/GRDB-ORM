@@ -33,6 +33,8 @@ public extension DbBook {
         """
         var arguments = StatementArguments()
         arguments += [userUuid.uuidString]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [BooksForUserWithSpecificUuidType] = try Row.fetchAll(statement).map { row -> BooksForUserWithSpecificUuidType in
@@ -95,6 +97,8 @@ public extension DbBook {
                             from Book
                             left join User on User.userUuid = Book.userUuid
         """
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         let converted: [BooksWithOptionalUserType] = try Row.fetchAll(statement).map { row -> BooksWithOptionalUserType in
             BooksWithOptionalUserType(row: row)
@@ -138,6 +142,8 @@ public extension DbUser {
         """
         var arguments = StatementArguments()
         arguments += [firstName]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
@@ -184,6 +190,8 @@ public extension DbUser {
         """
         var arguments = StatementArguments()
         arguments += [firstName]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [UUID] = try Row.fetchAll(statement).map { row -> UUID in
@@ -228,6 +236,8 @@ public extension DbUser {
         var query = """
         select count(*) from User
         """
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         let converted: [Int] = try Row.fetchAll(statement).map { row -> Int in
             row[0]
@@ -272,6 +282,8 @@ public extension DbBook {
         """
         var arguments = StatementArguments()
         arguments += [userUuid.uuidString]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         try statement.execute()
@@ -283,6 +295,8 @@ public extension DbBook {
         var query = """
         select exists(select 1 from Book)
         """
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         let converted: [Bool] = try Row.fetchAll(statement).map { row -> Bool in
             row[0]
@@ -340,6 +354,8 @@ public extension DbUser {
         var query = """
         select serializedInfo, serializedInfoNullable from user limit 1
         """
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         let converted: [SerializeInfoSingleType] = try Row.fetchAll(statement).map { row -> SerializeInfoSingleType in
             SerializeInfoSingleType(row: row)
@@ -397,6 +413,8 @@ public extension DbUser {
         var query = """
         select serializedInfo, serializedInfoNullable from user
         """
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         let converted: [SerializeInfoArrayType] = try Row.fetchAll(statement).map { row -> SerializeInfoArrayType in
             SerializeInfoArrayType(row: row)
@@ -442,6 +460,8 @@ public extension DbUser {
         arguments += [try! serializedInfo.serializedData()]
         arguments += [try! serializedInfoNullable.serializedData()]
         arguments += [firstName]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         try statement.execute()
@@ -471,6 +491,8 @@ public extension DbUser {
 
             query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
         }()
+
+        Logging.log(query)
 
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
@@ -557,6 +579,8 @@ public extension DbUser {
         }()
 
         arguments += [try! serializedInfoNullable.serializedData()]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
@@ -636,6 +660,8 @@ public extension DbParent {
         """
         var arguments = StatementArguments()
         arguments += [parentUuid.uuidString]
+        Logging.log(query)
+
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
         let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in

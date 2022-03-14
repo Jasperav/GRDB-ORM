@@ -197,8 +197,9 @@ impl<'a> QueryWriterMainStruct<'a> {
                         {},
                     ]
 
+                    Logging.log({query})
 
-                    let statement = try db.cachedStatement(sql: {})
+                    let statement = try db.cachedStatement(sql: {query})
 
                     statement.setUncheckedArguments(arguments)
 
@@ -209,7 +210,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                 column.swift_property_name,
                 column.swift_type.type_name,
                 encoded,
-                query
+                query = query
             ));
         }
     }
@@ -422,6 +423,8 @@ impl<'a> QueryWriterMainStruct<'a> {
                     {}
                 ]
 
+                Logging.log(upsertQuery)
+
                 let statement = try db.cachedStatement(sql: upsertQuery)
 
                 statement.setUncheckedArguments(arguments)
@@ -447,13 +450,15 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> [{struct_name}] {{
-                let statement = try db.cachedStatement(sql: {})
+                Logging.log({query})
+
+                let statement = try db.cachedStatement(sql: {query})
 
                 return try {struct_name}.fetchAll(statement)
             }}
         ",
             SELECT_ALL_METHOD,
-            SELECT_ALL_QUERY,
+            query = SELECT_ALL_QUERY,
             struct_name = self.table_meta_data.struct_name
         ));
     }
@@ -462,12 +467,15 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> Int {{
-                let statement = try db.cachedStatement(sql: {})
+                Logging.log({query})
+
+                let statement = try db.cachedStatement(sql: {query})
 
                 return try Int.fetchOne(statement)!
             }}
         ",
-            SELECT_COUNT_METHOD, SELECT_COUNT_QUERY
+            SELECT_COUNT_METHOD,
+            query = SELECT_COUNT_QUERY
         ));
     }
 
@@ -560,7 +568,9 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "{}func gen{}(db: Database{}) throws {{
-                let statement = try db.cachedStatement(sql: Self.{})
+                Logging.log(Self.{query})
+
+                let statement = try db.cachedStatement(sql: Self.{query})
 
                 {}
 
@@ -572,9 +582,9 @@ impl<'a> QueryWriterMainStruct<'a> {
             static_instance.modifier(),
             method_name,
             arguments,
-            query,
             args,
-            check
+            check,
+            query = query,
         ));
     }
 }
