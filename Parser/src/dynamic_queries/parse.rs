@@ -2,9 +2,7 @@ use crate::dynamic_queries::return_type::{Query, QuerySelectDecoding, ReturnType
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{
-    create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty,
-};
+use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
 use grdb_orm_lib::dyn_query::DynamicQuery;
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
@@ -74,6 +72,7 @@ impl<'a> Parser<'a> {
                 line_writer: &mut self.line_writer,
                 tables: self.tables,
                 config: self.config,
+                write_to_line_writer: true,
             }
             .parse();
 
@@ -97,36 +96,63 @@ impl<'a> Parser<'a> {
             self.write_body(dynamic_query, parameters.clone(), &query, &func_return_type);
 
             if let Some(different_type) = &dynamic_query.map_to_different_type {
-                let return_type = format!(
-                    "-> {}",
-                    if dynamic_query.return_types_is_array {
-                        format!("[{}]", different_type)
-                    } else {
-                        different_type.to_string()
-                    }
+                assert!(!func_return_type.is_empty());
+
+                // Make sure the result type is the same
+                let (mapped_to_type, func_name) = if different_type.contains('.') {
+                    let split = different_type.split('.').collect::<Vec<_>>();
+
+                    assert_eq!(2, split.len());
+
+                    (split[0].to_string(), split[1].to_string())
+                } else {
+                    (dynamic_query.extension.clone(), different_type.clone())
+                };
+
+                // Search it in the list
+                let matched = self
+                    .config
+                    .dynamic_queries
+                    .iter()
+                    .filter(|dyn_query| dyn_query.extension == mapped_to_type)
+                    .filter(|dyn_query| dyn_query.func_name == func_name)
+                    .collect::<Vec<_>>();
+
+                assert_eq!(
+                    1,
+                    matched.len(),
+                    "No match for mapped type: {}",
+                    different_type
                 );
+
+                let dyn_query = matched[0];
+
+                assert_eq!(dyn_query.return_types, dynamic_query.return_types);
+                assert_eq!(
+                    dyn_query.return_types_is_array,
+                    dynamic_query.return_types_is_array
+                );
+
+                let mapped_type = ReturnType {
+                    dynamic_query: dyn_query,
+                    line_writer: &mut self.line_writer,
+                    tables: self.tables,
+                    config: self.config,
+                    write_to_line_writer: false,
+                }
+                .parse();
+                let mapped_return_type = format!("-> {}", mapped_type.return_type());
 
                 self.add_with_modifier(format!(
                     "static func {}Mapped(db: Database{}) throws {} {{",
-                    dynamic_query.func_name, &parameter_types_separated_colons, return_type
+                    dynamic_query.func_name, &parameter_types_separated_colons, mapped_return_type
                 ));
-
-                let query_changed_return_type = match &query {
-                    Query::Select {
-                        return_type: _,
-                        decoding,
-                    } => Query::Select {
-                        return_type: different_type.to_string(),
-                        decoding: decoding.clone(),
-                    },
-                    Query::UpdateOrDelete => panic!("Not expected with this configuration"),
-                };
 
                 self.write_body(
                     dynamic_query,
                     parameters.clone(),
-                    &query_changed_return_type,
-                    &return_type,
+                    &mapped_type,
+                    &mapped_return_type,
                 );
             }
 

@@ -230,7 +230,7 @@ fn update_generated_code() {
                 ],
                 return_types_is_array: true,
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid".to_string(),
-                map_to_different_type: Some("RetrieveOptionalUserValuesType".to_string()),
+                map_to_different_type: Some("retrieveOptionalUserValues".to_string()),
             },
         ],
         suffix_swift_structs: "",
