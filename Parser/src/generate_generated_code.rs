@@ -1,7 +1,7 @@
 use crate::configuration::{Config, Visibility};
 use crate::custom_mapping::CustomMapping;
-use crate::dynamic_queries::DynamicQuery;
 use crate::parse::parse;
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use sqlite_parser::Metadata;
 use std::env::current_dir;
