@@ -1,9 +1,9 @@
-use crate::dynamic_queries::reader::DynamicQuery;
 use crate::dynamic_queries::return_type::{Query, QuerySelectDecoding, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
+use grdb_orm_lib::dyn_query::DynamicQuery;
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
 

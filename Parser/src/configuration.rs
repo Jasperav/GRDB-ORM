@@ -1,7 +1,7 @@
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use std::path::PathBuf;
 
 use crate::custom_mapping::CustomMapping;
-use crate::dynamic_queries::DynamicQuery;
 use crate::line_writer::LineWriter;
 use crate::output_dir_initializer::create_safe_dir;
 

@@ -15,7 +15,7 @@ Inflector = "0.11"
 regex = "1.4"
 dotenv = "0.15"
 toml = "0.5"
-serde = { version = "1.0", features = ["derive"] }
+grdb_orm_lib = { path = "../grdb_orm_lib" }
 
 [dependencies.rusqlite]
 version = "0.24.2"

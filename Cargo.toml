@@ -2,4 +2,5 @@
 members = [
     "new_version",
     "Parser",
+    "grdb_orm_lib",
 ]

@@ -1,10 +1,10 @@
 use std::ops::Index;
 
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use sqlite_parser::{Metadata, Type};
 
 use crate::configuration::Config;
-use crate::dynamic_queries::DynamicQuery;
 use crate::line_writer::LineWriter;
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{
