@@ -26,7 +26,9 @@ impl<'a> TableMetaData<'a> {
                 {}
             ]
 
-            let statement = try db.cachedStatement(sql: {})
+            Logging.log({query})
+
+            let statement = try db.cachedStatement(sql: {query})
 
             statement.setUncheckedArguments(arguments)
 
@@ -47,14 +49,14 @@ impl<'a> TableMetaData<'a> {
                 ""
             },
             encode_swift_properties(values),
-            sql,
             if add_assert_one_row_affected {
                 "if assertOneRowAffected {
                 assert(db.changesCount == 1)
             }"
             } else {
                 ""
-            }
+            },
+            query = sql,
         ));
     }
     fn keys(&self, part_of_pk: bool) -> Vec<&SwiftProperty> {

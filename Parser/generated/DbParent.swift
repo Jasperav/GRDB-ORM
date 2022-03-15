@@ -47,6 +47,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
+        Logging.log(Self.insertUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.insertUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -65,6 +67,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genInsertOrIgnore(db: Database) throws {
+        Logging.log(Self.insertOrIgnoreUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.insertOrIgnoreUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -78,6 +82,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genReplace(db: Database) throws {
+        Logging.log(Self.replaceUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -91,6 +97,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genUpsertUserUuid(db: Database) throws {
+        Logging.log(Self.upsertUserUuidQuery)
+
         let statement = try db.cachedStatement(sql: Self.upsertUserUuidQuery)
 
         let arguments: StatementArguments = try [
@@ -112,12 +120,16 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public static func genDeleteAll(db: Database) throws {
+        Logging.log(Self.deleteAllQuery)
+
         let statement = try db.cachedStatement(sql: Self.deleteAllQuery)
 
         try statement.execute()
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
+        Logging.log(Self.updateUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -210,6 +222,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             userUuid?.uuidString
         ]
 
+        Logging.log(upsertQuery)
+
         let statement = try db.cachedStatement(sql: upsertQuery)
 
         statement.setUncheckedArguments(arguments)
@@ -231,6 +245,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             parentUuid.uuidString
         ]
 
+        Logging.log("update Parent set parentUuid = ?")
+
         let statement = try db.cachedStatement(sql: "update Parent set parentUuid = ?")
 
         statement.setUncheckedArguments(arguments)
@@ -244,6 +260,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             userUuid?.uuidString
         ]
 
+        Logging.log("update Parent set userUuid = ?")
+
         let statement = try db.cachedStatement(sql: "update Parent set userUuid = ?")
 
         statement.setUncheckedArguments(arguments)
@@ -253,6 +271,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
     public
     static func genSelectAll(db: Database) throws -> [DbParent] {
+        Logging.log(selectAllQuery)
+
         let statement = try db.cachedStatement(sql: selectAllQuery)
 
         return try DbParent.fetchAll(statement)
@@ -260,6 +280,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
     public
     static func genSelectCount(db: Database) throws -> Int {
+        Logging.log(selectCountQuery)
+
         let statement = try db.cachedStatement(sql: selectCountQuery)
 
         return try Int.fetchOne(statement)!
@@ -286,6 +308,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 parentUuid.uuidString
             ]
 
+            Logging.log(Self.selectQuery)
+
             let statement = try db.cachedStatement(sql: Self.selectQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -308,6 +332,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 parentUuid.uuidString
             ]
 
+            Logging.log(Self.selectExistsQuery)
+
             let statement = try db.cachedStatement(sql: Self.selectExistsQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -321,6 +347,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             let arguments: StatementArguments = try [
                 parentUuid.uuidString
             ]
+
+            Logging.log(Self.deleteQuery)
 
             let statement = try db.cachedStatement(sql: Self.deleteQuery)
 
@@ -339,6 +367,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 self.parentUuid.uuidString
             ]
 
+            Logging.log(DbParent.UpdatableColumn.updateParentUuidQuery)
+
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateParentUuidQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -355,6 +385,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 userUuid?.uuidString,
                 parentUuid.uuidString
             ]
+
+            Logging.log(DbParent.UpdatableColumn.updateUserUuidQuery)
 
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateUserUuidQuery)
 
@@ -406,6 +438,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             arguments += [parentUuid.uuidString]
 
             let finalQuery = updateQuery + " " + pkQuery
+
+            Logging.log(finalQuery)
 
             let statement = try db.cachedStatement(sql: finalQuery)
 

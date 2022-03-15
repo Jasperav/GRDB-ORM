@@ -85,7 +85,9 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            let statement = try db.cachedStatement(sql: Self.{})
+            Logging.log(Self.{query})
+
+            let statement = try db.cachedStatement(sql: Self.{query})
 
             statement.setUncheckedArguments(arguments)
 
@@ -94,8 +96,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         ",
             self.table_meta_data.struct_name,
             values,
-            SELECT_QUERY,
-            self.table_meta_data.struct_name
+            self.table_meta_data.struct_name,
+            query = SELECT_QUERY,
         ));
     }
 
@@ -128,7 +130,9 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            let statement = try db.cachedStatement(sql: Self.{})
+            Logging.log(Self.{query})
+
+            let statement = try db.cachedStatement(sql: Self.{query})
 
             statement.setUncheckedArguments(arguments)
 
@@ -136,7 +140,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             return try Bool.fetchOne(statement)!
         }}
         ",
-            values, SELECT_EXISTS_QUERY,
+            values,
+            query = SELECT_EXISTS_QUERY,
         ));
     }
 
@@ -185,8 +190,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         let switch = self
             .table_meta_data
             .swift_properties
-            .to_vec()
-            .into_iter()
+            .iter()
             .map(|s| {
                 format!(
                     "case .{p}(let val): try genUpdate{}(db: db, {p}: val, assertOneRowAffected: assertOneRowAffected)",
@@ -319,6 +323,8 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
 
                 let finalQuery = updateQuery + \" \" + pkQuery
+
+                Logging.log(finalQuery)
 
                 let statement = try db.cachedStatement(sql: finalQuery)
 

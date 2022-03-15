@@ -57,6 +57,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
+        Logging.log(Self.insertUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.insertUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -77,6 +79,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genInsertOrIgnore(db: Database) throws {
+        Logging.log(Self.insertOrIgnoreUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.insertOrIgnoreUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -92,6 +96,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genReplace(db: Database) throws {
+        Logging.log(Self.replaceUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.replaceUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -107,6 +113,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genUpsertUserUuid(db: Database) throws {
+        Logging.log(Self.upsertUserUuidQuery)
+
         let statement = try db.cachedStatement(sql: Self.upsertUserUuidQuery)
 
         let arguments: StatementArguments = try [
@@ -122,6 +130,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genUpsertIntegerOptional(db: Database) throws {
+        Logging.log(Self.upsertIntegerOptionalQuery)
+
         let statement = try db.cachedStatement(sql: Self.upsertIntegerOptionalQuery)
 
         let arguments: StatementArguments = try [
@@ -137,6 +147,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public func genUpsertTsCreated(db: Database) throws {
+        Logging.log(Self.upsertTsCreatedQuery)
+
         let statement = try db.cachedStatement(sql: Self.upsertTsCreatedQuery)
 
         let arguments: StatementArguments = try [
@@ -160,12 +172,16 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     public static func genDeleteAll(db: Database) throws {
+        Logging.log(Self.deleteAllQuery)
+
         let statement = try db.cachedStatement(sql: Self.deleteAllQuery)
 
         try statement.execute()
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
+        Logging.log(Self.updateUniqueQuery)
+
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
         let arguments: StatementArguments = try [
@@ -290,6 +306,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             tsCreated
         ]
 
+        Logging.log(upsertQuery)
+
         let statement = try db.cachedStatement(sql: upsertQuery)
 
         statement.setUncheckedArguments(arguments)
@@ -311,6 +329,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             bookUuid.uuidString
         ]
 
+        Logging.log("update Book set bookUuid = ?")
+
         let statement = try db.cachedStatement(sql: "update Book set bookUuid = ?")
 
         statement.setUncheckedArguments(arguments)
@@ -323,6 +343,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid?.uuidString
         ]
+
+        Logging.log("update Book set userUuid = ?")
 
         let statement = try db.cachedStatement(sql: "update Book set userUuid = ?")
 
@@ -337,6 +359,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integerOptional
         ]
 
+        Logging.log("update Book set integerOptional = ?")
+
         let statement = try db.cachedStatement(sql: "update Book set integerOptional = ?")
 
         statement.setUncheckedArguments(arguments)
@@ -350,6 +374,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             tsCreated
         ]
 
+        Logging.log("update Book set tsCreated = ?")
+
         let statement = try db.cachedStatement(sql: "update Book set tsCreated = ?")
 
         statement.setUncheckedArguments(arguments)
@@ -359,6 +385,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
     public
     static func genSelectAll(db: Database) throws -> [DbBook] {
+        Logging.log(selectAllQuery)
+
         let statement = try db.cachedStatement(sql: selectAllQuery)
 
         return try DbBook.fetchAll(statement)
@@ -366,6 +394,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
     public
     static func genSelectCount(db: Database) throws -> Int {
+        Logging.log(selectCountQuery)
+
         let statement = try db.cachedStatement(sql: selectCountQuery)
 
         return try Int.fetchOne(statement)!
@@ -392,6 +422,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 bookUuid.uuidString
             ]
 
+            Logging.log(Self.selectQuery)
+
             let statement = try db.cachedStatement(sql: Self.selectQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -414,6 +446,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 bookUuid.uuidString
             ]
 
+            Logging.log(Self.selectExistsQuery)
+
             let statement = try db.cachedStatement(sql: Self.selectExistsQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -427,6 +461,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             let arguments: StatementArguments = try [
                 bookUuid.uuidString
             ]
+
+            Logging.log(Self.deleteQuery)
 
             let statement = try db.cachedStatement(sql: Self.deleteQuery)
 
@@ -445,6 +481,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 self.bookUuid.uuidString
             ]
 
+            Logging.log(DbBook.UpdatableColumn.updateBookUuidQuery)
+
             let statement = try db.cachedStatement(sql: DbBook.UpdatableColumn.updateBookUuidQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -461,6 +499,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 userUuid?.uuidString,
                 bookUuid.uuidString
             ]
+
+            Logging.log(DbBook.UpdatableColumn.updateUserUuidQuery)
 
             let statement = try db.cachedStatement(sql: DbBook.UpdatableColumn.updateUserUuidQuery)
 
@@ -479,6 +519,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 bookUuid.uuidString
             ]
 
+            Logging.log(DbBook.UpdatableColumn.updateIntegerOptionalQuery)
+
             let statement = try db.cachedStatement(sql: DbBook.UpdatableColumn.updateIntegerOptionalQuery)
 
             statement.setUncheckedArguments(arguments)
@@ -495,6 +537,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 tsCreated,
                 bookUuid.uuidString
             ]
+
+            Logging.log(DbBook.UpdatableColumn.updateTsCreatedQuery)
 
             let statement = try db.cachedStatement(sql: DbBook.UpdatableColumn.updateTsCreatedQuery)
 
@@ -562,6 +606,8 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             arguments += [bookUuid.uuidString]
 
             let finalQuery = updateQuery + " " + pkQuery
+
+            Logging.log(finalQuery)
 
             let statement = try db.cachedStatement(sql: finalQuery)
 
