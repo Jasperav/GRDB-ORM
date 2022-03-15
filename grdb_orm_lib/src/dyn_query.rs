@@ -8,3 +8,9 @@ pub struct DynamicQuery {
     pub return_types_is_array: bool,
     pub query: String,
 }
+
+impl DynamicQuery {
+    pub fn to_toml(&self) -> String {
+        toml::ser::to_string(&self).unwrap()
+    }
+}

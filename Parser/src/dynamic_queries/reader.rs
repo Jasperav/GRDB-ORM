@@ -1,6 +1,6 @@
 use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
 use grdb_orm_lib::dyn_query::DynamicQuery;
-use toml::Value;
+use grdb_orm_lib::toml::Value;
 
 read!(DynamicQuery);
 
@@ -10,7 +10,7 @@ fn transform(content: &str) -> Vec<DynamicQuery> {
     let tables = value.as_table().unwrap();
     let queries = tables
         .iter()
-        .map(|(_, table)| toml::de::from_str(&table.to_string()).unwrap())
+        .map(|(_, table)| grdb_orm_lib::toml::de::from_str(&table.to_string()).unwrap())
         .collect::<Vec<DynamicQuery>>();
 
     validate(&queries);
@@ -74,7 +74,7 @@ mod tests {
             query: "select * from User where firstName = ?".to_string(),
         };
 
-        println!("{}", toml::ser::to_string(&x).unwrap());
+        println!("{}", x.to_toml());
     }
 
     #[test]
