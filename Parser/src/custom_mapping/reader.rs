@@ -1,5 +1,5 @@
+use grdb_orm_lib::toml::Value;
 use regex::Regex;
-use toml::Value;
 
 /// The custom mapping for a type
 pub struct CustomMapping {
