@@ -190,7 +190,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         let switch = self
             .table_meta_data
             .swift_properties
-            .into_iter()
+            .iter()
             .map(|s| {
                 format!(
                     "case .{p}(let val): try genUpdate{}(db: db, {p}: val, assertOneRowAffected: assertOneRowAffected)",
