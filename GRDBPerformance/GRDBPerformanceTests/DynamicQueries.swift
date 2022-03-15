@@ -86,6 +86,20 @@ class DynamicQueryTest: XCTestCase {
         }
     }
 
+    func testMappedType() throws {
+        let db = setupPool()
+
+        try! db.write { con in
+                    let user = DbUser.random()
+                    let parentUuid = UUID()
+
+                    try user.genInsert(db: con)
+                    try DbParent(parentUuid: parentUuid, userUuid: user.userUuid).genInsert(db: con)
+
+                    XCTAssertEqual(try DbParent.retrieveOptionalUserValuesMappedMapped(db: con, parentUuid: parentUuid), try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parentUuid))
+                }
+    }
+
     func testMappedBlobColumn() {
         let db = setupPool()
 
@@ -192,6 +206,8 @@ class DynamicQueryTest: XCTestCase {
         }
 
         waitForExpectations(timeout: 3)
+
+        _ = cancellable
     }
 
     func testSimpleInQuery() {

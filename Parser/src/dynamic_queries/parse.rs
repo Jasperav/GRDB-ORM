@@ -2,7 +2,7 @@ use crate::dynamic_queries::return_type::{Query, QuerySelectDecoding, ReturnType
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
+use crate::swift_property::{create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty};
 use grdb_orm_lib::dyn_query::DynamicQuery;
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
@@ -82,18 +82,51 @@ impl<'a> Parser<'a> {
             } else {
                 format!("-> {}", query.return_type())
             };
+            let parameter_types_separated_colons = parameter_types_separated_colon(
+                &parameters.iter().map(|p| &p.1).collect::<Vec<_>>(),
+            );
 
             // Write the method declaration
             self.add_with_modifier(format!(
                 "static func {}(db: Database{}) throws {} {{",
-                dynamic_query.func_name,
-                parameter_types_separated_colon(
-                    &parameters.iter().map(|p| &p.1).collect::<Vec<_>>()
-                ),
-                func_return_type
+                dynamic_query.func_name, &parameter_types_separated_colons, func_return_type
             ));
 
             self.write_body(dynamic_query, parameters.clone(), &query, &func_return_type);
+
+            if let Some(different_type) = &dynamic_query.map_to_different_type {
+                let return_type = format!(
+                    "-> {}",
+                    if dynamic_query.return_types_is_array {
+                        format!("[{}]", different_type)
+                    } else {
+                        different_type.to_string()
+                    }
+                );
+
+                self.add_with_modifier(format!(
+                    "static func {}Mapped(db: Database{}) throws {} {{",
+                    dynamic_query.func_name, &parameter_types_separated_colons, return_type
+                ));
+
+                let query_changed_return_type = match &query {
+                    Query::Select {
+                        return_type: _,
+                        decoding,
+                    } => Query::Select {
+                        return_type: different_type.to_string(),
+                        decoding: decoding.clone(),
+                    },
+                    Query::UpdateOrDelete => panic!("Not expected with this configuration"),
+                };
+
+                self.write_body(
+                    dynamic_query,
+                    parameters.clone(),
+                    &query_changed_return_type,
+                    &return_type,
+                );
+            }
 
             self.write_queryable_type(
                 dynamic_query,

@@ -21,6 +21,7 @@ pub struct ReturnType<'a> {
 }
 
 /// The different ways of how rows should be decoded
+#[derive(Clone, Debug)]
 pub enum QuerySelectDecoding {
     // Custom decoding is not needed because a struct is generated with the correct decoding
     NotNeeded,

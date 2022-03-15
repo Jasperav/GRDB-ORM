@@ -7,6 +7,8 @@ pub struct DynamicQuery {
     pub return_types: Vec<String>,
     pub return_types_is_array: bool,
     pub query: String,
+    /// Func name of the other query
+    pub map_to_different_type: Option<String>,
 }
 
 impl DynamicQuery {
