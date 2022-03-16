@@ -18,9 +18,11 @@ pub struct ReturnType<'a> {
     pub line_writer: &'a mut LineWriter,
     pub tables: &'a Metadata,
     pub config: &'a Config,
+    pub write_to_line_writer: bool,
 }
 
 /// The different ways of how rows should be decoded
+#[derive(Clone, Debug)]
 pub enum QuerySelectDecoding {
     // Custom decoding is not needed because a struct is generated with the correct decoding
     NotNeeded,
@@ -210,15 +212,17 @@ impl<'a> ReturnType<'a> {
             let properties = struct_properties.join("\n");
             let initializer = initializer_row.join("\n");
 
-            self.line_writer.add_line(format!(
-                "struct {struct_name}: Equatable {{
+            if self.write_to_line_writer {
+                self.line_writer.add_line(format!(
+                    "struct {struct_name}: Equatable {{
                 {properties}
                 {modifier}init(row: Row) {{
                     {initializer}
                 }}
             }}
             "
-            ));
+                ));
+            }
 
             decoding_row = QuerySelectDecoding::NotNeeded;
             return_type = struct_name;

@@ -72,6 +72,7 @@ impl<'a> Parser<'a> {
                 line_writer: &mut self.line_writer,
                 tables: self.tables,
                 config: self.config,
+                write_to_line_writer: true,
             }
             .parse();
 
@@ -82,18 +83,78 @@ impl<'a> Parser<'a> {
             } else {
                 format!("-> {}", query.return_type())
             };
+            let parameter_types_separated_colons = parameter_types_separated_colon(
+                &parameters.iter().map(|p| &p.1).collect::<Vec<_>>(),
+            );
 
             // Write the method declaration
             self.add_with_modifier(format!(
                 "static func {}(db: Database{}) throws {} {{",
-                dynamic_query.func_name,
-                parameter_types_separated_colon(
-                    &parameters.iter().map(|p| &p.1).collect::<Vec<_>>()
-                ),
-                func_return_type
+                dynamic_query.func_name, &parameter_types_separated_colons, func_return_type
             ));
 
             self.write_body(dynamic_query, parameters.clone(), &query, &func_return_type);
+
+            if let Some(different_type) = &dynamic_query.map_to_different_type {
+                assert!(!func_return_type.is_empty());
+
+                // Make sure the result type is the same
+                let (mapped_to_type, func_name) = if different_type.contains('.') {
+                    let split = different_type.split('.').collect::<Vec<_>>();
+
+                    assert_eq!(2, split.len());
+
+                    (split[0].to_string(), split[1].to_string())
+                } else {
+                    (dynamic_query.extension.clone(), different_type.clone())
+                };
+
+                // Search it in the list
+                let matched = self
+                    .config
+                    .dynamic_queries
+                    .iter()
+                    .filter(|dyn_query| dyn_query.extension == mapped_to_type)
+                    .filter(|dyn_query| dyn_query.func_name == func_name)
+                    .collect::<Vec<_>>();
+
+                assert_eq!(
+                    1,
+                    matched.len(),
+                    "No match for mapped type: {}",
+                    different_type
+                );
+
+                let dyn_query = matched[0];
+
+                assert_eq!(dyn_query.return_types, dynamic_query.return_types);
+                assert_eq!(
+                    dyn_query.return_types_is_array,
+                    dynamic_query.return_types_is_array
+                );
+
+                let mapped_type = ReturnType {
+                    dynamic_query: dyn_query,
+                    line_writer: &mut self.line_writer,
+                    tables: self.tables,
+                    config: self.config,
+                    write_to_line_writer: false,
+                }
+                .parse();
+                let mapped_return_type = format!("-> {}", mapped_type.return_type());
+
+                self.add_with_modifier(format!(
+                    "static func {}Mapped(db: Database{}) throws {} {{",
+                    dynamic_query.func_name, &parameter_types_separated_colons, mapped_return_type
+                ));
+
+                self.write_body(
+                    dynamic_query,
+                    parameters.clone(),
+                    &mapped_type,
+                    &mapped_return_type,
+                );
+            }
 
             self.write_queryable_type(
                 dynamic_query,

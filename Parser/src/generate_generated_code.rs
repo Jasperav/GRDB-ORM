@@ -62,6 +62,7 @@ fn update_generated_code() {
                     join User on User.userUuid = Book.userUuid
                     where User.userUuid = ?"
                     .to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -77,6 +78,7 @@ fn update_generated_code() {
                     from Book
                     left join User on User.userUuid = Book.userUuid"
                     .to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -89,6 +91,7 @@ fn update_generated_code() {
                 return_types: vec!["User".to_string()],
                 return_types_is_array: false,
                 query: "select * from User where firstName = ?".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -101,6 +104,7 @@ fn update_generated_code() {
                 return_types: vec!["User.userUuid".to_string()],
                 return_types_is_array: false,
                 query: "select userUuid from User where firstName = ?".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -109,6 +113,7 @@ fn update_generated_code() {
                 return_types: vec!["Int".to_string()],
                 return_types_is_array: false,
                 query: "select count(*) from User".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -121,6 +126,7 @@ fn update_generated_code() {
                 return_types: vec![],
                 return_types_is_array: false,
                 query: "delete from Book where userUuid = ?".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -129,6 +135,7 @@ fn update_generated_code() {
                 return_types: vec!["Bool".to_string()],
                 return_types_is_array: false,
                 query: "select exists(select 1 from Book)".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -141,6 +148,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select serializedInfo, serializedInfoNullable from user limit 1"
                     .to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -152,6 +160,7 @@ fn update_generated_code() {
                 ],
                 return_types_is_array: true,
                 query: "select serializedInfo, serializedInfoNullable from user".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -164,6 +173,7 @@ fn update_generated_code() {
                 return_types: vec![],
                 return_types_is_array: false,
                 query: "update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -174,6 +184,7 @@ fn update_generated_code() {
                 return_types: vec!["User".to_string()],
                 return_types_is_array: true,
                 query: "select * from user where firstName in %PARAM_IN%".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -187,6 +198,7 @@ fn update_generated_code() {
                 return_types: vec!["User".to_string()],
                 return_types_is_array: true,
                 query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
+                map_to_different_type: None,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -202,6 +214,23 @@ fn update_generated_code() {
                 ],
                 return_types_is_array: true,
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?".to_string(),
+                map_to_different_type: None,
+            },
+            DynamicQuery {
+                extension: "Parent".to_string(),
+                func_name: "retrieveOptionalUserValuesMapped".to_string(),
+                parameter_types: vec![
+                    ("Parent".to_string(), "parentUuid".to_string(), "parentUuid".to_string()),
+                ],
+                return_types: vec![
+                    "Parent.parentUuid".to_string(),
+                    "User.userUuid?".to_string(),
+                    "User.jsonStructArray?".to_string(),
+                    "User.jsonStructArrayOptional".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid".to_string(),
+                map_to_different_type: Some("retrieveOptionalUserValues".to_string()),
             },
         ],
         suffix_swift_structs: "",

@@ -72,6 +72,7 @@ mod tests {
             return_types: vec!["User".to_string()],
             return_types_is_array: true,
             query: "select * from User where firstName = ?".to_string(),
+            map_to_different_type: None,
         };
 
         println!("{}", x.to_toml());

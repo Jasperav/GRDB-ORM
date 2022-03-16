@@ -65,7 +65,7 @@ checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
 
 [[package]]
 name = "grdb_orm_lib"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "toml",
