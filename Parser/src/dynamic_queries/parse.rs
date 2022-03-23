@@ -1,4 +1,4 @@
-use crate::dynamic_queries::return_type::{Query, QuerySelectDecoding, ReturnType};
+use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
@@ -175,10 +175,7 @@ impl<'a> Parser<'a> {
         parameters: Vec<&SwiftProperty>,
     ) {
         let the_type = match query {
-            Query::Select {
-                return_type: val,
-                decoding: _,
-            } => val,
+            Query::Select { return_type: val } => val,
             Query::UpdateOrDelete => return,
         };
 
@@ -358,10 +355,7 @@ impl<'a> Parser<'a> {
         }
 
         match &query {
-            Query::Select {
-                return_type: _,
-                decoding,
-            } => {
+            Query::Select { return_type: _ } => {
                 let return_value =
                     query.replace_optional_for_closure(dynamic_query.return_types_is_array);
 
@@ -379,12 +373,7 @@ impl<'a> Parser<'a> {
                 } else {
                     (return_value.as_str(), format!("[{}]", return_value))
                 };
-                let decoding = match decoding {
-                    QuerySelectDecoding::NotNeeded => {
-                        format!("{return_value_closure}.init(row: row)")
-                    }
-                    QuerySelectDecoding::Decoding(decoding) => decoding.clone(),
-                };
+                let decoding = format!("{return_value_closure}.init(row: row)");
 
                 // Add the converted property
                 self.add_line(format!(
