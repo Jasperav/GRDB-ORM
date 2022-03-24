@@ -28,20 +28,20 @@ class DynamicQueryTest: XCTestCase {
 
     func assertFindByUsername(con: Database, find: DbUser) {
         XCTAssert(try! DbUser.findByUsername(db: con, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.findByUsername(db: con, firstName: find.firstName!)!.userUuid)
+        XCTAssertEqual(find.userUuid, try! DbUser.findByUsername(db: con, firstName: find.firstName!)!.gen0.userUuid)
     }
 
     func assertFindUserUuidByUsername(con: Database, find: DbUser) {
         XCTAssert(try! DbUser.findUserUuidByUsername(db: con, firstName: "doesnotexists") == nil)
-        XCTAssertEqual(find.userUuid, try! DbUser.findUserUuidByUsername(db: con, firstName: find.firstName!)!)
+        XCTAssertEqual(find.userUuid, try! DbUser.findUserUuidByUsername(db: con, firstName: find.firstName!)!.gen0)
     }
 
     func assertAmountOfUsersAfterInsertion(con: Database) {
-        XCTAssertEqual(1, try! DbUser.amountOfUsers(db: con))
+        XCTAssertEqual(1, try! DbUser.amountOfUsers(db: con)!.gen0)
     }
 
     func assertAmountOfUsersBeforeInsertion(con: Database) {
-        XCTAssertEqual(0, try! DbUser.amountOfUsers(db: con))
+        XCTAssertEqual(0, try! DbUser.amountOfUsers(db: con)!.gen0)
     }
 
     func assertBooksForUserWithSpecificUuid(con: Database, user: DbUser, book0: DbBook, book1: DbBook) {
@@ -74,15 +74,15 @@ class DynamicQueryTest: XCTestCase {
         let db = setupPool()
 
         try! db.write { con in
-            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con))
+            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con)!.gen0)
 
             try! DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: 0, tsCreated: 0).genInsert(db: con)
 
-            XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(db: con))
+            XCTAssertEqual(true, try! DbBook.hasAtLeastOneBook(db: con)!.gen0)
 
             try! DbBook.genDeleteAll(db: con)
 
-            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con))
+            XCTAssertEqual(false, try! DbBook.hasAtLeastOneBook(db: con)!.gen0)
         }
     }
 

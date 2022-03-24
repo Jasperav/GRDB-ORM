@@ -21,20 +21,8 @@ pub struct ReturnType<'a> {
     pub write_to_line_writer: bool,
 }
 
-/// The different ways of how rows should be decoded
-#[derive(Clone, Debug)]
-pub enum QuerySelectDecoding {
-    // Custom decoding is not needed because a struct is generated with the correct decoding
-    NotNeeded,
-    // Decoding is needed, because a typealias is generated because just 1 column/type is selected
-    Decoding(String),
-}
-
 pub enum Query {
-    Select {
-        return_type: String,
-        decoding: QuerySelectDecoding,
-    },
+    Select { return_type: String },
     // The query shouldn't start with 'insert', since that query is already generated
     UpdateOrDelete,
 }
@@ -42,10 +30,7 @@ pub enum Query {
 impl Query {
     pub fn return_type(&self) -> String {
         match &self {
-            Query::Select {
-                return_type,
-                decoding: _,
-            } => return_type.clone(),
+            Query::Select { return_type } => return_type.clone(),
             // This doesn't have a return type
             Query::UpdateOrDelete => "".to_string(),
         }
@@ -56,10 +41,7 @@ impl Query {
     /// Only do this when there is a single type and it isn't an array, else e.g. (DbUser, SomeType?) will be corrupted
     pub fn replace_optional_for_closure(&self, return_types_is_array: bool) -> String {
         match &self {
-            Query::Select {
-                return_type,
-                decoding: _,
-            } => {
+            Query::Select { return_type } => {
                 if return_types_is_array {
                     return_type.clone()
                 } else {
@@ -185,59 +167,46 @@ impl<'a> ReturnType<'a> {
         assert_eq!(decoding.len(), return_types_swift_struct.len());
 
         let modifier = self.config.visibility.modifier();
-        let return_type;
-        let decoding_row;
 
-        if return_types_swift_struct.len() == 1 {
-            return_type = return_types_swift_struct[0].clone();
+        let struct_name = format!(
+            "{}Type",
+            some_kind_of_uppercase_first_letter(&self.dynamic_query.func_name)
+        );
+        // Create a separate struct which holds the values
+        let mut struct_properties = vec![];
+        let mut initializer_row = vec![];
 
-            // Decoding is always 1 row here
-            decoding_row = QuerySelectDecoding::Decoding(decoding.remove(0));
-        } else {
-            let struct_name = format!(
-                "{}Type",
-                some_kind_of_uppercase_first_letter(&self.dynamic_query.func_name)
-            );
-            // Create a separate struct which holds the values
-            let mut struct_properties = vec![];
-            let mut initializer_row = vec![];
+        for (index, s) in return_types_swift_struct.iter().enumerate() {
+            let property_name = format!("gen{index}");
 
-            for (index, s) in return_types_swift_struct.iter().enumerate() {
-                let property_name = format!("gen{index}");
+            struct_properties.push(format!("{modifier}let {property_name}: {s}"));
+            initializer_row.push(format!("{property_name} = {}", decoding[index]));
+        }
 
-                struct_properties.push(format!("{modifier}let {property_name}: {s}"));
-                initializer_row.push(format!("{property_name} = {}", decoding[index]));
-            }
+        let properties = struct_properties.join("\n");
+        let initializer = initializer_row.join("\n");
 
-            let properties = struct_properties.join("\n");
-            let initializer = initializer_row.join("\n");
-
-            if self.write_to_line_writer {
-                self.line_writer.add_line(format!(
-                    "struct {struct_name}: Equatable {{
+        if self.write_to_line_writer {
+            self.line_writer.add_line(format!(
+                "struct {struct_name}: Equatable {{
                 {properties}
                 {modifier}init(row: Row) {{
                     {initializer}
                 }}
             }}
             "
-                ));
-            }
-
-            decoding_row = QuerySelectDecoding::NotNeeded;
-            return_type = struct_name;
-        };
+            ));
+        }
 
         // Make it an array or optional if needed
         let return_value = if self.dynamic_query.return_types_is_array {
-            format!("[{return_type}]")
+            format!("[{struct_name}]")
         } else {
-            return_type + "?"
+            struct_name + "?"
         };
 
         Query::Select {
             return_type: return_value,
-            decoding: decoding_row,
         }
     }
 }

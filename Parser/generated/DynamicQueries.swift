@@ -136,7 +136,14 @@ public extension DbBook {
 }
 
 public extension DbUser {
-    static func findByUsername(db: Database, firstName: String) throws -> DbUser? {
+    struct FindByUsernameType: Equatable {
+        public let gen0: DbUser
+        public init(row: Row) {
+            gen0 = DbUser(row: row, startingIndex: 0)
+        }
+    }
+
+    static func findByUsername(db: Database, firstName: String) throws -> FindByUsernameType? {
         var query = """
         select * from User where firstName = ?
         """
@@ -146,8 +153,8 @@ public extension DbUser {
 
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
-        let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
-            DbUser(row: row, startingIndex: 0)
+        let converted: [FindByUsernameType] = try Row.fetchAll(statement).map { row -> FindByUsernameType in
+            FindByUsernameType(row: row)
         }
 
         assert(converted.count <= 1, "Expected 1 or zero rows")
@@ -166,13 +173,13 @@ public extension DbUser {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: DbUser? = nil
+        public static let defaultValue: FindByUsernameType? = nil
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<DbUser?, Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindByUsernameType?, Error> {
             ValueObservation
                 .tracking { db in
                     try findByUsername(db: db, firstName: firstName)
@@ -184,7 +191,14 @@ public extension DbUser {
 }
 
 public extension DbUser {
-    static func findUserUuidByUsername(db: Database, firstName: String) throws -> UUID? {
+    struct FindUserUuidByUsernameType: Equatable {
+        public let gen0: UUID
+        public init(row: Row) {
+            gen0 = row[0]
+        }
+    }
+
+    static func findUserUuidByUsername(db: Database, firstName: String) throws -> FindUserUuidByUsernameType? {
         var query = """
         select userUuid from User where firstName = ?
         """
@@ -194,8 +208,8 @@ public extension DbUser {
 
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
-        let converted: [UUID] = try Row.fetchAll(statement).map { row -> UUID in
-            row[0]
+        let converted: [FindUserUuidByUsernameType] = try Row.fetchAll(statement).map { row -> FindUserUuidByUsernameType in
+            FindUserUuidByUsernameType(row: row)
         }
 
         assert(converted.count <= 1, "Expected 1 or zero rows")
@@ -214,13 +228,13 @@ public extension DbUser {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: UUID? = nil
+        public static let defaultValue: FindUserUuidByUsernameType? = nil
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<UUID?, Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindUserUuidByUsernameType?, Error> {
             ValueObservation
                 .tracking { db in
                     try findUserUuidByUsername(db: db, firstName: firstName)
@@ -232,15 +246,22 @@ public extension DbUser {
 }
 
 public extension DbUser {
-    static func amountOfUsers(db: Database) throws -> Int? {
+    struct AmountOfUsersType: Equatable {
+        public let gen0: Int
+        public init(row: Row) {
+            gen0 = row[0]
+        }
+    }
+
+    static func amountOfUsers(db: Database) throws -> AmountOfUsersType? {
         var query = """
         select count(*) from User
         """
         Logging.log(query)
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [Int] = try Row.fetchAll(statement).map { row -> Int in
-            row[0]
+        let converted: [AmountOfUsersType] = try Row.fetchAll(statement).map { row -> AmountOfUsersType in
+            AmountOfUsersType(row: row)
         }
 
         assert(converted.count <= 1, "Expected 1 or zero rows")
@@ -257,14 +278,14 @@ public extension DbUser {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: Int? = nil
+        public static let defaultValue: AmountOfUsersType? = nil
 
         public static func == (_: Self, _: Self) -> Bool {
             // TODO: not sure if this is correct
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<Int?, Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AmountOfUsersType?, Error> {
             ValueObservation
                 .tracking { db in
                     try amountOfUsers(db: db)
@@ -291,15 +312,22 @@ public extension DbBook {
 }
 
 public extension DbBook {
-    static func hasAtLeastOneBook(db: Database) throws -> Bool? {
+    struct HasAtLeastOneBookType: Equatable {
+        public let gen0: Bool
+        public init(row: Row) {
+            gen0 = row[0]
+        }
+    }
+
+    static func hasAtLeastOneBook(db: Database) throws -> HasAtLeastOneBookType? {
         var query = """
         select exists(select 1 from Book)
         """
         Logging.log(query)
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [Bool] = try Row.fetchAll(statement).map { row -> Bool in
-            row[0]
+        let converted: [HasAtLeastOneBookType] = try Row.fetchAll(statement).map { row -> HasAtLeastOneBookType in
+            HasAtLeastOneBookType(row: row)
         }
 
         assert(converted.count <= 1, "Expected 1 or zero rows")
@@ -316,14 +344,14 @@ public extension DbBook {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: Bool? = nil
+        public static let defaultValue: HasAtLeastOneBookType? = nil
 
         public static func == (_: Self, _: Self) -> Bool {
             // TODO: not sure if this is correct
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<Bool?, Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<HasAtLeastOneBookType?, Error> {
             ValueObservation
                 .tracking { db in
                     try hasAtLeastOneBook(db: db)
@@ -469,7 +497,14 @@ public extension DbUser {
 }
 
 public extension DbUser {
-    static func allWithProvidedFirstNames(db: Database, firstName: [String]) throws -> [DbUser] {
+    struct AllWithProvidedFirstNamesType: Equatable {
+        public let gen0: DbUser
+        public init(row: Row) {
+            gen0 = DbUser(row: row, startingIndex: 0)
+        }
+    }
+
+    static func allWithProvidedFirstNames(db: Database, firstName: [String]) throws -> [AllWithProvidedFirstNamesType] {
         var query = """
         select * from user where firstName in %PARAM_IN%
         """
@@ -496,8 +531,8 @@ public extension DbUser {
 
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
-        let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
-            DbUser(row: row, startingIndex: 0)
+        let converted: [AllWithProvidedFirstNamesType] = try Row.fetchAll(statement).map { row -> AllWithProvidedFirstNamesType in
+            AllWithProvidedFirstNamesType(row: row)
         }
 
         return converted
@@ -515,13 +550,13 @@ public extension DbUser {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: [DbUser] = []
+        public static let defaultValue: [AllWithProvidedFirstNamesType] = []
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[DbUser], Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[AllWithProvidedFirstNamesType], Error> {
             ValueObservation
                 .tracking { db in
                     try allWithProvidedFirstNames(db: db, firstName: firstName)
@@ -533,7 +568,14 @@ public extension DbUser {
 }
 
 public extension DbUser {
-    static func complex(db: Database, firstNames0: [String], jsonStructOptional: JsonType, integer: [Int], serializedInfoNullable: SerializedInfo) throws -> [DbUser] {
+    struct ComplexType: Equatable {
+        public let gen0: DbUser
+        public init(row: Row) {
+            gen0 = DbUser(row: row, startingIndex: 0)
+        }
+    }
+
+    static func complex(db: Database, firstNames0: [String], jsonStructOptional: JsonType, integer: [Int], serializedInfoNullable: SerializedInfo) throws -> [ComplexType] {
         var query = """
         select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?
         """
@@ -583,8 +625,8 @@ public extension DbUser {
 
         let statement = try db.cachedStatement(sql: query)
         statement.setUncheckedArguments(arguments)
-        let converted: [DbUser] = try Row.fetchAll(statement).map { row -> DbUser in
-            DbUser(row: row, startingIndex: 0)
+        let converted: [ComplexType] = try Row.fetchAll(statement).map { row -> ComplexType in
+            ComplexType(row: row)
         }
 
         return converted
@@ -611,13 +653,13 @@ public extension DbUser {
             self.scheduler = scheduler
         }
 
-        public static let defaultValue: [DbUser] = []
+        public static let defaultValue: [ComplexType] = []
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
             lhs.firstNames0 == rhs.firstNames0 && lhs.jsonStructOptional == rhs.jsonStructOptional && lhs.integer == rhs.integer && lhs.serializedInfoNullable == rhs.serializedInfoNullable
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[DbUser], Error> {
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[ComplexType], Error> {
             ValueObservation
                 .tracking { db in
                     try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
