@@ -26,7 +26,7 @@ pub fn write_logging(line_writer: &mut LineWriter) {
                     }
 
                     for range in ranges.reversed() {
-                        let arg = surelyDatabaseValues.removeFirst().description
+                        let arg = surelyDatabaseValues.removeLast().description
 
                         queryChanged.replaceSubrange(range, with: arg)
                     }

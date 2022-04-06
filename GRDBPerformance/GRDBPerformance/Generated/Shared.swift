@@ -61,19 +61,9 @@ struct Logging {
             }
 
             for range in ranges.reversed() {
-                let description = surelyDatabaseValues.removeFirst().description
-                let startsWithQuote = description.starts(with: "\"")
-                let finalDescription: String
+                let arg = surelyDatabaseValues.removeLast().description
 
-                if startsWithQuote {
-                    let stringWithoutQuotes = String(description.dropFirst().reversed().dropFirst().reversed())
-
-                    finalDescription = "'" + String(stringWithoutQuotes) + "'"
-                } else {
-                    finalDescription = description
-                }
-
-                queryChanged.replaceSubrange(range, with: finalDescription)
+                queryChanged.replaceSubrange(range, with: arg)
             }
 
             logger.debug("Executing: \(queryChanged)")
