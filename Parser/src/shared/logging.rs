@@ -25,11 +25,21 @@ pub fn write_logging(line_writer: &mut LineWriter) {
                         start = range.upperBound
                     }
 
-                    for range in ranges.reversed() {
-                        let arg = surelyDatabaseValues.removeLast().description
+            for range in ranges.reversed() {
+                let arg = surelyDatabaseValues.removeLast().description
+                let startsWithQuotes = arg.first! == \"\\\"\"
+                let finalDescription: String
 
-                        queryChanged.replaceSubrange(range, with: arg)
-                    }
+                if startsWithQuotes {
+                    let withoutQuotes = arg.dropFirst().reversed().dropFirst().reversed()
+
+                    finalDescription = \"'\" + withoutQuotes + \"'\"
+                } else {
+                    finalDescription = arg
+                }
+
+                queryChanged.replaceSubrange(range, with: finalDescription)
+            }
 
                     logger.debug(\"Executing: \\(queryChanged)\")
                     #endif
