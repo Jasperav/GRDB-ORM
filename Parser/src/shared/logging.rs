@@ -11,9 +11,37 @@ pub fn write_logging(line_writer: &mut LineWriter) {
                 private static let logger = Logger(subsystem: \"GRDB-ORM\", category: \"Query logging\")
                 #endif
 
-                public static func log(_ query: String) {
+                public static func log(_ query: String, statementArguments: StatementArguments) {
                     #if DEBUG
-                    logger.debug(\"Executing: \\(query)\")
+                    let maybeDatabaseValues = Mirror(reflecting: statementArguments.self).children.first { $0.label == \"values\" }?.value as? [DatabaseValue]
+                    var surelyDatabaseValues = maybeDatabaseValues!
+                    var queryChanged = query
+                    var ranges: [Range<String.Index>] = []
+                    var start = queryChanged.startIndex
+
+                    while start < queryChanged.endIndex,
+                          let range = queryChanged.range(of: \"?\", range: start ..< queryChanged.endIndex) {
+                        ranges.append(range)
+                        start = range.upperBound
+                    }
+
+            for range in ranges.reversed() {
+                let arg = surelyDatabaseValues.removeLast().description
+                let startsWithQuotes = arg.first! == \"\\\"\"
+                let finalDescription: String
+
+                if startsWithQuotes {
+                    let withoutQuotes = arg.dropFirst().reversed().dropFirst().reversed()
+
+                    finalDescription = \"'\" + withoutQuotes + \"'\"
+                } else {
+                    finalDescription = arg
+                }
+
+                queryChanged.replaceSubrange(range, with: finalDescription)
+            }
+
+                    logger.debug(\"Executing: \\(queryChanged)\")
                     #endif
                 }
              }

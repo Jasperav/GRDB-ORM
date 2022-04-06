@@ -344,11 +344,16 @@ impl<'a> Parser<'a> {
             }
         }
 
-        self.add_line(
-            "Logging.log(query)
+        self.add_line(format!(
+            "Logging.log(query, statementArguments: {})
 
         let statement = try db.cachedStatement(sql: query)",
-        );
+            if has_arguments {
+                "arguments"
+            } else {
+                ".init()"
+            }
+        ));
 
         if has_arguments {
             self.add_line("statement.setUncheckedArguments(arguments)");

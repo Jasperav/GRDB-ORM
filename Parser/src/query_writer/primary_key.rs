@@ -85,7 +85,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            Logging.log(Self.{query})
+            Logging.log(Self.{query}, statementArguments: arguments)
 
             let statement = try db.cachedStatement(sql: Self.{query})
 
@@ -130,7 +130,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
                 {}
             ]
 
-            Logging.log(Self.{query})
+            Logging.log(Self.{query}, statementArguments: arguments)
 
             let statement = try db.cachedStatement(sql: Self.{query})
 
@@ -324,7 +324,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 let finalQuery = updateQuery + \" \" + pkQuery
 
-                Logging.log(finalQuery)
+                Logging.log(finalQuery, statementArguments: arguments)
 
                 let statement = try db.cachedStatement(sql: finalQuery)
 

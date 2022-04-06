@@ -197,7 +197,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                         {},
                     ]
 
-                    Logging.log({query})
+                    Logging.log({query}, statementArguments: arguments)
 
                     let statement = try db.cachedStatement(sql: {query})
 
@@ -423,7 +423,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                     {}
                 ]
 
-                Logging.log(upsertQuery)
+                Logging.log(upsertQuery, statementArguments: arguments)
 
                 let statement = try db.cachedStatement(sql: upsertQuery)
 
@@ -450,7 +450,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> [{struct_name}] {{
-                Logging.log({query})
+                Logging.log({query}, statementArguments: .init())
 
                 let statement = try db.cachedStatement(sql: {query})
 
@@ -467,7 +467,7 @@ impl<'a> QueryWriterMainStruct<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
             static func {}(db: Database) throws -> Int {{
-                Logging.log({query})
+                Logging.log({query}, statementArguments: .init())
 
                 let statement = try db.cachedStatement(sql: {query})
 
@@ -568,11 +568,11 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "{}func gen{}(db: Database{}) throws {{
-                Logging.log(Self.{query})
-
                 let statement = try db.cachedStatement(sql: Self.{query})
 
                 {}
+
+                Logging.log(Self.{query}, statementArguments: {})
 
                 try statement.execute()
 
@@ -583,6 +583,11 @@ impl<'a> QueryWriterMainStruct<'a> {
             method_name,
             arguments,
             args,
+            if args.is_empty() {
+                ".init()"
+            } else {
+                "arguments"
+            },
             check,
             query = query,
         ));
