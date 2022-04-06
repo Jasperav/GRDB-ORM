@@ -11,9 +11,18 @@ pub fn write_logging(line_writer: &mut LineWriter) {
                 private static let logger = Logger(subsystem: \"GRDB-ORM\", category: \"Query logging\")
                 #endif
 
-                public static func log(_ query: String) {
+                public static func log(_ query: String, _ args: Any...) {
                     #if DEBUG
-                    logger.debug(\"Executing: \\(query)\")
+                    let argsToString = args.map { String(describing: $0) }.joined(separator: \", \")
+                    let toAdd: String
+
+                    if argsToString.isEmpty {
+                        toAdd = \"\"
+                    } else {
+                        toAdd = \" with arguments: \" + argsToString
+                    }
+
+                    logger.debug(\"Executing: \\(query)\\(toAdd)\")
                     #endif
                 }
              }

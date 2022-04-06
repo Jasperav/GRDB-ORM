@@ -1,4 +1,4 @@
-use crate::line_writer::StaticInstance;
+use crate::line_writer::{parameter_types_separated_colon_names_only, StaticInstance};
 use crate::query_writer::primary_key::DELETE_METHOD;
 use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
@@ -192,12 +192,12 @@ impl<'a> QueryWriterMainStruct<'a> {
 
             self.table_meta_data.line_writer.add_with_modifier(format!(
                 "
-                static func genUpdate{}AllRows(db: Database, {}: {}) throws {{
+                static func genUpdate{}AllRows(db: Database, {property_name}: {}) throws {{
                     let arguments: StatementArguments = try [
                         {},
                     ]
 
-                    Logging.log({query})
+                    Logging.log({query}, {property_name})
 
                     let statement = try db.cachedStatement(sql: {query})
 
@@ -207,9 +207,9 @@ impl<'a> QueryWriterMainStruct<'a> {
                 }}
             ",
                 capitalized_name,
-                column.swift_property_name,
                 column.swift_type.type_name,
                 encoded,
+                property_name = column.swift_property_name,
                 query = query
             ));
         }
@@ -423,7 +423,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                     {}
                 ]
 
-                Logging.log(upsertQuery)
+                Logging.log(upsertQuery, columns)
 
                 let statement = try db.cachedStatement(sql: upsertQuery)
 
@@ -488,10 +488,30 @@ impl<'a> QueryWriterMainStruct<'a> {
                 .as_slice(),
         );
         let insert_method = "Insert";
+        let swift_properties = self.table_meta_data.swift_properties;
+        let copied = swift_properties.iter().collect::<Vec<_>>();
 
-        self.write(insert_method, INSERT_UNIQUE_QUERY, &db_values, true);
-        self.write("InsertOrIgnore", INSERT_OR_IGNORE_QUERY, &db_values, false);
-        self.write("Replace", REPLACE_UNIQUE_QUERY, &db_values, false);
+        self.write(
+            insert_method,
+            INSERT_UNIQUE_QUERY,
+            &db_values,
+            true,
+            copied.as_slice(),
+        );
+        self.write(
+            "InsertOrIgnore",
+            INSERT_OR_IGNORE_QUERY,
+            &db_values,
+            false,
+            copied.as_slice(),
+        );
+        self.write(
+            "Replace",
+            REPLACE_UNIQUE_QUERY,
+            &db_values,
+            false,
+            copied.as_slice(),
+        );
 
         let non_pk_cloned = self
             .table_meta_data
@@ -500,7 +520,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             .map(|c| <&SwiftProperty>::clone(c).clone())
             .collect::<Vec<_>>();
 
-        for column in non_pk_cloned {
+        for column in non_pk_cloned.clone() {
             let query_name = create_upsert_query_name(&column.column.name);
             let method_name = query_name.strip_suffix("Query").unwrap().to_string();
 
@@ -509,6 +529,11 @@ impl<'a> QueryWriterMainStruct<'a> {
                 &query_name,
                 &db_values,
                 false,
+                non_pk_cloned
+                    .iter()
+                    .map(|a| a)
+                    .collect::<Vec<_>>()
+                    .as_slice(),
             );
         }
 
@@ -526,7 +551,7 @@ impl<'a> QueryWriterMainStruct<'a> {
     }
 
     fn write_delete(&mut self) {
-        self.write("DeleteAll", DELETE_ALL_QUERY, "", true);
+        self.write("DeleteAll", DELETE_ALL_QUERY, "", true, &[]);
     }
 
     fn write_update(&mut self) {
@@ -540,12 +565,30 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         non_pk.append(&mut pk);
 
+        let copy = non_pk
+            .clone()
+            .into_iter()
+            .map(|a| a.clone())
+            .collect::<Vec<_>>();
         let values = encode_swift_properties(&non_pk);
 
-        self.write("Update", UPDATE_UNIQUE_QUERY, &values, true);
+        self.write(
+            "Update",
+            UPDATE_UNIQUE_QUERY,
+            &values,
+            true,
+            copy.iter().map(|a| a).collect::<Vec<_>>().as_slice(),
+        );
     }
 
-    fn write(&mut self, method_name: &str, query: &str, values: &str, add_check: bool) {
+    fn write(
+        &mut self,
+        method_name: &str,
+        query: &str,
+        values: &str,
+        add_check: bool,
+        swift_properties: &[&SwiftProperty],
+    ) {
         let (static_instance, args, check, arguments) = if values.is_empty() {
             (StaticInstance::Static, "".to_string(), "", "")
         } else {
@@ -568,7 +611,7 @@ impl<'a> QueryWriterMainStruct<'a> {
 
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "{}func gen{}(db: Database{}) throws {{
-                Logging.log(Self.{query})
+                Logging.log(Self.{query}{})
 
                 let statement = try db.cachedStatement(sql: Self.{query})
 
@@ -582,6 +625,7 @@ impl<'a> QueryWriterMainStruct<'a> {
             static_instance.modifier(),
             method_name,
             arguments,
+            parameter_types_separated_colon_names_only(swift_properties),
             args,
             check,
             query = query,

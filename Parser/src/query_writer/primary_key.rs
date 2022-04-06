@@ -324,7 +324,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 let finalQuery = updateQuery + \" \" + pkQuery
 
-                Logging.log(finalQuery)
+                Logging.log(finalQuery, columns)
 
                 let statement = try db.cachedStatement(sql: finalQuery)
 

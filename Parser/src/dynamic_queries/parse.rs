@@ -1,5 +1,7 @@
 use crate::dynamic_queries::return_type::{Query, ReturnType};
-use crate::line_writer::parameter_types_separated_colon;
+use crate::line_writer::{
+    parameter_types_separated_colon, parameter_types_separated_colon_names_only,
+};
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
@@ -301,7 +303,7 @@ impl<'a> Parser<'a> {
             self.add_line("var arguments = StatementArguments()");
         }
 
-        for (is_array, swift_property) in swift_properties {
+        for (is_array, swift_property) in swift_properties.clone() {
             if *is_array {
                 let mut swift_property_clone = swift_property.clone();
 
@@ -344,11 +346,18 @@ impl<'a> Parser<'a> {
             }
         }
 
-        self.add_line(
-            "Logging.log(query)
+        self.add_line(format!(
+            "Logging.log(query{})
 
         let statement = try db.cachedStatement(sql: query)",
-        );
+            parameter_types_separated_colon_names_only(
+                swift_properties
+                    .iter()
+                    .map(|s| &s.1)
+                    .collect::<Vec<_>>()
+                    .as_slice()
+            )
+        ));
 
         if has_arguments {
             self.add_line("statement.setUncheckedArguments(arguments)");

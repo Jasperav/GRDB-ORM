@@ -1,4 +1,6 @@
-use crate::line_writer::{parameter_types_separated_colon, LineWriter};
+use crate::line_writer::{
+    parameter_types_separated_colon, parameter_types_separated_colon_names_only, LineWriter,
+};
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
 
 /// Holds information about the current processing table
@@ -26,7 +28,7 @@ impl<'a> TableMetaData<'a> {
                 {}
             ]
 
-            Logging.log({query})
+            Logging.log({query}{})
 
             let statement = try db.cachedStatement(sql: {query})
 
@@ -49,6 +51,7 @@ impl<'a> TableMetaData<'a> {
                 ""
             },
             encode_swift_properties(values),
+            parameter_types_separated_colon_names_only(parameters),
             if add_assert_one_row_affected {
                 "if assertOneRowAffected {
                 assert(db.changesCount == 1)

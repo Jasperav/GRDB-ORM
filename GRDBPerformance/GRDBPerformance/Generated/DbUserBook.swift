@@ -52,7 +52,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
-        Logging.log(Self.insertUniqueQuery)
+        Logging.log(Self.insertUniqueQuery, bookUuid, userUuid, realToDouble)
 
         let statement = try db.cachedStatement(sql: Self.insertUniqueQuery)
 
@@ -73,7 +73,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genInsertOrIgnore(db: Database) throws {
-        Logging.log(Self.insertOrIgnoreUniqueQuery)
+        Logging.log(Self.insertOrIgnoreUniqueQuery, bookUuid, userUuid, realToDouble)
 
         let statement = try db.cachedStatement(sql: Self.insertOrIgnoreUniqueQuery)
 
@@ -89,7 +89,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genReplace(db: Database) throws {
-        Logging.log(Self.replaceUniqueQuery)
+        Logging.log(Self.replaceUniqueQuery, bookUuid, userUuid, realToDouble)
 
         let statement = try db.cachedStatement(sql: Self.replaceUniqueQuery)
 
@@ -105,7 +105,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genUpsertRealToDouble(db: Database) throws {
-        Logging.log(Self.upsertRealToDoubleQuery)
+        Logging.log(Self.upsertRealToDoubleQuery, realToDouble)
 
         let statement = try db.cachedStatement(sql: Self.upsertRealToDoubleQuery)
 
@@ -137,7 +137,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
-        Logging.log(Self.updateUniqueQuery)
+        Logging.log(Self.updateUniqueQuery, realToDouble, bookUuid, userUuid)
 
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
@@ -247,7 +247,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        Logging.log(upsertQuery)
+        Logging.log(upsertQuery, columns)
 
         let statement = try db.cachedStatement(sql: upsertQuery)
 
@@ -270,7 +270,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             bookUuid.uuidString
         ]
 
-        Logging.log("update UserBook set bookUuid = ?")
+        Logging.log("update UserBook set bookUuid = ?", bookUuid)
 
         let statement = try db.cachedStatement(sql: "update UserBook set bookUuid = ?")
 
@@ -285,7 +285,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             userUuid.uuidString
         ]
 
-        Logging.log("update UserBook set userUuid = ?")
+        Logging.log("update UserBook set userUuid = ?", userUuid)
 
         let statement = try db.cachedStatement(sql: "update UserBook set userUuid = ?")
 
@@ -300,7 +300,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        Logging.log("update UserBook set realToDouble = ?")
+        Logging.log("update UserBook set realToDouble = ?", realToDouble)
 
         let statement = try db.cachedStatement(sql: "update UserBook set realToDouble = ?")
 
@@ -414,7 +414,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            Logging.log(DbUserBook.UpdatableColumn.updateBookUuidQuery)
+            Logging.log(DbUserBook.UpdatableColumn.updateBookUuidQuery, bookUuid)
 
             let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateBookUuidQuery)
 
@@ -434,7 +434,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 self.userUuid.uuidString
             ]
 
-            Logging.log(DbUserBook.UpdatableColumn.updateUserUuidQuery)
+            Logging.log(DbUserBook.UpdatableColumn.updateUserUuidQuery, userUuid)
 
             let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateUserUuidQuery)
 
@@ -454,7 +454,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
                 userUuid.uuidString
             ]
 
-            Logging.log(DbUserBook.UpdatableColumn.updateRealToDoubleQuery)
+            Logging.log(DbUserBook.UpdatableColumn.updateRealToDoubleQuery, realToDouble)
 
             let statement = try db.cachedStatement(sql: DbUserBook.UpdatableColumn.updateRealToDoubleQuery)
 
@@ -516,7 +516,7 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             let finalQuery = updateQuery + " " + pkQuery
 
-            Logging.log(finalQuery)
+            Logging.log(finalQuery, columns)
 
             let statement = try db.cachedStatement(sql: finalQuery)
 

@@ -47,7 +47,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genInsert(db: Database, assertOneRowAffected: Bool = true) throws {
-        Logging.log(Self.insertUniqueQuery)
+        Logging.log(Self.insertUniqueQuery, parentUuid, userUuid)
 
         let statement = try db.cachedStatement(sql: Self.insertUniqueQuery)
 
@@ -67,7 +67,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genInsertOrIgnore(db: Database) throws {
-        Logging.log(Self.insertOrIgnoreUniqueQuery)
+        Logging.log(Self.insertOrIgnoreUniqueQuery, parentUuid, userUuid)
 
         let statement = try db.cachedStatement(sql: Self.insertOrIgnoreUniqueQuery)
 
@@ -82,7 +82,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genReplace(db: Database) throws {
-        Logging.log(Self.replaceUniqueQuery)
+        Logging.log(Self.replaceUniqueQuery, parentUuid, userUuid)
 
         let statement = try db.cachedStatement(sql: Self.replaceUniqueQuery)
 
@@ -97,7 +97,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genUpsertUserUuid(db: Database) throws {
-        Logging.log(Self.upsertUserUuidQuery)
+        Logging.log(Self.upsertUserUuidQuery, userUuid)
 
         let statement = try db.cachedStatement(sql: Self.upsertUserUuidQuery)
 
@@ -128,7 +128,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
-        Logging.log(Self.updateUniqueQuery)
+        Logging.log(Self.updateUniqueQuery, userUuid, parentUuid)
 
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
@@ -222,7 +222,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             userUuid?.uuidString
         ]
 
-        Logging.log(upsertQuery)
+        Logging.log(upsertQuery, columns)
 
         let statement = try db.cachedStatement(sql: upsertQuery)
 
@@ -245,7 +245,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             parentUuid.uuidString
         ]
 
-        Logging.log("update Parent set parentUuid = ?")
+        Logging.log("update Parent set parentUuid = ?", parentUuid)
 
         let statement = try db.cachedStatement(sql: "update Parent set parentUuid = ?")
 
@@ -260,7 +260,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             userUuid?.uuidString
         ]
 
-        Logging.log("update Parent set userUuid = ?")
+        Logging.log("update Parent set userUuid = ?", userUuid)
 
         let statement = try db.cachedStatement(sql: "update Parent set userUuid = ?")
 
@@ -367,7 +367,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 self.parentUuid.uuidString
             ]
 
-            Logging.log(DbParent.UpdatableColumn.updateParentUuidQuery)
+            Logging.log(DbParent.UpdatableColumn.updateParentUuidQuery, parentUuid)
 
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateParentUuidQuery)
 
@@ -386,7 +386,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
                 parentUuid.uuidString
             ]
 
-            Logging.log(DbParent.UpdatableColumn.updateUserUuidQuery)
+            Logging.log(DbParent.UpdatableColumn.updateUserUuidQuery, userUuid)
 
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateUserUuidQuery)
 
@@ -439,7 +439,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
             let finalQuery = updateQuery + " " + pkQuery
 
-            Logging.log(finalQuery)
+            Logging.log(finalQuery, columns)
 
             let statement = try db.cachedStatement(sql: finalQuery)
 

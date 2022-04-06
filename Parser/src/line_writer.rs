@@ -42,6 +42,19 @@ pub fn parameter_types_separated_colon(pt: &[&SwiftProperty]) -> String {
             .join(", ")
 }
 
+pub fn parameter_types_separated_colon_names_only(pt: &[&SwiftProperty]) -> String {
+    if pt.is_empty() {
+        return "".to_string();
+    }
+
+    ", ".to_string()
+        + &pt
+            .iter()
+            .map(|pt| format!("{}", pt.swift_property_name))
+            .collect::<Vec<_>>()
+            .join(", ")
+}
+
 impl LineWriter {
     pub fn new(modifier: &'static str, output_dir: PathBuf) -> Self {
         let mut s = Self {
