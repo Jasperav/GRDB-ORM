@@ -26,9 +26,9 @@ impl<'a> TableMetaData<'a> {
                 {}
             ]
 
-            Logging.log({query})
-
             let statement = try db.cachedStatement(sql: {query})
+
+            Logging.log({query}, statementArguments: arguments)
 
             statement.setUncheckedArguments(arguments)
 

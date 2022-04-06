@@ -46,9 +46,27 @@ struct Logging {
         private static let logger = Logger(subsystem: "GRDB-ORM", category: "Query logging")
     #endif
 
-    public static func log(_ query: String) {
+    public static func log(_ query: String, statementArguments: StatementArguments) {
         #if DEBUG
-            logger.debug("Executing: \(query)")
+            let maybeDatabaseValues = Mirror(reflecting: statementArguments.self).children.first { $0.label == "values" }?.value as? [DatabaseValue]
+            var surelyDatabaseValues = maybeDatabaseValues!
+            var queryChanged = query
+            var ranges: [Range<String.Index>] = []
+            var start = queryChanged.startIndex
+
+            while start < queryChanged.endIndex,
+                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex) {
+                ranges.append(range)
+                start = range.upperBound
+            }
+
+            for range in ranges.reversed() {
+                let arg = surelyDatabaseValues.removeFirst().description
+
+                queryChanged.replaceSubrange(range, with: arg)
+            }
+
+            logger.debug("Executing: \(queryChanged)")
         #endif
     }
 }
