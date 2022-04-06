@@ -1122,7 +1122,8 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 userUuid.uuidString
             ]
 
-            Logging.log(Self.deleteQuery)
+
+            Logging.log(Self.deleteQuery, test: unwrap)
 
             let statement = try db.cachedStatement(sql: Self.deleteQuery)
 

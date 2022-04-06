@@ -5,24 +5,42 @@ pub fn write_logging(line_writer: &mut LineWriter) {
     line_writer.add_comment("Will log in debug mode only");
     line_writer.add_line(
         "import OSLog
+import Foundation
+
+            #if DEBUG
+            extension String  {
+                var isNumber: Bool {
+                    return !isEmpty && rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil
+                }
+            }
+            #endif
 
              struct Logging {
                 #if DEBUG
                 private static let logger = Logger(subsystem: \"GRDB-ORM\", category: \"Query logging\")
                 #endif
 
-                public static func log(_ query: String, _ args: Any...) {
+                public static func log(_ query: String, _ databaseValues: [DatabaseValue]) {
                     #if DEBUG
-                    let argsToString = args.map { String(describing: $0) }.joined(separator: \", \")
-                    let toAdd: String
+                    let maybeDatabaseValues = Mirror(reflecting: databaseValues.self).children.first { $0.label == \"values\" }?.value as? [DatabaseValue]
+                    var surelyDatabaseValues = maybeDatabaseValues!
+                    var queryChanged = query
+                    var ranges: [Range<String.Index>] = []
+                    var start = queryChanged.startIndex
 
-                    if argsToString.isEmpty {
-                        toAdd = \"\"
-                    } else {
-                        toAdd = \" with arguments: \" + argsToString
+                    while start < queryChanged.endIndex,
+                          let range = queryChanged.range(of: \"?\", range: start ..< queryChanged.endIndex) {
+                        ranges.append(range)
+                        start = range.upperBound
                     }
 
-                    logger.debug(\"Executing: \\(query)\\(toAdd)\")
+                    for range in ranges.reversed() {
+                        let arg = surelyDatabaseValues.removeFirst().description
+
+                        queryChanged.replaceSubrange(range, with: arg)
+                    }
+
+                    logger.debug(\"Executing: \(queryChanged)\")
                     #endif
                 }
              }

@@ -38,8 +38,17 @@ public extension Data {
     }
 }
 
+import Foundation
 // Will log in debug mode only
 import OSLog
+
+#if DEBUG
+    extension String {
+        var isNumber: Bool {
+            return !isEmpty && rangeOfCharacter(from: CharacterSet.decimalDigits.inverted) == nil
+        }
+    }
+#endif
 
 struct Logging {
     #if DEBUG
@@ -48,16 +57,30 @@ struct Logging {
 
     public static func log(_ query: String, _ args: Any...) {
         #if DEBUG
-            let argsToString = args.map { String(describing: $0) }.joined(separator: ", ")
-            let toAdd: String
+            var queryChanged = query
+            var argsToChange = args
+            var ranges: [Range<String.Index>] = []
+            var start = queryChanged.startIndex
 
-            if argsToString.isEmpty {
-                toAdd = ""
-            } else {
-                toAdd = " with arguments: " + argsToString
+            while start < queryChanged.endIndex,
+                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex) {
+                ranges.append(range)
+                start = range.upperBound
             }
 
-            logger.debug("Executing: \(query)\(toAdd)")
+            for range in ranges.reversed() {
+                let arg = argsToChange.removeFirst()
+
+                var replacement = String(describing: arg)
+
+                if !replacement.isNumber {
+                    replacement = "\"" + replacement + "\""
+                }
+
+                queryChanged.replaceSubrange(range, with: replacement)
+            }
+
+            logger.debug("Executing: \(queryChanged)")
         #endif
     }
 }
