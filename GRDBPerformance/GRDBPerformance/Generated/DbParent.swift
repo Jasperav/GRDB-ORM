@@ -127,6 +127,36 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try statement.execute()
     }
 
+    public
+    static func genDeleteByParentUuid(db: Database, parentUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            parentUuid.uuidString
+        ]
+
+        Logging.log("delete from Parent where parentUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Parent where parentUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            userUuid.uuidString
+        ]
+
+        Logging.log("delete from Parent where userUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Parent where userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 

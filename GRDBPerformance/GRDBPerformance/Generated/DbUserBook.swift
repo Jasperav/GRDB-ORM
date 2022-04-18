@@ -136,6 +136,51 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
         try statement.execute()
     }
 
+    public
+    static func genDeleteByBookUuid(db: Database, bookUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString
+        ]
+
+        Logging.log("delete from UserBook where bookUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from UserBook where bookUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            userUuid.uuidString
+        ]
+
+        Logging.log("delete from UserBook where userUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from UserBook where userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByRealToDouble(db: Database, realToDouble: Double) throws {
+        let arguments: StatementArguments = try [
+            realToDouble
+        ]
+
+        Logging.log("delete from UserBook where realToDouble = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from UserBook where realToDouble = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 

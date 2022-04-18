@@ -186,15 +186,32 @@ impl<'a> QueryWriterMainStruct<'a> {
             let capitalized_name = some_kind_of_uppercase_first_letter(&column.swift_property_name);
             let encoded = encode_swift_properties(&[column]);
             let query = format!(
-                "\"update {} set {} = ?\"",
+                "update {} set {} = ?",
                 self.table_meta_data.table_name, column.column.name
             );
+            self.write_all_rows(
+                &format!("Update{capitalized_name}AllRows"),
+                &column.swift_property_name,
+                &column.swift_type.type_name,
+                &encoded,
+                &query,
+            );
+        }
+    }
 
-            self.table_meta_data.line_writer.add_with_modifier(format!(
-                "
-                static func genUpdate{}AllRows(db: Database, {}: {}) throws {{
+    fn write_all_rows(
+        &mut self,
+        method_name: &str,
+        parameter_name: &str,
+        parameter_type: &str,
+        encoded: &str,
+        query: &str,
+    ) {
+        self.table_meta_data.line_writer.add_with_modifier(format!(
+            "
+                static func gen{method_name}(db: Database, {parameter_name}: {parameter_type}) throws {{
                     let arguments: StatementArguments = try [
-                        {},
+                        {encoded},
                     ]
 
                     Logging.log({query}, statementArguments: arguments)
@@ -205,14 +222,8 @@ impl<'a> QueryWriterMainStruct<'a> {
 
                     try statement.execute()
                 }}
-            ",
-                capitalized_name,
-                column.swift_property_name,
-                column.swift_type.type_name,
-                encoded,
-                query = query
-            ));
-        }
+            ", query = format!("\"{query}\"")
+        ));
     }
 
     fn write_updatable_columns(&mut self) {
@@ -527,6 +538,30 @@ impl<'a> QueryWriterMainStruct<'a> {
 
     fn write_delete(&mut self) {
         self.write("DeleteAll", DELETE_ALL_QUERY, "", true);
+
+        let mut properties = self.table_meta_data.swift_properties.clone();
+
+        for property in &mut properties {
+            // Don't allow nullable fields
+            property.swift_type.type_name = property.swift_type.type_name.replace('?', "");
+            property.column.nullable = false;
+
+            let encoded = encode_swift_properties(&[property]);
+
+            self.write_all_rows(
+                &format!(
+                    "DeleteBy{}",
+                    some_kind_of_uppercase_first_letter(&property.swift_property_name)
+                ),
+                &property.swift_property_name,
+                &property.swift_type.type_name,
+                &encoded,
+                &format!(
+                    "delete from {} where {} = ?",
+                    self.table_meta_data.table_name, property.column.name
+                ),
+            );
+        }
     }
 
     fn write_update(&mut self) {
