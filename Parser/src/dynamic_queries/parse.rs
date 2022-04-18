@@ -56,7 +56,7 @@ impl<'a> Parser<'a> {
                     }
                     + 1;
 
-                let mut swift_property = if is_build_in_type(&table, Type::Text) {
+                let mut swift_property = if is_build_in_type(table, Type::Text) {
                     SwiftProperty {
                         swift_property_name: param_name.to_string(),
                         swift_type: SwiftTypeWithTypeName {
