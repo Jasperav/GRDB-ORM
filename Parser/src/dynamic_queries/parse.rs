@@ -2,8 +2,12 @@ use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Parser};
 use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{create_swift_type_name, encode_swift_properties, SwiftProperty};
+use crate::swift_property::{
+    create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty, SwiftType,
+    SwiftTypeWithTypeName,
+};
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use sqlite_parser::{Column, Type};
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
 
@@ -52,8 +56,25 @@ impl<'a> Parser<'a> {
                     }
                     + 1;
 
-                let mut swift_property =
-                    self.find_swift_property(table, column, param_name, &mut database_values);
+                let mut swift_property = if is_build_in_type(&table, Type::Text) {
+                    SwiftProperty {
+                        swift_property_name: param_name.to_string(),
+                        swift_type: SwiftTypeWithTypeName {
+                            type_name: table.to_string(),
+                            swift_type: SwiftType::NoJson,
+                        },
+                        column: Column {
+                            id: 0,
+                            name: table.to_string(),
+                            the_type: table.to_string().into(),
+                            nullable: false,
+                            part_of_pk: false,
+                        },
+                        refers_to_self: false,
+                    }
+                } else {
+                    self.find_swift_property(table, column, param_name, &mut database_values)
+                };
 
                 if belongs_to_parameterized_in_query {
                     swift_property.swift_type.type_name =

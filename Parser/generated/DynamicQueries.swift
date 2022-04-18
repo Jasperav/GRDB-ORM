@@ -830,3 +830,57 @@ public extension DbParent {
         }
     }
 }
+
+public extension DbParent {
+    struct LimitedType: Equatable {
+        public let gen0: DbParent
+        public init(row: Row) {
+            gen0 = DbParent(row: row, startingIndex: 0)
+        }
+    }
+
+    static func limited(db: Database, limit: Int) throws -> [LimitedType] {
+        var query = """
+        select * from Parent limit ?
+        """
+        var arguments = StatementArguments()
+        arguments += [limit]
+        Logging.log(query, statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: query)
+        statement.setUncheckedArguments(arguments)
+        let converted: [LimitedType] = try Row.fetchAll(statement).map { row -> LimitedType in
+            LimitedType(row: row)
+        }
+
+        return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct LimitedQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+        public let limit: Int
+        public init(
+            limit: Int,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.limit = limit
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: [LimitedType] = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.limit == rhs.limit
+        }
+
+        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[LimitedType], Error> {
+            ValueObservation
+                .tracking { db in
+                    try limited(db: db, limit: limit)
+                }
+                .publisher(in: dbQueue, scheduling: scheduler)
+                .eraseToAnyPublisher()
+        }
+    }
+}
