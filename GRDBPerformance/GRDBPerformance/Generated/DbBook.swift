@@ -179,6 +179,66 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
+    public
+    static func genDeleteByBookUuid(db: Database, bookUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            bookUuid.uuidString
+        ]
+
+        Logging.log("delete from Book where bookUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Book where bookUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            userUuid.uuidString
+        ]
+
+        Logging.log("delete from Book where userUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Book where userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByIntegerOptional(db: Database, integerOptional: Int) throws {
+        let arguments: StatementArguments = try [
+            integerOptional
+        ]
+
+        Logging.log("delete from Book where integerOptional = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Book where integerOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByTsCreated(db: Database, tsCreated: Int64) throws {
+        let arguments: StatementArguments = try [
+            tsCreated
+        ]
+
+        Logging.log("delete from Book where tsCreated = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from Book where tsCreated = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 

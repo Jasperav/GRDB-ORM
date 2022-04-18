@@ -605,6 +605,168 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
+    public
+    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+        let arguments: StatementArguments = try [
+            userUuid.uuidString
+        ]
+
+        Logging.log("delete from User where userUuid = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where userUuid = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByFirstName(db: Database, firstName: String) throws {
+        let arguments: StatementArguments = try [
+            firstName
+        ]
+
+        Logging.log("delete from User where firstName = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where firstName = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByJsonStruct(db: Database, jsonStruct: JsonType) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStruct)
+                return String(data: data, encoding: .utf8)!
+            }()
+        ]
+
+        Logging.log("delete from User where jsonStruct = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where jsonStruct = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByJsonStructOptional(db: Database, jsonStructOptional: JsonType) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStructOptional)
+                return String(data: data, encoding: .utf8)!
+            }()
+        ]
+
+        Logging.log("delete from User where jsonStructOptional = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where jsonStructOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStructArray)
+                return String(data: data, encoding: .utf8)!
+            }()
+        ]
+
+        Logging.log("delete from User where jsonStructArray = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where jsonStructArray = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]) throws {
+        let arguments: StatementArguments = try [
+            try {
+                let data = try Shared.jsonEncoder.encode(jsonStructArrayOptional)
+                return String(data: data, encoding: .utf8)!
+            }()
+        ]
+
+        Logging.log("delete from User where jsonStructArrayOptional = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where jsonStructArrayOptional = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByInteger(db: Database, integer: Int) throws {
+        let arguments: StatementArguments = try [
+            integer
+        ]
+
+        Logging.log("delete from User where integer = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where integer = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteByBool(db: Database, bool: Bool) throws {
+        let arguments: StatementArguments = try [
+            bool
+        ]
+
+        Logging.log("delete from User where bool = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where bool = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteBySerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
+        let arguments: StatementArguments = try [
+            try! serializedInfo.serializedData()
+        ]
+
+        Logging.log("delete from User where serializedInfo = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where serializedInfo = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
+    public
+    static func genDeleteBySerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo) throws {
+        let arguments: StatementArguments = try [
+            try! serializedInfoNullable.serializedData()
+        ]
+
+        Logging.log("delete from User where serializedInfoNullable = ?", statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: "delete from User where serializedInfoNullable = ?")
+
+        statement.setUncheckedArguments(arguments)
+
+        try statement.execute()
+    }
+
     public func genUpdate(db: Database, assertOneRowAffected: Bool = true) throws {
         let statement = try db.cachedStatement(sql: Self.updateUniqueQuery)
 
