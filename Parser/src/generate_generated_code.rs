@@ -232,6 +232,19 @@ fn update_generated_code() {
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid".to_string(),
                 map_to_different_type: Some("retrieveOptionalUserValues".to_string()),
             },
+            DynamicQuery {
+                extension: "Parent".to_string(),
+                func_name: "limited".to_string(),
+                parameter_types: vec![
+                    ("Int".to_string(), "limit".to_string(), "limit".to_string()),
+                ],
+                return_types: vec![
+                    "Parent".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select * from Parent limit ?".to_string(),
+                map_to_different_type: None,
+            },
         ],
         suffix_swift_structs: "",
         prefix_swift_structs: "Db",

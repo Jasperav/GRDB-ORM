@@ -210,6 +210,26 @@ class DynamicQueryTest: XCTestCase {
         _ = cancellable
     }
 
+    func testBuildInTypeAsParameter() throws {
+        let db = setupPool()
+
+        try db.write { con in
+            let parent0 = DbParent(parentUuid: UUID(), userUuid: nil)
+            let parent1 = DbParent(parentUuid: UUID(), userUuid: nil)
+
+            try parent0.genInsert(db: con)
+            try parent1.genInsert(db: con)
+
+            let parents = try DbParent.limited(db: con, limit: 1)
+
+            XCTAssertEqual(1, parents.count)
+
+            let first = parents[0]
+
+            XCTAssert(first.gen0 == parent0 || first.gen0 == parent1)
+        }
+    }
+
     func testSimpleInQuery() {
         let db = setupPool()
 
