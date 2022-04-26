@@ -7,10 +7,10 @@ import Combine
 import GRDBQuery
 public extension DbBook {
     struct BooksForUserWithSpecificUuidType: Equatable {
-        public let gen0: DbBook
-        public let gen1: Int
-        public let gen2: [JsonType]?
-        public let gen3: Int
+        public var gen0: DbBook
+        public var gen1: Int
+        public var gen2: [JsonType]?
+        public var gen3: Int
         public init(row: Row) {
             gen0 = DbBook(row: row, startingIndex: 0)
             gen1 = row[4]
@@ -75,9 +75,9 @@ public extension DbBook {
 
 public extension DbBook {
     struct BooksWithOptionalUserType: Equatable {
-        public let gen0: DbBook
-        public let gen1: DbUser?
-        public let gen2: Bool?
+        public var gen0: DbBook
+        public var gen1: DbUser?
+        public var gen2: Bool?
         public init(row: Row) {
             gen0 = DbBook(row: row, startingIndex: 0)
             gen1 = {
@@ -137,7 +137,7 @@ public extension DbBook {
 
 public extension DbUser {
     struct FindByUsernameType: Equatable {
-        public let gen0: DbUser
+        public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
         }
@@ -192,7 +192,7 @@ public extension DbUser {
 
 public extension DbUser {
     struct FindUserUuidByUsernameType: Equatable {
-        public let gen0: UUID
+        public var gen0: UUID
         public init(row: Row) {
             gen0 = row[0]
         }
@@ -247,7 +247,7 @@ public extension DbUser {
 
 public extension DbUser {
     struct AmountOfUsersType: Equatable {
-        public let gen0: Int
+        public var gen0: Int
         public init(row: Row) {
             gen0 = row[0]
         }
@@ -313,7 +313,7 @@ public extension DbBook {
 
 public extension DbBook {
     struct HasAtLeastOneBookType: Equatable {
-        public let gen0: Bool
+        public var gen0: Bool
         public init(row: Row) {
             gen0 = row[0]
         }
@@ -364,8 +364,8 @@ public extension DbBook {
 
 public extension DbUser {
     struct SerializeInfoSingleType: Equatable {
-        public let gen0: SerializedInfo
-        public let gen1: SerializedInfo?
+        public var gen0: SerializedInfo
+        public var gen1: SerializedInfo?
         public init(row: Row) {
             gen0 = try! SerializedInfo(serializedData: row[0])
             gen1 = {
@@ -423,8 +423,8 @@ public extension DbUser {
 
 public extension DbUser {
     struct SerializeInfoArrayType: Equatable {
-        public let gen0: SerializedInfo
-        public let gen1: SerializedInfo?
+        public var gen0: SerializedInfo
+        public var gen1: SerializedInfo?
         public init(row: Row) {
             gen0 = try! SerializedInfo(serializedData: row[0])
             gen1 = {
@@ -498,7 +498,7 @@ public extension DbUser {
 
 public extension DbUser {
     struct AllWithProvidedFirstNamesType: Equatable {
-        public let gen0: DbUser
+        public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
         }
@@ -569,7 +569,7 @@ public extension DbUser {
 
 public extension DbUser {
     struct ComplexType: Equatable {
-        public let gen0: DbUser
+        public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
         }
@@ -672,10 +672,10 @@ public extension DbUser {
 
 public extension DbParent {
     struct RetrieveOptionalUserValuesType: Equatable {
-        public let gen0: UUID
-        public let gen1: UUID?
-        public let gen2: [JsonType]?
-        public let gen3: [JsonType]?
+        public var gen0: UUID
+        public var gen1: UUID?
+        public var gen2: [JsonType]?
+        public var gen3: [JsonType]?
         public init(row: Row) {
             gen0 = row[0]
             gen1 = row[1]
@@ -744,10 +744,10 @@ public extension DbParent {
 
 public extension DbParent {
     struct RetrieveOptionalUserValuesMappedType: Equatable {
-        public let gen0: UUID
-        public let gen1: UUID?
-        public let gen2: [JsonType]?
-        public let gen3: [JsonType]?
+        public var gen0: UUID
+        public var gen1: UUID?
+        public var gen2: [JsonType]?
+        public var gen3: [JsonType]?
         public init(row: Row) {
             gen0 = row[0]
             gen1 = row[1]
@@ -833,7 +833,7 @@ public extension DbParent {
 
 public extension DbParent {
     struct LimitedType: Equatable {
-        public let gen0: DbParent
+        public var gen0: DbParent
         public init(row: Row) {
             gen0 = DbParent(row: row, startingIndex: 0)
         }

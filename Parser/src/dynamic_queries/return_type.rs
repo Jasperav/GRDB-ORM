@@ -179,7 +179,7 @@ impl<'a> ReturnType<'a> {
         for (index, s) in return_types_swift_struct.iter().enumerate() {
             let property_name = format!("gen{index}");
 
-            struct_properties.push(format!("{modifier}let {property_name}: {s}"));
+            struct_properties.push(format!("{modifier}var {property_name}: {s}"));
             initializer_row.push(format!("{property_name} = {}", decoding[index]));
         }
 
