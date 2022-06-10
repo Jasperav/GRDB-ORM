@@ -222,7 +222,7 @@ impl<'a> Parser<'a> {
             "
                 ),
                 "db: db".to_string(),
-                "// TODO: not sure if this is correct\ntrue".to_string(),
+                "// Guess this is correct\ntrue".to_string(),
             )
         } else {
             let property_type = parameters
