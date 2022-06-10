@@ -1,5 +1,50 @@
-# Add your own transformation here with the use of Regex, like this:
-#   UUID=[".*[U]uid"]
-# Any column name matching that value, will have the type UUID.
-# If you want to add a type with a package prefix, use the special FROMPACKAGE syntax, like so:
-#   MyPackageFROMPACKAGEMyClass=["MyClass"]
+UUID=[".*[U]uid", "avatar", "createdBy"]
+Int64=[
+    "tsCreated",
+    "recentSearchedTsCreated",
+    "karma",
+    "likes",
+    "currentUserBlockedThisUserTsCreated",
+    "replies",
+    "currentDirectEvents",
+    "totalDirectEventsAfterLastJoin",
+    "tsSent"
+]
+Bool=[
+    "showOnMap",
+    "showOnOverview",
+    "showOnHotScreen",
+    "showInMapScreen",
+    "hasPassword",
+    "isLiked",
+    "isInRange",
+    "allowsPrivateChats",
+    "allowsNsfw",
+    "isSeen",
+    "isHidden",
+    "isVerified",
+    "isJoined",
+    "isSubscribed",
+    "thisUserBlockedCurrentUser",
+    "allowMessagesByInRangeRegularUsers",
+    "allowMessagesByOutOfRangeRegularUsers",
+    "stillReadableForOutOfRangeRegularUsers",
+    "isConfirmed",
+    "incomingFriendshipRequest",
+    "outstandingFriendshipRequest",
+    "friends",
+    "nsfw",
+    "replacedOtherNotification",
+]
+Data_MediaContent=["mediaContentMapped"]
+Data_MessageReactionRepeated=["emojiReactionsMapped"]
+Data_ConversationAnnouncementMinimal=["announcementMapped"]
+Data_ConversationDistance=["distanceMapped"]
+Infra_NotificationEnvelope=["notificationMapped"]
+Report_Message_MessageReportReason=["messageReportReasonMapped"]
+Report_Conversation_ConversationReportReason=["conversationReportReasonMapped"]
+Report_User_UserReportReason=["userReportReasonMapped"]
+Data_ConversationUserRole=["conversationUserRoleMapped"]
+Data_ConversationEventPk=["lastReadConversationEventPk"]
+Envelope_RequestEnvelope=["requestEnvelope"]
+UserIdUsername=["userIdUsernamesMapped"]

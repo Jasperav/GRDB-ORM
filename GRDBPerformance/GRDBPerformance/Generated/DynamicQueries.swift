@@ -120,7 +120,7 @@ public extension DbBook {
         public static let defaultValue: [BooksWithOptionalUserType] = []
 
         public static func == (_: Self, _: Self) -> Bool {
-            // TODO: not sure if this is correct
+            // This is correct I think
             true
         }
 
@@ -281,7 +281,7 @@ public extension DbUser {
         public static let defaultValue: AmountOfUsersType? = nil
 
         public static func == (_: Self, _: Self) -> Bool {
-            // TODO: not sure if this is correct
+            // This is correct I think
             true
         }
 
@@ -347,7 +347,7 @@ public extension DbBook {
         public static let defaultValue: HasAtLeastOneBookType? = nil
 
         public static func == (_: Self, _: Self) -> Bool {
-            // TODO: not sure if this is correct
+            // This is correct I think
             true
         }
 
@@ -406,7 +406,7 @@ public extension DbUser {
         public static let defaultValue: SerializeInfoSingleType? = nil
 
         public static func == (_: Self, _: Self) -> Bool {
-            // TODO: not sure if this is correct
+            // This is correct I think
             true
         }
 
@@ -464,7 +464,7 @@ public extension DbUser {
         public static let defaultValue: [SerializeInfoArrayType] = []
 
         public static func == (_: Self, _: Self) -> Bool {
-            // TODO: not sure if this is correct
+            // This is correct I think
             true
         }
 
