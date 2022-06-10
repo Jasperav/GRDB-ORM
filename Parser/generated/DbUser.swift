@@ -126,22 +126,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -170,22 +166,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -209,22 +201,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -248,22 +236,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -287,22 +271,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -326,22 +306,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -365,22 +341,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -404,22 +376,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -443,22 +411,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -482,22 +446,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -521,22 +481,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -560,22 +516,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -776,22 +728,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -1000,22 +948,18 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 let data = try Shared.jsonEncoder.encode(self.jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try self.jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             try {
                 let data = try Shared.jsonEncoder.encode(self.jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try {
-                try self.jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }(),
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            },
             integer,
             bool,
             try! serializedInfo.serializedData(),
@@ -1090,12 +1034,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructOptionalAllRows(db: Database, jsonStructOptional: JsonType?) throws {
         let arguments: StatementArguments = try [
-            try {
-                try jsonStructOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }()
+            try try jsonStructOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            }
         ]
 
         Logging.log("update User set jsonStructOptional = ?", statementArguments: arguments)
@@ -1128,12 +1070,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructArrayOptionalAllRows(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
         let arguments: StatementArguments = try [
-            try {
-                try jsonStructArrayOptional.map {
-                    let data = try Shared.jsonEncoder.encode($0)
-                    return String(data: data, encoding: .utf8)!
-                }
-            }()
+            try try jsonStructArrayOptional.map {
+                let data = try Shared.jsonEncoder.encode($0)
+                return String(data: data, encoding: .utf8)!
+            }
         ]
 
         Logging.log("update User set jsonStructArrayOptional = ?", statementArguments: arguments)
@@ -1359,12 +1299,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try {
-                    try jsonStructOptional.map {
-                        let data = try Shared.jsonEncoder.encode($0)
-                        return String(data: data, encoding: .utf8)!
-                    }
-                }(),
+                try try jsonStructOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                },
                 userUuid.uuidString
             ]
 
@@ -1405,12 +1343,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try {
-                    try jsonStructArrayOptional.map {
-                        let data = try Shared.jsonEncoder.encode($0)
-                        return String(data: data, encoding: .utf8)!
-                    }
-                }(),
+                try try jsonStructArrayOptional.map {
+                    let data = try Shared.jsonEncoder.encode($0)
+                    return String(data: data, encoding: .utf8)!
+                },
                 userUuid.uuidString
             ]
 
@@ -1552,12 +1488,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try {
-                        try value.map {
-                            let data = try Shared.jsonEncoder.encode($0)
-                            return String(data: data, encoding: .utf8)!
-                        }
-                    }()]
+                    arguments += [try try value.map {
+                        let data = try Shared.jsonEncoder.encode($0)
+                        return String(data: data, encoding: .utf8)!
+                    }]
 
                     updateQuery += "jsonStructOptional = ?"
                 case let .jsonStructArray(value):
@@ -1576,12 +1510,10 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try {
-                        try value.map {
-                            let data = try Shared.jsonEncoder.encode($0)
-                            return String(data: data, encoding: .utf8)!
-                        }
-                    }()]
+                    arguments += [try try value.map {
+                        let data = try Shared.jsonEncoder.encode($0)
+                        return String(data: data, encoding: .utf8)!
+                    }]
 
                     updateQuery += "jsonStructArrayOptional = ?"
                 case let .integer(value):
