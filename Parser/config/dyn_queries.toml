@@ -1,334 +1,42 @@
-# This file is generated, don't edit
-[pr_by_ts_created_desc]
-parameter_types = []
-extension = "PersistentRequest"
-func_name = "findOrderByTsCreatedDesc"
-return_types = ["PersistentRequest"]
-return_types_is_array = true
-query = "select * from PersistentRequest order by tsCreated desc"
-
-[invalid_conversation_password]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "Conversation"
-func_name = "invalidPassword"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set hasPassword = 1, isVerified = 0 where conversationUuid = ?"
-
-[increase_conversation_current_direct_event]
-parameter_types = [["Conversation", "mostRecentConversationEventUuid", "mostRecentConversationEventUuid"], ["Conversation", "lastReadConversationEventPk", "lastReadConversationEventPk"], ["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "Conversation"
-func_name = "increaseCurrentDirectEvent"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set totalDirectEventsAfterLastJoin = case when isJoined then totalDirectEventsAfterLastJoin + 1 else totalDirectEventsAfterLastJoin end, currentDirectEvents = currentDirectEvents + 1, mostRecentConversationEventUuid = ?, lastReadConversationEventPk = case when isJoined then ? else lastReadConversationEventPk end where conversationUuid = ?"
-
-[conversation_just_joined]
-parameter_types = [["Conversation", "lastReadConversationEventPk", "lastReadConversationEventPk"], ["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "Conversation"
-func_name = "justJoined"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set lastReadConversationEventPk = ?, totalDirectEventsAfterLastJoin = currentDirectEvents where conversationUuid = ?"
-
-[update_conversation_is_subscribed_false]
-parameter_types = []
-extension = "Conversation"
-func_name = "setIsSubscribedToFalse"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set isSubscribed = 0"
-
-[insert_new_interlocutor_chat_from_interlocutor]
-parameter_types = [["InterlocutorChat", "otherUserUuid", "otherUserUuid"], ["InterlocutorChat", "latestMessageUuid", "latestMessageUuid"]]
-extension = "InterlocutorChat"
-func_name = "replaceAndIncreaseUnreadCount"
-return_types = []
-return_types_is_array = false
-query = "insert into InterlocutorChat (otherUserUuid, latestMessageUuid, unreadMessageCount) values (?, ?, 1) on conflict (otherUserUuid) do update set unreadMessageCount = unreadMessageCount + 1, latestMessageUuid=excluded.latestMessageUuid"
-
-[select_all_interlocutors_overview]
-parameter_types = []
-extension = "InterlocutorChat"
-func_name = "selectAllForOverview"
-return_types = ["User", "Int", "Message", "Media.mediaContentMapped?", "User"]
-return_types_is_array = true
-query = "select U.*, InterlocutorChat.unreadMessageCount, M.*, Media.mediaContentMapped, LastMessageCreatedBy.* from InterlocutorChat join Message M on InterlocutorChat.latestMessageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid join User U on InterlocutorChat.otherUserUuid = U.userUuid join User LastMessageCreatedBy on M.createdBy = LastMessageCreatedBy.userUuid order by M.tsSent desc"
-
-[count_unread_message]
-parameter_types = []
-extension = "InterlocutorChat"
-func_name = "countUnseen"
-return_types = ["Int"]
-return_types_is_array = false
-query = "select count(1) from InterlocutorChat where unreadMessageCount > 0"
-
-[select_all_conversation_user_roles_overview]
-parameter_types = [["ConversationRole", "conversationUuid", "conversationUuid"]]
-extension = "ConversationRole"
-func_name = "selectAllForConversationUserRolesOverview"
-return_types = ["User", "ConversationRole.conversationUserRoleMapped"]
-return_types_is_array = true
-query = "select U.*, ConversationRole.conversationUserRoleMapped from ConversationRole join User U on ConversationRole.userUuid = U.userUuid where conversationUuid = ? order by ConversationRole.conversationUserRoleMapped"
-
-[select_all_user_find_overview]
-parameter_types = [["User", "username", "username"], ["User", "username", "usernameAgain"]]
-extension = "User"
-func_name = "selectAllForUserFindOverview"
-return_types = ["User"]
-return_types_is_array = true
-query = "select * from (select User.* from User where friends = 1 and User.username like '%?%' union select User.* from User where recentSearchedTsCreated is not null and User.username like '%?%' union select User.* from User where User.searchScreenScore is not null) order by case when friends = 1 then -2 when recentSearchedTsCreated is not null then -1 else searchScreenScore end, username"
-
-[list_for_tagging]
-parameter_types = []
-extension = "User"
-func_name = "selectForTaggingNoInput"
-return_types = ["User"]
-return_types_is_array = true
-query = "select * from (select User.* from User where friends = 1 and User.username != '' union select User.* from User where recentSearchedTsCreated is not null and User.username != '' ) order by case when friends = 1 then -2 when recentSearchedTsCreated is not null then -1 else searchScreenScore end, username"
-
-[recent_searches]
-parameter_types = []
-extension = "DbUser"
-func_name = "recent"
-return_types = ["User"]
-return_types_is_array = true
-query = "select * from (select User.* from User where friends = 1 union select User.* from User where recentSearchedTsCreated is not null ) order by case when friends = 1 then -1 when recentSearchedTsCreated is not null then -recentSearchedTsCreated else searchScreenScore end, username"
-
-[select_all_conversations_map]
-parameter_types = []
-extension = "Conversation"
-func_name = "selectAllForMap"
-return_types = ["Conversation"]
-return_types_is_array = true
-query = "select Conversation.* from Conversation where showOnMapScreen = 1"
-
-[select_all_user_blocked]
-parameter_types = []
-extension = "User"
-func_name = "selectAllForUserBlockedOverview"
-return_types = ["User"]
-return_types_is_array = true
-query = "select U.* from User U where U.currentUserBlockedThisUserTsCreated is not null"
-
-[select_all_conversation_user_bans_overview]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "ConversationUserBan"
-func_name = "selectAllForOverview"
-return_types = ["ConversationUserBan.userReportReasonMapped", "User"]
-return_types_is_array = true
-query = "select ConversationUserBan.userReportReasonMapped, U.* from ConversationUserBan join User U on ConversationUserBan.userUuid = U.userUuid where conversationUuid = ? order by ConversationUserBan.tsCreated desc"
-
-[setup_conversation]
-parameter_types = []
-extension = "Conversation"
-func_name = "setup"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set isJoined = 0, relevance = null, showOnMapScreen = 0"
-
-[count_unseen_notifications]
-parameter_types = []
-extension = "Notification"
-func_name = "countUnseen"
-return_types = ["Int"]
-return_types_is_array = false
-query = "select count(1) from Notification where isSeen = 0"
-
-[delete_own_conversation_event_notifications_for_reply]
-parameter_types = [["Notification", "messageUuid", "messageUuid"], ["Notification", "conversationAnnouncementUuid", "conversationAnnouncementUuid"]]
-extension = "Notification"
-func_name = "deleteOwnConversationEventForReply"
-return_types = []
-return_types_is_array = false
-query = "delete from Notification where (messageUuid = ? or conversationAnnouncementUuid = ?) and otherMessageUuid is not null"
-
-[deleteWithoutOpenEvent]
-parameter_types = [["ConversationEvent", "conversationUuid", "conversationUuid"], ["ConversationEvent", "conversationEventUuid", "conversationEventUuid"]]
-extension = "ConversationEvent"
-func_name = "deleteWithoutOpenEvent"
-return_types = []
-return_types_is_array = false
-query = "delete from ConversationEvent where conversationUuid = ? and parentConversationEventUuid is null and conversationEventUuid != ?"
-
-[deleteInterlocutorMessages]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "InterlocutorMessage"
-func_name = "deleteMessages"
-return_types = []
-return_types_is_array = false
-query = "delete from Message where messageUuid in (select InterlocutorMessage.messageUuid from InterlocutorMessage where otherUserUuid = ?)"
-
-[select_all_notifications_overview]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "Notification"
-func_name = "selectAllForOverview"
-return_types = ["Notification", "User?", "Conversation?", "ConversationRole.conversationUserRoleMapped?", "Message?", "Media.mediaContentMapped?"]
-return_types_is_array = true
-query = "select Notification.*, OtherUser.*, Conversation.*, CR.conversationUserRoleMapped, M.*, MessageMedia.mediaContentMapped from Notification left join User OtherUser on Notification.otherUserUuid = OtherUser.userUuid left join Conversation on Notification.conversationUuid = Conversation.conversationUuid left join ConversationRole CR on Conversation.conversationUuid = CR.conversationUuid and CR.userUuid = ? left join Message M on Notification.messageUuid = M.messageUuid left join Media MessageMedia on MessageMedia.mediaUuid = M.mediaUuid order by Notification.tsCreated desc"
-
-[track_user]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "DbUser"
-func_name = "track"
-return_types = ["User"]
-return_types_is_array = false
-query = "select * from User where userUuid = ?"
-
-[track_conversation]
-parameter_types = [["User", "userUuid", "userUuid"], ["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "DbConversation"
-func_name = "track"
-return_types = ["Conversation", "ConversationRole.conversationUserRoleMapped?"]
-return_types_is_array = false
-query = "select Conversation.*, CR.conversationUserRoleMapped from Conversation left join ConversationRole CR on Conversation.conversationUuid = CR.conversationUuid and CR.userUuid = ? where Conversation.conversationUuid = ?"
-
-[privileged_conversations]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "DbConversation"
-func_name = "privileged"
-return_types = ["Conversation", "ConversationRole.conversationUserRoleMapped"]
-return_types_is_array = true
-query = "select Conversation.*, CR.conversationUserRoleMapped from Conversation join ConversationRole CR on CR.conversationUuid = Conversation.conversationUuid and CR.userUuid = ?"
-
-[subscribed_conversations]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "DbConversation"
-func_name = "subscribed"
-return_types = ["Conversation", "ConversationRole.conversationUserRoleMapped?"]
-return_types_is_array = true
-query = "select Conversation.*, CR.conversationUserRoleMapped from Conversation left join ConversationRole CR on Conversation.conversationUuid = CR.conversationUuid and CR.userUuid = ? where Conversation.isSubscribed = 1"
-
-[reset_show_on_hot_screen]
-parameter_types = [["ConversationEvent", "conversationUuid", "conversationUuid"]]
-extension = "DbConversationEvent"
-func_name = "resetShowOnHotScreen"
-return_types = []
-return_types_is_array = false
-query = "update ConversationEvent set showOnHotScreen = 0 where conversationUuid = ?"
-
-[friends_overview]
-parameter_types = []
-extension = "DbUser"
-func_name = "friendsOverview"
-return_types = ["User"]
-return_types_is_array = true
-query = "select * from User where friends = 1 order by User.username"
-
-[update_messages_referred_by_conversation_minus_ony_day]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "DbMessage"
-func_name = "updateTsSentByOneDayByConversationUuid"
-return_types = []
-return_types_is_array = true
-query = "update Message set tsSent = tsSent - 86000000 where messageUuid in (select messageUuid from ConversationEvent where conversationUuid = ?)"
-
-[update_announcements_referred_by_conversation_minus_ony_day]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "DbConversationAnnouncement"
-func_name = "updateTsSentByOneDayByConversationUuid"
-return_types = []
-return_types_is_array = true
-query = "update ConversationAnnouncement set tsSent = tsSent - 86000000 where conversationAnnouncementUuid in (select conversationAnnouncementUuid from ConversationEvent where conversationUuid = ?)"
-
-[increase_replies]
-parameter_types = [["ConversationEvent", "conversationEventUuid", "conversationEventUuid"]]
-extension = "ConversationEvent"
-func_name = "increaseReplies"
-return_types = []
-return_types_is_array = false
-query = "update ConversationEvent set replies = replies + 1 where conversationEventUuid = ?"
-
-[delete_by_parent_conversation_event_uuid]
-parameter_types = [["ConversationEvent", "parentConversationEventUuid", "parentConversationEventUuid"]]
-extension = "ConversationEvent"
-func_name = "deleteByParentConversationEventUuid"
-return_types = []
-return_types_is_array = false
-query = "delete from ConversationEvent where parentConversationEventUuid = ?"
-
-[select_all_conversations_overview]
-parameter_types = [["User", "userUuid", "userUuid"]]
-extension = "Conversation"
-func_name = "selectAllForOverview"
-return_types = ["Conversation", "ConversationRole.conversationUserRoleMapped?", "ConversationEventMostRecent", "User", "Message?", "Media.mediaContentMapped?", "ConversationAnnouncement?", "User?"]
-return_types_is_array = true
-query = "select Conversation.*, CR.conversationUserRoleMapped, ConversationEventMostRecent.*, LastEventCreatedBy.*, M.*, MessageMedia.mediaContentMapped, CA.*, OtherUser.* from Conversation join ConversationEventMostRecent on Conversation.mostRecentConversationEventUuid = ConversationEventMostRecent.conversationEventUuid join User LastEventCreatedBy on LastEventCreatedBy.userUuid = ConversationEventMostRecent.createdBy left join Message M on ConversationEventMostRecent.messageUuid = M.messageUuid left join Media MessageMedia on MessageMedia.mediaUuid = M.mediaUuid left join ConversationAnnouncement CA on ConversationEventMostRecent.conversationAnnouncementUuid = CA.conversationAnnouncementUuid left join User OtherUser on CA.otherUserUuid = OtherUser.userUuid left join ConversationRole CR on Conversation.conversationUuid = CR.conversationUuid and CR.userUuid = ? where Conversation.relevance is not null order by Conversation.relevance desc "
-
-[conversation_like]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "Conversation"
-func_name = "like"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set isLiked = 1, likes = likes + 1 where conversationUuid = ?"
-
-[conversation_unlike]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "Conversation"
-func_name = "unlike"
-return_types = []
-return_types_is_array = false
-query = "update Conversation set isLiked = 0, likes = likes - 1 where conversationUuid = ?"
-
-[interlocutor_messagesfor_interlocutor]
-parameter_types = [["User", "userUuid", "userUuid"], ["Int", "Int", "limit"]]
-extension = "InterlocutorMessage"
-func_name = "interlocutorMessages"
-return_types = ["Message", "Media.mediaContentMapped?", "InterlocutorMessage", "Message?", "Media.mediaContentMapped?"]
-return_types_is_array = true
-query = "select M.*, Media.mediaContentMapped, InterlocutorMessage.*, ParentMessage.*, ParentMessageMedia.mediaContentMapped from InterlocutorMessage join Message M on InterlocutorMessage.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join Message ParentMessage on InterlocutorMessage.parentMessageUuid = ParentMessage.messageUuid left join Media ParentMessageMedia on ParentMessageMedia.mediaUuid = ParentMessage.mediaUuid where InterlocutorMessage.otherUserUuid = ? order by M.tsSent desc limit ?"
-
-[newer_thanfor_interlocutor]
-parameter_types = [["User", "userUuid", "userUuid"], ["Message", "tsSent", "tsSent"]]
-extension = "InterlocutorMessage"
-func_name = "newerThan"
-return_types = ["Message", "Media.mediaContentMapped?", "InterlocutorMessage", "Message?", "Media.mediaContentMapped?"]
-return_types_is_array = true
-query = "select M.*, Media.mediaContentMapped, InterlocutorMessage.*, ParentMessage.*, ParentMessageMedia.mediaContentMapped from InterlocutorMessage join Message M on InterlocutorMessage.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join Message ParentMessage on InterlocutorMessage.parentMessageUuid = ParentMessage.messageUuid left join Media ParentMessageMedia on ParentMessageMedia.mediaUuid = ParentMessage.mediaUuid where InterlocutorMessage.otherUserUuid = ? and M.tsSent > ? order by M.tsSent desc"
-map_to_different_type = "interlocutorMessages"
-
-[load_olderfor_interlocutor]
-parameter_types = [["User", "userUuid", "userUuid"], ["Message", "tsSent", "tsSent"], ["Int", "Int", "limit"]]
-extension = "InterlocutorMessage"
-func_name = "loadOlder"
-return_types = ["Message", "Media.mediaContentMapped?", "InterlocutorMessage", "Message?", "Media.mediaContentMapped?"]
-return_types_is_array = true
-query = "select M.*, Media.mediaContentMapped, InterlocutorMessage.*, ParentMessage.*, ParentMessageMedia.mediaContentMapped from InterlocutorMessage join Message M on InterlocutorMessage.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join Message ParentMessage on InterlocutorMessage.parentMessageUuid = ParentMessage.messageUuid left join Media ParentMessageMedia on ParentMessageMedia.mediaUuid = ParentMessage.mediaUuid where InterlocutorMessage.otherUserUuid = ? and M.tsSent < ? order by M.tsSent desc limit ?"
-map_to_different_type = "interlocutorMessages"
-
-[load_until_and_includingfor_interlocutor]
-parameter_types = [["User", "userUuid", "userUuid"], ["Message", "tsSent", "currentTopMessageTsSent"], ["Message", "tsSent", "messageParentTsSent"]]
-extension = "InterlocutorMessage"
-func_name = "loadUntilAndIncluding"
-return_types = ["Message", "Media.mediaContentMapped?", "InterlocutorMessage", "Message?", "Media.mediaContentMapped?"]
-return_types_is_array = true
-query = "select M.*, Media.mediaContentMapped, InterlocutorMessage.*, ParentMessage.*, ParentMessageMedia.mediaContentMapped from InterlocutorMessage join Message M on InterlocutorMessage.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join Message ParentMessage on InterlocutorMessage.parentMessageUuid = ParentMessage.messageUuid left join Media ParentMessageMedia on ParentMessageMedia.mediaUuid = ParentMessage.mediaUuid where InterlocutorMessage.otherUserUuid = ? and M.tsSent < ? and M.tsSent >= ? order by M.tsSent desc"
-map_to_different_type = "interlocutorMessages"
-
-[newest_first]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "ConversationEvent"
-func_name = "newestFirst"
-return_types = ["ConversationEvent", "User", "ConversationRole.conversationUserRoleMapped?", "Message?", "Media.mediaContentMapped?", "ConversationAnnouncement?", "User?"]
-return_types_is_array = true
-query = "select CE.*, U.*, CR.conversationUserRoleMapped, M.*, Media.mediaContentMapped, CA.*, OtherUser.* from ConversationEvent CE join User U on U.userUuid = CE.createdBy left join ConversationRole CR on U.userUuid = CR.userUuid and CR.conversationUuid = CE.conversationUuid left join Message M on CE.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join ConversationAnnouncement CA on CE.conversationAnnouncementUuid = CA.conversationAnnouncementUuid left join User OtherUser on CA.otherUserUuid = OtherUser.userUuid where CE.conversationUuid = ? and CE.parentConversationEventUuid is null order by CE.tsSent desc"
-
-[hot_first]
-parameter_types = [["Conversation", "conversationUuid", "conversationUuid"]]
-extension = "ConversationEvent"
-func_name = "hotFirst"
-return_types = ["ConversationEvent", "User", "ConversationRole.conversationUserRoleMapped?", "Message?", "Media.mediaContentMapped?", "ConversationAnnouncement?", "User?"]
-return_types_is_array = true
-query = "select CE.*, U.*, CR.conversationUserRoleMapped, M.*, Media.mediaContentMapped, CA.*, OtherUser.* from ConversationEvent CE join User U on U.userUuid = CE.createdBy left join ConversationRole CR on U.userUuid = CR.userUuid and CR.conversationUuid = CE.conversationUuid left join Message M on CE.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join ConversationAnnouncement CA on CE.conversationAnnouncementUuid = CA.conversationAnnouncementUuid left join User OtherUser on CA.otherUserUuid = OtherUser.userUuid where CE.conversationUuid = ? and CE.showOnHotScreen = 1 and case when M.emojiReactionCount is null then CA.emojiReactionCount else M.emojiReactionCount end > 0 order by case when M.emojiReactionCount is null then CA.emojiReactionCount else M.emojiReactionCount end desc, CE.tsSent asc"
-map_to_different_type = "newestFirst"
-
-[replies]
-parameter_types = [["ConversationEvent", "parentConversationEventUuid", "parentConversationEventUuid"], ["ConversationEvent", "conversationEventUuid", "conversationEventUuid"]]
-extension = "ConversationEvent"
-func_name = "replies"
-return_types = ["ConversationEvent", "User", "ConversationRole.conversationUserRoleMapped?", "Message?", "Media.mediaContentMapped?", "ConversationAnnouncement?", "User?"]
-return_types_is_array = true
-query = "select CE.*, U.*, CR.conversationUserRoleMapped, M.*, Media.mediaContentMapped, CA.*, OtherUser.* from ConversationEvent CE join User U on U.userUuid = CE.createdBy left join ConversationRole CR on U.userUuid = CR.userUuid and CR.conversationUuid = CE.conversationUuid left join Message M on CE.messageUuid = M.messageUuid left join Media on Media.mediaUuid = M.mediaUuid left join ConversationAnnouncement CA on CE.conversationAnnouncementUuid = CA.conversationAnnouncementUuid left join User OtherUser on CA.otherUserUuid = OtherUser.userUuid where (CE.parentConversationEventUuid = ? or CE.conversationEventUuid = ?) order by CE.tsSent desc"
-map_to_different_type = "newestFirst"
-
+# Below is an example of a dynamic query (checkout method spitout_example_toml in Parser/src/dynamic_queries/reader.rs
+# if you have trouble filling the values, or checkout Parser/src/test.rs for a complete example).
+#
+# []
+#   It starts with a mandatory comment, which looks like this: [my comment]
+#
+# [parameter_types]
+#   After that, the parameter can be supplied and are substituted for parameters.
+#   It is an array with 3 mandatory arguments as a tuple:
+#       ["User", "firstName", "firstName"]
+#   It can be read like this: take column (second argument) firstName from table (first argument) as parameter
+#   with name firstName (third argument)
+#
+# [extension]
+#   The extension is the type to add the method to (extension User { myMethod() {...} })
+#
+# [func_name]
+#   The name of the Swift function
+#
+# [return_types]
+#   The types to return from the function. If you are deleting/updating a row, this must be empty.
+#
+# [return_types_is_array]
+#   Determines if the return type is an array. If you are deleting/updating a row, this value is ignored.
+#
+# [query]
+#   The actual query
+#
+# EXAMPLE
+#
+# [This-is-a-query-that-finds-a-user-by-the-users-first-name]
+# parameter_types = [["User", "firstName", "firstName"]]
+# extension = "User"
+# func_name = "findByUsername"
+# return_types = ["User"]
+# return_types_is_array = true
+# query = "select * from User where firstName = ?"
+#
+# Tips
+#   When using an IN query, make sure to use the special syntax: %PARAM_IN%
+#   That looks like this:
+#   query = "select * from User where firstName in %PARAM_IN%"
