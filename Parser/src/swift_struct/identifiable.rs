@@ -5,6 +5,7 @@ pub struct IdentifiableConformance<'a> {
 }
 
 impl<'a> IdentifiableConformance<'a> {
+    #[allow(clippy::format_push_string)]
     pub fn write(self) {
         let pk = self.table_meta_data.primary_keys();
 
