@@ -1,6 +1,8 @@
+use clap::Parser;
 use configuration::{Config, Visibility};
 use std::env::current_exe;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::time::Duration;
 
 /// Easy way to read a file to a string and call a `transform` method
@@ -34,14 +36,34 @@ mod table_meta_data;
 #[cfg(test)]
 mod generate_generated_code;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    location_config: Option<String>,
+}
+
 fn main() {
     println!("Preparing to generate Swift structs and queries...");
 
+    let args = Args::parse();
+
     std::thread::sleep(Duration::from_secs(1));
 
-    let mut config_current_dir = current_exe().unwrap();
+    let mut config_current_dir = if let Some(config) = args.location_config {
+        println!("Found explicit config file");
 
-    println!("Trying to find config dir");
+        PathBuf::from_str(&config).unwrap()
+    } else {
+        println!("Did not found an explicit config file, trying to find one recursively");
+
+        current_exe().unwrap()
+    };
+
+    println!(
+        "Trying to find config dir, starting at {:#?} and moving up",
+        config_current_dir
+    );
 
     loop {
         let joined_config = config_current_dir.join("config");

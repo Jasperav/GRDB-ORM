@@ -12,6 +12,7 @@ env_parser = { version = "0.1", features = ["to_lazy_static"] }
 sqlite_parser = "0.1"
 lazy_static = "1.4"
 Inflector = "0.11"
+clap = { version = "4.0.0-rc.1", features = ["derive"] }
 regex = "1.4"
 dotenv = "0.15"
 grdb_orm_lib = { path = "../grdb_orm_lib" }
