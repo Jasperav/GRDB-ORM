@@ -140,7 +140,7 @@ pub(crate) fn test_query(
 
         while let Some(row) = rows.next().unwrap() {
             let detail: String = row.get(3).unwrap();
-            let used_index = Regex::new(r"USING INDEX\s(\w+)").unwrap();
+            let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
 
             if let Some(index) = used_index.captures(&detail) {
                 let index = index.get(1).unwrap().as_str();
