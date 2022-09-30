@@ -36,9 +36,7 @@ The queries are validated when generating a Swift `func` for them
 2. Clone this project
 3. Navigate inside the Parser dir
 4. [Add your configuration](#add-your-configuration)
-5. Run the parser (either one of the two options):
-    - Execute the binary in Parser/compiled/sqlite_parser_swift_grdb
-    - Run `cargo run` in the Parser dir
+5. Run the parser: Run `cargo run` in the Parser dir
 6. Copy paste the generated files from your output dir in your Xcode project
 
 ## Add your configuration

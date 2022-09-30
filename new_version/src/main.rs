@@ -23,9 +23,6 @@ fn main() {
     }
 
     run!("cargo", ["test", "--", "--test-threads=1"]);
-    run!("rm", ["-rf", "./compiled/"]);
-    run!("cargo", ["build", "--release"]);
-    run!("cp", ["-a", "../target/release/.", "./compiled"]);
     run!(
         "rm",
         ["-rf", "../GRDBPerformance/GRDBPerformance/Generated"]
@@ -42,7 +39,7 @@ fn main() {
     run!("cargo", ["fmt", "--all", "--", "--check"]);
 
     // For some reason this doesn't work for me locally
-    //run!("cargo", ["clippy", "--all", "--", "-D", "warnings"]);
+    run!("cargo", ["clippy", "--all", "--", "-D", "warnings"]);
 
     // Run the swift tests
     assert!(Command::new("xcodebuild")

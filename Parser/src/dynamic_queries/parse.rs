@@ -63,7 +63,7 @@ impl<'a> Parser<'a> {
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
             test_query(
-                &self.config,
+                self.config,
                 &connection,
                 &dynamic_query.query,
                 dynamic_query.return_types.is_empty(),
