@@ -135,27 +135,29 @@ pub(crate) fn test_query(
     if config.index_optimizer {
         // Find used indexes
         let query = format!("explain query plan {}", query_for_validation);
-
-        while let Some(row) = connection
+        let mut prepared = connection
             .prepare(&query)
-            .unwrap()
+            .unwrap();
+        let mut rows = prepared
             .query(NO_PARAMS)
-            .unwrap()
+            .unwrap();
+
+        while let Some(row) = rows
             .next()
             .unwrap()
         {
             let detail: String = row.get(3).unwrap();
-            let used_index = Regex::new(r"(?<=USING INDEX\s|USING INDEX\.\s)(\w+)").unwrap();
+            let used_index = Regex::new(r"USING INDEX\s(\w+)").unwrap();
 
-            if let Some(index) = used_index.find(&detail) {
-                let index = index.as_str();
+            if let Some(index) = used_index.captures(&detail) {
+                let index = index.get(1).unwrap().as_str();
 
                 if is_auto_generated_index(index) {
                     // Ignore
                     continue;
                 }
 
-                *indexes.get_mut(index).unwrap() = true;
+                *indexes.get_mut(index).expect(index) = true;
             } else {
                 panic!(
                     "No index was used, got other detail for query: {}, error:\n{:#?}",

@@ -27,6 +27,8 @@ impl<'a> Parser<'a> {
             return;
         }
 
+        println!("Processing dynamic queries");
+
         self.add_line("import Combine".to_string());
         self.add_line("import GRDBQuery".to_string());
 
@@ -34,14 +36,15 @@ impl<'a> Parser<'a> {
         let connection = rusqlite::Connection::open(&self.config.sqlite_location).unwrap();
 
         if self.config.index_optimizer {
-            while let Some(row) = connection
+            println!("Using index optimizer, finding indexes...");
+            let mut prepared = connection
                 .prepare("select name from sqlite_master where type= 'index'")
-                .unwrap()
+                .unwrap();
+            let mut rows = prepared
                 .query(NO_PARAMS)
-                .unwrap()
-                .next()
-                .unwrap()
-            {
+                .unwrap();
+
+            while let Some(row) = rows.next().unwrap() {
                 let name: String = row.get(0).unwrap();
 
                 if is_auto_generated_index(&name) {
@@ -50,6 +53,12 @@ impl<'a> Parser<'a> {
                 }
 
                 assert!(indexes.insert(name, false).is_none());
+            }
+
+            println!("Found the following custom indexes:");
+
+            for index in &indexes {
+                println!("{}", index.0);
             }
         }
 

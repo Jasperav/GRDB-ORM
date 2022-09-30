@@ -22,7 +22,7 @@ fn main() {
         };
     }
 
-    run!("cargo", ["test", "--verbose", "--", "--test-threads=1"]);
+    run!("cargo", ["test", "--", "--test-threads=1"]);
     run!("rm", ["-rf", "./compiled/"]);
     run!("cargo", ["build", "--release"]);
     run!("cp", ["-a", "../target/release/.", "./compiled"]);
