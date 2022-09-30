@@ -11,7 +11,50 @@ use std::fs::File;
 /// Annotated as a test so it can be executed
 #[test]
 fn update_generated_code() {
-    let (metadata, path) = create_db();
+    let (metadata, path) = create_db(
+        "
+        create table User
+            (
+                userUuid TEXT PRIMARY KEY NOT NULL,
+                firstName TEXT,
+                jsonStruct TEXT NOT NULL,
+                jsonStructOptional TEXT,
+                jsonStructArray TEXT NOT NULL,
+                jsonStructArrayOptional TEXT,
+                integer INTEGER NOT NULL,
+                bool INTEGER NOT NULL,
+                serializedInfo BLOB NOT NULL,
+                serializedInfoNullable BLOB
+            );
+
+        create table Book
+            (
+                bookUuid TEXT PRIMARY KEY NOT NULL,
+                userUuid TEXT,
+                integerOptional INTEGER,
+                tsCreated INTEGER NOT NULL,
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
+
+        create table UserBook
+            (
+                bookUuid TEXT NOT NULL,
+                userUuid TEXT NOT NULL,
+                realToDouble REAL,
+                PRIMARY KEY (bookUuid, userUuid),
+                FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
+
+        create table Parent
+            (
+                parentUuid TEXT NOT NULL,
+                userUuid TEXT,
+                PRIMARY KEY (parentUuid),
+                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
+            );
+        ",
+    );
 
     let config = Config {
         visibility: Visibility::Public,
@@ -253,6 +296,7 @@ fn update_generated_code() {
         sqlite_location: path.clone(),
         all_immutable: false,
         imports: "import Foundation\nimport GRDB".to_string(),
+        index_optimizer: false,
     };
 
     parse(metadata, config);
@@ -260,58 +304,14 @@ fn update_generated_code() {
     delete_db(path);
 }
 
-pub fn create_db() -> (Metadata, String) {
+pub fn create_db(batch: &str) -> (Metadata, String) {
     let db_path = current_dir().unwrap().join("generatedfortest.sqlite3");
 
     File::create(&db_path).unwrap();
 
     let con = rusqlite::Connection::open(&db_path).unwrap();
 
-    con.execute_batch(
-        "
-        create table User
-            (
-                userUuid TEXT PRIMARY KEY NOT NULL,
-                firstName TEXT,
-                jsonStruct TEXT NOT NULL,
-                jsonStructOptional TEXT,
-                jsonStructArray TEXT NOT NULL,
-                jsonStructArrayOptional TEXT,
-                integer INTEGER NOT NULL,
-                bool INTEGER NOT NULL,
-                serializedInfo BLOB NOT NULL,
-                serializedInfoNullable BLOB
-            );
-
-        create table Book
-            (
-                bookUuid TEXT PRIMARY KEY NOT NULL,
-                userUuid TEXT,
-                integerOptional INTEGER,
-                tsCreated INTEGER NOT NULL,
-                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
-            );
-
-        create table UserBook
-            (
-                bookUuid TEXT NOT NULL,
-                userUuid TEXT NOT NULL,
-                realToDouble REAL,
-                PRIMARY KEY (bookUuid, userUuid),
-                FOREIGN KEY(bookUuid) REFERENCES Book(bookUuid),
-                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
-            );
-
-        create table Parent
-            (
-                parentUuid TEXT NOT NULL,
-                userUuid TEXT,
-                PRIMARY KEY (parentUuid),
-                FOREIGN KEY(userUuid) REFERENCES User(userUuid)
-            );
-        ",
-    )
-    .unwrap();
+    con.execute_batch(batch).unwrap();
 
     let tables = sqlite_parser::parse_no_parser(&db_path);
 
@@ -320,4 +320,69 @@ pub fn create_db() -> (Metadata, String) {
 
 pub fn delete_db(path: String) {
     std::fs::remove_file(path).unwrap();
+}
+
+mod index_optimizer_test {
+    use crate::generate_generated_code::create_db;
+    use crate::parse::parse;
+    use crate::{Config, Visibility};
+    use grdb_orm_lib::dyn_query::DynamicQuery;
+    use std::env::current_dir;
+
+    fn setup(query: &str, add_index: bool) {
+        let mut table_create = "create table User(
+                userUuid TEXT PRIMARY KEY NOT NULL,
+                name TEXT,
+                something_random TEXT
+            );"
+        .to_string();
+
+        if add_index {
+            table_create += "\nCREATE INDEX user_name
+            ON User (name);";
+        }
+        let (metadata, path) = create_db(&table_create);
+
+        let config = Config {
+            visibility: Visibility::Public,
+            output_dir: current_dir().unwrap(),
+            custom_mapping: vec![],
+            dynamic_queries: vec![DynamicQuery {
+                parameter_types: vec![],
+                extension: "User".to_string(),
+                func_name: "selectAll".to_string(),
+                return_types: vec!["User".to_string()],
+                return_types_is_array: true,
+                query: query.to_string(),
+                map_to_different_type: None,
+            }],
+            suffix_swift_structs: "",
+            prefix_swift_structs: "",
+            use_swiftformat: true,
+            use_swiftlint: true,
+            sqlite_location: path,
+            all_immutable: false,
+            imports: "".to_string(),
+            index_optimizer: true,
+        };
+
+        parse(metadata, config);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_unused_index() {
+        setup("select * from User", true);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_index() {
+        setup("select * from User where name = 'test'", false);
+    }
+
+    #[test]
+    fn correct() {
+        setup("select * from User where name = 'test'", true);
+    }
 }

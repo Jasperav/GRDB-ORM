@@ -18,6 +18,7 @@ pub struct Config {
     pub sqlite_location: String,
     pub all_immutable: bool,
     pub imports: String,
+    pub index_optimizer: bool,
 }
 
 impl Config {

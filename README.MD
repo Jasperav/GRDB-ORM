@@ -19,6 +19,9 @@ The queries are validated when generating a Swift `func` for them
 - Primary key objects are generated for each `struct` which can in turn be used to query a unique row or to delete a unique row
 - [Configurable](#add-your-configuration)
 - [Much better performance](#performance) than `Codable` `struct`s in GRDB (without custom initializers)
+- Index checker based on dynamic queries (because auto generated queries are exclusively on the primary key index):
+  - Automatically finds unused indexes
+  - Finds missing indexes
   
 ## Why this is faster than GRDB
 - Generated code knows the properties types at compile time, rather than runtime. It removes the overhead
@@ -33,9 +36,7 @@ The queries are validated when generating a Swift `func` for them
 2. Clone this project
 3. Navigate inside the Parser dir
 4. [Add your configuration](#add-your-configuration)
-5. Run the parser (either one of the two options):
-    - Execute the binary in Parser/compiled/sqlite_parser_swift_grdb
-    - Run `cargo run` in the Parser dir
+5. Run the parser: Run `cargo run` in the Parser dir
 6. Copy paste the generated files from your output dir in your Xcode project
 
 ## Add your configuration

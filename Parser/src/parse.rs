@@ -1,10 +1,12 @@
 use crate::configuration::Config;
-use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
+use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QUERY};
 use crate::line_writer::LineWriter;
 use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
-use rusqlite::{Error, NO_PARAMS};
+use regex::Regex;
+use rusqlite::{Connection, Error, NO_PARAMS};
 use sqlite_parser::Metadata;
+use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
 /// Starting point of parsing [Metadata] and [Config]
@@ -95,13 +97,12 @@ impl<'a> Parser<'a> {
 
 /// Tests a query
 pub(crate) fn test_query(
-    sqlite_location: &str,
+    config: &Config,
+    connection: &Connection,
     query: &str,
     return_types_is_empty: bool,
+    indexes: &mut HashMap<String, bool>,
 ) -> String {
-    // Start a connection to test the queries
-    let connection = rusqlite::Connection::open(sqlite_location).unwrap();
-
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query
         .replace(" ?", " '1'")
@@ -128,6 +129,34 @@ pub(crate) fn test_query(
                 // Fine
             }
             _ => panic!("Invalid query: {:#?}, error: {:#?}", query, e),
+        }
+    }
+
+    if config.index_optimizer {
+        // Find used indexes
+        let query = format!("explain query plan {}", query_for_validation);
+        let mut prepared = connection.prepare(&query).unwrap();
+        let mut rows = prepared.query(NO_PARAMS).unwrap();
+
+        while let Some(row) = rows.next().unwrap() {
+            let detail: String = row.get(3).unwrap();
+            let used_index = Regex::new(r"USING INDEX\s(\w+)").unwrap();
+
+            if let Some(index) = used_index.captures(&detail) {
+                let index = index.get(1).unwrap().as_str();
+
+                if is_auto_generated_index(index) {
+                    // Ignore
+                    continue;
+                }
+
+                *indexes.get_mut(index).expect(index) = true;
+            } else {
+                panic!(
+                    "No index was used, got other detail for query: {}, error:\n{:#?}",
+                    query_for_validation, detail
+                );
+            }
         }
     }
 
