@@ -7,7 +7,6 @@ use crate::swift_property::{
     SwiftTypeWithTypeName,
 };
 use grdb_orm_lib::dyn_query::DynamicQuery;
-use rusqlite::NO_PARAMS;
 use sqlite_parser::{Column, Type};
 use std::collections::HashMap;
 
@@ -40,7 +39,7 @@ impl<'a> Parser<'a> {
             let mut prepared = connection
                 .prepare("select name from sqlite_master where type= 'index'")
                 .unwrap();
-            let mut rows = prepared.query(NO_PARAMS).unwrap();
+            let mut rows = prepared.query([]).unwrap();
 
             while let Some(row) = rows.next().unwrap() {
                 let name: String = row.get(0).unwrap();

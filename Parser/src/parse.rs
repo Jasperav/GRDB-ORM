@@ -4,7 +4,7 @@ use crate::line_writer::LineWriter;
 use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
 use regex::Regex;
-use rusqlite::{Connection, Error, NO_PARAMS};
+use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
@@ -123,7 +123,7 @@ pub(crate) fn test_query(
 
     let query = format!("explain {}", query_for_validation);
 
-    if let Err(e) = connection.query_row(&query, NO_PARAMS, |_| Ok(())) {
+    if let Err(e) = connection.query_row(&query, [], |_| Ok(())) {
         match e {
             Error::QueryReturnedNoRows => {
                 // Fine
@@ -136,7 +136,7 @@ pub(crate) fn test_query(
         // Find used indexes
         let query = format!("explain query plan {}", query_for_validation);
         let mut prepared = connection.prepare(&query).unwrap();
-        let mut rows = prepared.query(NO_PARAMS).unwrap();
+        let mut rows = prepared.query([]).unwrap();
 
         println!("Preparing to find query plan: {}", query);
 
