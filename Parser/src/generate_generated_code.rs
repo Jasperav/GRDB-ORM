@@ -385,4 +385,12 @@ mod index_optimizer_test {
     fn correct() {
         setup("select * from User where name = 'test'", true);
     }
+
+    #[test]
+    fn correct_join() {
+        setup(
+            "select *, (select 1 from User where name = 'x') from User where name = 'test'",
+            true,
+        );
+    }
 }

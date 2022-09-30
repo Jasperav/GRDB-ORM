@@ -138,12 +138,46 @@ pub(crate) fn test_query(
         let mut prepared = connection.prepare(&query).unwrap();
         let mut rows = prepared.query(NO_PARAMS).unwrap();
 
+        println!("Preparing to find query plan: {}", query);
+
         while let Some(row) = rows.next().unwrap() {
             let detail: String = row.get(3).unwrap();
+
+            println!(
+                "Got detail for query, detail: {}", detail
+            );
+
+            let lowercased = detail.to_lowercase();
+            let skippable = ["scalar subquery", "correlated scalar", "list subquery"];
+
+            let mut should_continue = false;
+
+            for skip in skippable {
+                if lowercased.starts_with(skip) {
+                    println!(
+                        "Skip processing because it is a skippable detail: {}",
+                        detail
+                    );
+
+                    should_continue = true;
+                    break;
+                }
+            }
+
+            if should_continue {
+                continue;
+            }
+
+            if !lowercased.starts_with("search") {
+                panic!("Scanning tables is SLOW: {}", detail);
+            }
+
             let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
 
             if let Some(index) = used_index.captures(&detail) {
                 let index = index.get(1).unwrap().as_str();
+
+                println!("Found matching index: {}", index);
 
                 if is_auto_generated_index(index) {
                     // Ignore
@@ -152,10 +186,7 @@ pub(crate) fn test_query(
 
                 *indexes.get_mut(index).expect(index) = true;
             } else {
-                panic!(
-                    "No index was used, got other detail for query: {}, error:\n{:#?}",
-                    query_for_validation, detail
-                );
+                panic!("No index was used");
             }
         }
     }

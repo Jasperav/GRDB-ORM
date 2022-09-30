@@ -323,7 +323,7 @@ impl<'a> Parser<'a> {
                 {equatable}
             }}
 
-            {modifier}func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<{the_type}, Error> {{
+            {modifier}func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<{the_type}, Error> {{
                     ValueObservation
                             .tracking({{ db in
                                 try {}({call_method})
