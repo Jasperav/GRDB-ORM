@@ -9,6 +9,9 @@ pub struct DynamicQuery {
     pub query: String,
     /// Func name of the other query
     pub map_to_different_type: Option<String>,
+    /// Set this only to true when using the index optimizer and this query should ignore
+    /// a b_tree plan
+    pub bypass_b_tree_index_optimizer: bool,
 }
 
 impl DynamicQuery {

@@ -1,6 +1,6 @@
 use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
-use crate::parse::{test_query, Parser};
+use crate::parse::{test_query, Index, Parser};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{
     create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty, SwiftType,
@@ -37,7 +37,7 @@ impl<'a> Parser<'a> {
         if self.config.index_optimizer {
             println!("Using index optimizer, finding indexes...");
             let mut prepared = connection
-                .prepare("select name from sqlite_master where type= 'index'")
+                .prepare("select name from sqlite_master where type = 'index'")
                 .unwrap();
             let mut rows = prepared.query([]).unwrap();
 
@@ -49,7 +49,27 @@ impl<'a> Parser<'a> {
                     continue;
                 }
 
-                assert!(indexes.insert(name, false).is_none());
+                let mut prepared = connection
+                    .prepare(&format!("PRAGMA index_info('{}')", name))
+                    .unwrap();
+                let mut rows = prepared.query([]).unwrap();
+                let mut amount = 0;
+
+                while rows.next().unwrap().is_some() {
+                    amount += 1;
+                }
+
+                assert_ne!(0, amount);
+
+                assert!(indexes
+                    .insert(
+                        name,
+                        Index {
+                            used: false,
+                            amount_of_columns: amount,
+                        }
+                    )
+                    .is_none());
             }
 
             println!("Found the following custom indexes:");
@@ -61,13 +81,7 @@ impl<'a> Parser<'a> {
 
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
-            test_query(
-                self.config,
-                &connection,
-                &dynamic_query.query,
-                dynamic_query.return_types.is_empty(),
-                &mut indexes,
-            );
+            test_query(self.config, &connection, dynamic_query, &mut indexes);
 
             // The parameters to invoke the Swift functions for
             let mut parameters = vec![];
@@ -225,8 +239,14 @@ impl<'a> Parser<'a> {
 
         if self.config.index_optimizer {
             for index in indexes {
-                if !index.1 {
+                if !index.1.used {
                     panic!("Unused index: {:#?}", index.0);
+                }
+            }
+
+            for dyn_query in &self.config.dynamic_queries {
+                if dyn_query.bypass_b_tree_index_optimizer {
+                    panic!("Got method names which where not ignored: {:#?}", dyn_query);
                 }
             }
         }

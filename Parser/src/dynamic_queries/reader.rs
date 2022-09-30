@@ -73,6 +73,7 @@ mod tests {
             return_types_is_array: true,
             query: "select * from User where firstName = ?".to_string(),
             map_to_different_type: None,
+            bypass_b_tree_index_optimizer: false,
         };
 
         println!("{}", x.to_toml());

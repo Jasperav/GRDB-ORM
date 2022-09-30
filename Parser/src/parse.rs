@@ -3,11 +3,17 @@ use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QU
 use crate::line_writer::LineWriter;
 use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
+
+pub struct Index {
+    pub used: bool,
+    pub amount_of_columns: i32,
+}
 
 /// Starting point of parsing [Metadata] and [Config]
 pub(crate) fn parse(tables: Metadata, config: Config) {
@@ -99,10 +105,11 @@ impl<'a> Parser<'a> {
 pub(crate) fn test_query(
     config: &Config,
     connection: &Connection,
-    query: &str,
-    return_types_is_empty: bool,
-    indexes: &mut HashMap<String, bool>,
+    dyn_query: &DynamicQuery,
+    indexes: &mut HashMap<String, Index>,
 ) -> String {
+    let query = &dyn_query.query;
+    let return_types_is_empty = dyn_query.return_types.is_empty();
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query
         .replace(" ?", " '1'")
@@ -137,6 +144,7 @@ pub(crate) fn test_query(
         let query = format!("explain query plan {}", query_for_validation);
         let mut prepared = connection.prepare(&query).unwrap();
         let mut rows = prepared.query([]).unwrap();
+        let mut bypassed_b_tree = false;
 
         println!("Preparing to find query plan: {}", query);
 
@@ -172,6 +180,16 @@ pub(crate) fn test_query(
                 continue;
             }
 
+            if lowercased.starts_with("use temp b-tree for order by")
+                && dyn_query.bypass_b_tree_index_optimizer
+            {
+                println!("Bypassing b-tree");
+
+                bypassed_b_tree = true;
+
+                continue;
+            }
+
             if !lowercased.starts_with("search") {
                 panic!("Scanning tables is SLOW: {}", detail);
             }
@@ -188,10 +206,30 @@ pub(crate) fn test_query(
                     continue;
                 }
 
-                *indexes.get_mut(index).expect(index) = true;
+                let sqlite_index = indexes.get_mut(index).expect(index);
+
+                // Check if exactly all columns are used
+                let question_marks = detail.matches('?').count();
+                let amount_of_columns = sqlite_index.amount_of_columns as usize;
+                let mut allowed_number_of_columns = vec![amount_of_columns];
+
+                if query.contains("order by ") && amount_of_columns > 0 {
+                    // For some reason, the order by is not included in the index
+                    allowed_number_of_columns.push(amount_of_columns - 1);
+                }
+
+                if !allowed_number_of_columns.contains(&question_marks) {
+                    panic!("Not all columns used in the index")
+                }
+
+                sqlite_index.used = true;
             } else {
                 panic!("No index was used");
             }
+        }
+
+        if !bypassed_b_tree && dyn_query.bypass_b_tree_index_optimizer {
+            panic!("Did not bypass");
         }
     }
 

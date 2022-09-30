@@ -26,6 +26,9 @@
 # [query]
 #   The actual query
 #
+# [bypass_b_tree_index_optimizer]
+#   Set this only to true when using the index optimizer and this query should ignore a b_tree plan
+#
 # EXAMPLE
 #
 # [This-is-a-query-that-finds-a-user-by-the-users-first-name]
@@ -35,6 +38,7 @@
 # return_types = ["User"]
 # return_types_is_array = true
 # query = "select * from User where firstName = ?"
+# bypass_b_tree_index_optimizer = false
 #
 # Tips
 #   When using an IN query, make sure to use the special syntax: %PARAM_IN%
