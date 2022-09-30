@@ -135,17 +135,10 @@ pub(crate) fn test_query(
     if config.index_optimizer {
         // Find used indexes
         let query = format!("explain query plan {}", query_for_validation);
-        let mut prepared = connection
-            .prepare(&query)
-            .unwrap();
-        let mut rows = prepared
-            .query(NO_PARAMS)
-            .unwrap();
+        let mut prepared = connection.prepare(&query).unwrap();
+        let mut rows = prepared.query(NO_PARAMS).unwrap();
 
-        while let Some(row) = rows
-            .next()
-            .unwrap()
-        {
+        while let Some(row) = rows.next().unwrap() {
             let detail: String = row.get(3).unwrap();
             let used_index = Regex::new(r"USING INDEX\s(\w+)").unwrap();
 

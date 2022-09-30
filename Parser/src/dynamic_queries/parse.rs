@@ -40,9 +40,7 @@ impl<'a> Parser<'a> {
             let mut prepared = connection
                 .prepare("select name from sqlite_master where type= 'index'")
                 .unwrap();
-            let mut rows = prepared
-                .query(NO_PARAMS)
-                .unwrap();
+            let mut rows = prepared.query(NO_PARAMS).unwrap();
 
             while let Some(row) = rows.next().unwrap() {
                 let name: String = row.get(0).unwrap();
