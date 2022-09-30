@@ -140,13 +140,17 @@ pub(crate) fn test_query(
 
         println!("Preparing to find query plan: {}", query);
 
+        let mut details = vec![];
+
         while let Some(row) = rows.next().unwrap() {
             let detail: String = row.get(3).unwrap();
 
-            println!(
-                "Got detail for query, detail: {}", detail
-            );
+            details.push(detail);
+        }
 
+        println!("Got {} rows, inner details: {:#?}", details.len(), details);
+
+        for detail in details {
             let lowercased = detail.to_lowercase();
             let skippable = ["scalar subquery", "correlated scalar", "list subquery"];
 
