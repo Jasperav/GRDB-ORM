@@ -236,7 +236,7 @@
 			);
 			mainGroup = 8EDB2CC31DD1A2167B39B4F9;
 			packageReferences = (
-				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */,
+				69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */,
 			);
 			productRefGroup = 8EDB20A6AEDF49ED3A08F5BF /* Products */;
@@ -418,7 +418,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -479,7 +479,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -495,6 +495,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				INFOPLIST_FILE = GRDBPerformance/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -512,6 +513,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				INFOPLIST_FILE = GRDBPerformance/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -556,7 +558,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */ = {
+		69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
@@ -569,7 +571,7 @@
 			repositoryURL = "https://github.com/groue/GRDBQuery";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
+				minimumVersion = 0.5.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -577,7 +579,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		69260EC725D68AE700647E4C /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift.git" */;
+			package = 69260EC625D68AE700647E4C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
 		};
 		69BAF48F27ABCE0600452053 /* GRDBQuery */ = {

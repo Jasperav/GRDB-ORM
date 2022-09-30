@@ -253,6 +253,7 @@ fn update_generated_code() {
         sqlite_location: path.clone(),
         all_immutable: false,
         imports: "import Foundation\nimport GRDB".to_string(),
+        index_optimizer: false,
     };
 
     parse(metadata, config);

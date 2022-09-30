@@ -19,6 +19,9 @@ The queries are validated when generating a Swift `func` for them
 - Primary key objects are generated for each `struct` which can in turn be used to query a unique row or to delete a unique row
 - [Configurable](#add-your-configuration)
 - [Much better performance](#performance) than `Codable` `struct`s in GRDB (without custom initializers)
+- Index checker based on dynamic queries (because auto generated queries are exclusively on the primary key index):
+  - Automatically finds unused indexes
+  - Finds missing indexes
   
 ## Why this is faster than GRDB
 - Generated code knows the properties types at compile time, rather than runtime. It removes the overhead

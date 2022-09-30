@@ -118,6 +118,7 @@ fn main() {
         sqlite_location: properties::SQLITE_LOCATION.to_owned(),
         all_immutable: *properties::ALL_IMMUTABLE,
         imports: packages,
+        index_optimizer: *properties::INDEX_OPTIMIZER,
     };
 
     println!("Successfully parsed configuration files");

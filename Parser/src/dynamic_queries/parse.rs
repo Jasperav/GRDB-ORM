@@ -7,9 +7,15 @@ use crate::swift_property::{
     SwiftTypeWithTypeName,
 };
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use rusqlite::NO_PARAMS;
 use sqlite_parser::{Column, Type};
+use std::collections::HashMap;
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
+
+pub fn is_auto_generated_index(index: &str) -> bool {
+    index.starts_with("sqlite_autoindex_")
+}
 
 /// Parses a dynamic query
 impl<'a> Parser<'a> {
@@ -24,12 +30,37 @@ impl<'a> Parser<'a> {
         self.add_line("import Combine".to_string());
         self.add_line("import GRDBQuery".to_string());
 
+        let mut indexes = HashMap::default();
+        let connection = rusqlite::Connection::open(&self.config.sqlite_location).unwrap();
+
+        if self.config.index_optimizer {
+            while let Some(row) = connection
+                .prepare("select name from sqlite_master where type= 'index'")
+                .unwrap()
+                .query(NO_PARAMS)
+                .unwrap()
+                .next()
+                .unwrap()
+            {
+                let name: String = row.get(0).unwrap();
+
+                if is_auto_generated_index(&name) {
+                    // Fine, auto generated index
+                    continue;
+                }
+
+                assert!(indexes.insert(name, false).is_none());
+            }
+        }
+
         for dynamic_query in &self.config.dynamic_queries {
             // Check if the query is valid
             test_query(
-                &self.config.sqlite_location,
+                &self.config,
+                &connection,
                 &dynamic_query.query,
                 dynamic_query.return_types.is_empty(),
+                &mut indexes,
             );
 
             // The parameters to invoke the Swift functions for
@@ -184,6 +215,14 @@ impl<'a> Parser<'a> {
             );
 
             self.add_closing_brackets();
+        }
+
+        if self.config.index_optimizer {
+            for index in indexes {
+                if !index.1 {
+                    panic!("Unused index: {:#?}", index.0);
+                }
+            }
         }
 
         self.write("DynamicQueries");
