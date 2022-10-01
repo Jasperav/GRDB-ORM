@@ -208,20 +208,6 @@ pub(crate) fn test_query(
 
                 let sqlite_index = indexes.get_mut(index).expect(index);
 
-                // Check if exactly all columns are used
-                let question_marks = detail.matches('?').count();
-                let amount_of_columns = sqlite_index.amount_of_columns as usize;
-                let mut allowed_number_of_columns = vec![amount_of_columns];
-
-                if query.contains("order by ") && amount_of_columns > 0 {
-                    // For some reason, the order by is not included in the index
-                    allowed_number_of_columns.push(amount_of_columns - 1);
-                }
-
-                if !allowed_number_of_columns.contains(&question_marks) {
-                    panic!("Not all columns used in the index")
-                }
-
                 sqlite_index.used = true;
             } else {
                 panic!("No index was used");
