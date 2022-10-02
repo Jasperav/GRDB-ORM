@@ -144,7 +144,7 @@ pub(crate) fn test_query(
         let query = format!("explain query plan {}", query_for_validation);
         let mut prepared = connection.prepare(&query).unwrap();
         let mut rows = prepared.query([]).unwrap();
-        let mut bypassed_b_tree = false;
+        let mut bypassed = false;
 
         println!("Preparing to find query plan: {}", query);
 
@@ -180,17 +180,15 @@ pub(crate) fn test_query(
                 continue;
             }
 
-            if lowercased.starts_with("use temp b-tree for order by")
-                && dyn_query.bypass_b_tree_index_optimizer
-            {
-                println!("Bypassing b-tree");
-
-                bypassed_b_tree = true;
-
-                continue;
-            }
-
             if !lowercased.starts_with("search") {
+                if dyn_query.bypass_index_optimizer {
+                    println!("Bypassing query");
+
+                    bypassed = true;
+
+                    continue;
+                }
+
                 panic!("Scanning tables is SLOW: {}", detail);
             }
 
@@ -208,13 +206,25 @@ pub(crate) fn test_query(
 
                 let sqlite_index = indexes.get_mut(index).expect(index);
 
-                sqlite_index.used = true;
+                // Check if exactly all columns are used
+                let question_marks = detail.matches('?').count();
+                let amount_of_columns = sqlite_index.amount_of_columns as usize;
+                let mut allowed_number_of_columns = vec![amount_of_columns];
+
+                if query.contains("order by ") && amount_of_columns > 0 {
+                    // For some reason, the order by is not included in the index
+                    allowed_number_of_columns.push(amount_of_columns - 1);
+                }
+
+                if allowed_number_of_columns.contains(&question_marks) {
+                    sqlite_index.used = true;
+                }
             } else {
                 panic!("No index was used");
             }
         }
 
-        if !bypassed_b_tree && dyn_query.bypass_b_tree_index_optimizer {
+        if !bypassed && dyn_query.bypass_index_optimizer {
             panic!("Did not bypass");
         }
     }

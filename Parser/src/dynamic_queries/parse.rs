@@ -245,7 +245,7 @@ impl<'a> Parser<'a> {
             }
 
             for dyn_query in &self.config.dynamic_queries {
-                if dyn_query.bypass_b_tree_index_optimizer {
+                if dyn_query.bypass_index_optimizer {
                     panic!("Got method names which where not ignored: {:#?}", dyn_query);
                 }
             }

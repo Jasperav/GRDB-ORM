@@ -106,7 +106,7 @@ fn update_generated_code() {
                     where User.userUuid = ?"
                     .to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -123,7 +123,7 @@ fn update_generated_code() {
                     left join User on User.userUuid = Book.userUuid"
                     .to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -137,7 +137,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select * from User where firstName = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -151,7 +151,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select userUuid from User where firstName = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -161,7 +161,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select count(*) from User".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -175,7 +175,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "delete from Book where userUuid = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -185,7 +185,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "select exists(select 1 from Book)".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -199,7 +199,7 @@ fn update_generated_code() {
                 query: "select serializedInfo, serializedInfoNullable from user limit 1"
                     .to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -212,7 +212,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select serializedInfo, serializedInfoNullable from user".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -226,7 +226,7 @@ fn update_generated_code() {
                 return_types_is_array: false,
                 query: "update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -238,7 +238,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select * from user where firstName in %PARAM_IN%".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -253,7 +253,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -270,7 +270,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -287,7 +287,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid".to_string(),
                 map_to_different_type: Some("retrieveOptionalUserValues".to_string()),
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -301,7 +301,7 @@ fn update_generated_code() {
                 return_types_is_array: true,
                 query: "select * from Parent limit ?".to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             },
         ],
         suffix_swift_structs: "",
@@ -371,7 +371,7 @@ mod index_optimizer_test {
                 return_types_is_array: true,
                 query: query.to_string(),
                 map_to_different_type: None,
-                bypass_b_tree_index_optimizer: false,
+                bypass_index_optimizer: false,
             }],
             suffix_swift_structs: "",
             prefix_swift_structs: "",
