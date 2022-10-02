@@ -18,5 +18,5 @@ dotenv = "0.15"
 grdb_orm_lib = { path = "../grdb_orm_lib" }
 
 [dependencies.rusqlite]
-version = "0.24.2"
+version = "0.28.0"
 features = ["bundled"]

@@ -1,6 +1,6 @@
 [package]
 name = "grdb_orm_lib"
-version = "0.1.3"
+version = "0.1.5"
 edition = "2021"
 description = "Used for GRDB orm"
 license = "MIT OR Apache-2.0"

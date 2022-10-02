@@ -3,11 +3,17 @@ use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QU
 use crate::line_writer::LineWriter;
 use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
 use crate::swift_struct::TableWriter;
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
-use rusqlite::{Connection, Error, NO_PARAMS};
+use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
+
+pub struct Index {
+    pub used: bool,
+    pub amount_of_columns: i32,
+}
 
 /// Starting point of parsing [Metadata] and [Config]
 pub(crate) fn parse(tables: Metadata, config: Config) {
@@ -99,17 +105,18 @@ impl<'a> Parser<'a> {
 pub(crate) fn test_query(
     config: &Config,
     connection: &Connection,
-    query: &str,
-    return_types_is_empty: bool,
-    indexes: &mut HashMap<String, bool>,
+    dyn_query: &DynamicQuery,
+    indexes: &mut HashMap<String, Index>,
 ) -> String {
+    let query = &dyn_query.query;
+    let return_types_is_empty = dyn_query.return_types.is_empty();
     // Thanks to SQLite weak typing, all parameterized queries can be easily testing by executing it with '1'
     let query_for_validation = query
         .replace(" ?", " '1'")
         .replace("(?", " ('1'")
         .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
-    println!("Validating query '{}'", query_for_validation);
+    println!("Validating query for func name '{}', '{}'", dyn_query.func_name, query_for_validation);
 
     // Check if the query starts with select, delete or update. Insert and anything else are illegal
     // This is because insert queries are already generated expect if the insert also contains an ON CONFLICT clause
@@ -123,7 +130,7 @@ pub(crate) fn test_query(
 
     let query = format!("explain {}", query_for_validation);
 
-    if let Err(e) = connection.query_row(&query, NO_PARAMS, |_| Ok(())) {
+    if let Err(e) = connection.query_row(&query, [], |_| Ok(())) {
         match e {
             Error::QueryReturnedNoRows => {
                 // Fine
@@ -136,27 +143,87 @@ pub(crate) fn test_query(
         // Find used indexes
         let query = format!("explain query plan {}", query_for_validation);
         let mut prepared = connection.prepare(&query).unwrap();
-        let mut rows = prepared.query(NO_PARAMS).unwrap();
+        let mut rows = prepared.query([]).unwrap();
+        let mut bypassed = false;
+
+        println!("Preparing to find query plan: {}", query);
+
+        let mut details = vec![];
 
         while let Some(row) = rows.next().unwrap() {
             let detail: String = row.get(3).unwrap();
+
+            details.push(detail);
+        }
+
+        println!("Got {} rows, inner details: {:#?}", details.len(), details);
+
+        for detail in details {
+            let lowercased = detail.to_lowercase();
+            let skippable = ["scalar subquery", "correlated scalar", "list subquery"];
+
+            let mut should_continue = false;
+
+            for skip in skippable {
+                if lowercased.starts_with(skip) {
+                    println!(
+                        "Skip processing because it is a skippable detail: {}",
+                        detail
+                    );
+
+                    should_continue = true;
+                    break;
+                }
+            }
+
+            if should_continue {
+                continue;
+            }
+
+            if !lowercased.starts_with("search") {
+                if dyn_query.bypass_index_optimizer {
+                    println!("Bypassing query");
+
+                    bypassed = true;
+                } else {
+                    panic!("Scanning tables is SLOW: {}", detail);
+                }
+            }
+
             let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
 
             if let Some(index) = used_index.captures(&detail) {
                 let index = index.get(1).unwrap().as_str();
+
+                println!("Found matching index: {}", index);
 
                 if is_auto_generated_index(index) {
                     // Ignore
                     continue;
                 }
 
-                *indexes.get_mut(index).expect(index) = true;
-            } else {
-                panic!(
-                    "No index was used, got other detail for query: {}, error:\n{:#?}",
-                    query_for_validation, detail
-                );
+                let sqlite_index = indexes.get_mut(index).expect(index);
+
+                // Check if exactly all columns are used
+                let question_marks = detail.matches('?').count();
+                let amount_of_columns = sqlite_index.amount_of_columns as usize;
+                let mut allowed_number_of_columns = vec![amount_of_columns];
+
+                if query.contains("order by ") && amount_of_columns > 0 {
+                    // For some reason, the order by is not included in the index
+                    allowed_number_of_columns.push(amount_of_columns - 1);
+                }
+
+                if allowed_number_of_columns.contains(&question_marks) {
+                    sqlite_index.used = true;
+                }
+            } else if !dyn_query.bypass_index_optimizer {
+                panic!("No index was used");
             }
+        }
+
+        if !bypassed && dyn_query.bypass_index_optimizer {
+            panic!("Did not bypass");
         }
     }
 

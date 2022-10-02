@@ -62,7 +62,7 @@ public extension DbBook {
             lhs.userUuid == rhs.userUuid
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[BooksForUserWithSpecificUuidType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksForUserWithSpecificUuidType], Error> {
             ValueObservation
                 .tracking { db in
                     try booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
@@ -124,7 +124,7 @@ public extension DbBook {
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[BooksWithOptionalUserType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksWithOptionalUserType], Error> {
             ValueObservation
                 .tracking { db in
                     try booksWithOptionalUser(db: db)
@@ -179,7 +179,7 @@ public extension DbUser {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindByUsernameType?, Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindByUsernameType?, Error> {
             ValueObservation
                 .tracking { db in
                     try findByUsername(db: db, firstName: firstName)
@@ -234,7 +234,7 @@ public extension DbUser {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<FindUserUuidByUsernameType?, Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindUserUuidByUsernameType?, Error> {
             ValueObservation
                 .tracking { db in
                     try findUserUuidByUsername(db: db, firstName: firstName)
@@ -285,7 +285,7 @@ public extension DbUser {
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<AmountOfUsersType?, Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<AmountOfUsersType?, Error> {
             ValueObservation
                 .tracking { db in
                     try amountOfUsers(db: db)
@@ -351,7 +351,7 @@ public extension DbBook {
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<HasAtLeastOneBookType?, Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<HasAtLeastOneBookType?, Error> {
             ValueObservation
                 .tracking { db in
                     try hasAtLeastOneBook(db: db)
@@ -410,7 +410,7 @@ public extension DbUser {
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<SerializeInfoSingleType?, Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<SerializeInfoSingleType?, Error> {
             ValueObservation
                 .tracking { db in
                     try serializeInfoSingle(db: db)
@@ -468,7 +468,7 @@ public extension DbUser {
             true
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[SerializeInfoArrayType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[SerializeInfoArrayType], Error> {
             ValueObservation
                 .tracking { db in
                     try serializeInfoArray(db: db)
@@ -556,7 +556,7 @@ public extension DbUser {
             lhs.firstName == rhs.firstName
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[AllWithProvidedFirstNamesType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[AllWithProvidedFirstNamesType], Error> {
             ValueObservation
                 .tracking { db in
                     try allWithProvidedFirstNames(db: db, firstName: firstName)
@@ -659,7 +659,7 @@ public extension DbUser {
             lhs.firstNames0 == rhs.firstNames0 && lhs.jsonStructOptional == rhs.jsonStructOptional && lhs.integer == rhs.integer && lhs.serializedInfoNullable == rhs.serializedInfoNullable
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[ComplexType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[ComplexType], Error> {
             ValueObservation
                 .tracking { db in
                     try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
@@ -731,7 +731,7 @@ public extension DbParent {
             lhs.parentUuid == rhs.parentUuid
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[RetrieveOptionalUserValuesType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesType], Error> {
             ValueObservation
                 .tracking { db in
                     try retrieveOptionalUserValues(db: db, parentUuid: parentUuid)
@@ -820,7 +820,7 @@ public extension DbParent {
             lhs.parentUuid == rhs.parentUuid
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[RetrieveOptionalUserValuesMappedType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesMappedType], Error> {
             ValueObservation
                 .tracking { db in
                     try retrieveOptionalUserValuesMapped(db: db, parentUuid: parentUuid)
@@ -874,7 +874,7 @@ public extension DbParent {
             lhs.limit == rhs.limit
         }
 
-        public func publisher(in dbQueue: DatabaseQueue) -> AnyPublisher<[LimitedType], Error> {
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LimitedType], Error> {
             ValueObservation
                 .tracking { db in
                     try limited(db: db, limit: limit)
