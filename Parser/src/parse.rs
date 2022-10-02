@@ -116,7 +116,7 @@ pub(crate) fn test_query(
         .replace("(?", " ('1'")
         .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
-    println!("Validating query '{}'", query_for_validation);
+    println!("Validating query for func name '{}', '{}'", dyn_query.func_name, query_for_validation);
 
     // Check if the query starts with select, delete or update. Insert and anything else are illegal
     // This is because insert queries are already generated expect if the insert also contains an ON CONFLICT clause
@@ -185,11 +185,9 @@ pub(crate) fn test_query(
                     println!("Bypassing query");
 
                     bypassed = true;
-
-                    continue;
+                } else {
+                    panic!("Scanning tables is SLOW: {}", detail);
                 }
-
-                panic!("Scanning tables is SLOW: {}", detail);
             }
 
             let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
@@ -219,7 +217,7 @@ pub(crate) fn test_query(
                 if allowed_number_of_columns.contains(&question_marks) {
                     sqlite_index.used = true;
                 }
-            } else {
+            } else if !dyn_query.bypass_index_optimizer {
                 panic!("No index was used");
             }
         }
