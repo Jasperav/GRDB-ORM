@@ -116,7 +116,10 @@ pub(crate) fn test_query(
         .replace("(?", " ('1'")
         .replace(PARAMETERIZED_IN_QUERY, "(1)");
 
-    println!("Validating query for func name '{}', '{}'", dyn_query.func_name, query_for_validation);
+    println!(
+        "Validating query for func name '{}', '{}'",
+        dyn_query.func_name, query_for_validation
+    );
 
     // Check if the query starts with select, delete or update. Insert and anything else are illegal
     // This is because insert queries are already generated expect if the insert also contains an ON CONFLICT clause
