@@ -1,22 +1,19 @@
 [package]
 name = "sqlite_parser_swift_grdb"
-version = "0.1.0"
-authors = ["Jasper Visser <jasperav@hotmail.com>"]
-edition = "2018"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [build-dependencies]
-env_parser = { version = "0.1", features = ["to_lazy_static"] }
+env_parser = { workspace = true }
 
 [dependencies]
-sqlite_parser = "0.1"
-lazy_static = "1.4"
-Inflector = "0.11"
-clap = { version = "4.0.0-rc.1", features = ["derive"] }
-regex = "1.4"
-dotenv = "0.15"
+sqlite_parser = { workspace = true }
+lazy_static = { workspace = true }
+Inflector = { workspace = true }
+clap = { workspace = true }
+regex = { workspace = true }
+dotenv = { workspace = true }
+rusqlite = { workspace = true }
 grdb_orm_lib = { path = "../grdb_orm_lib" }
-
-[dependencies.rusqlite]
-version = "0.28.0"
-features = ["bundled"]
