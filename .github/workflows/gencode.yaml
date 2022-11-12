@@ -14,7 +14,7 @@ jobs:
       - uses: fusion-engineering/setup-git-credentials@v2
         with:
           credentials: ${{secrets.GIT_CREDENTIALS}}
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build and test
         # https://stackoverflow.com/questions/58125659/github-actions-xcodebuild-fails-due-to-server-fingerprint
         run: |
