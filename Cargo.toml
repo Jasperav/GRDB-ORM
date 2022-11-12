@@ -4,3 +4,24 @@ members = [
     "Parser",
     "grdb_orm_lib",
 ]
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+authors = ["Jasper Visser <jasperav@hotmail.com>"]
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+sqlite_parser = "0.1.13"
+lazy_static = "1.4.0"
+Inflector = "0.11.4"
+clap = { version = "4.0.23", features = ["derive"] }
+regex = "1.7.0"
+dotenv = "0.15"
+serde = { version = "1.0.147", features = ["derive"] }
+toml = "0.5.9"
+env_parser = { version = "0.1.6", features = ["to_lazy_static"] }
+
+[workspace.dependencies.rusqlite]
+version = "0.28.0"
+features = ["bundled"]
