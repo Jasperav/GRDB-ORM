@@ -367,12 +367,12 @@ public extension DbUser {
         public var gen0: SerializedInfo
         public var gen1: SerializedInfo?
         public init(row: Row) {
-            gen0 = try! SerializedInfo(serializedData: row[0])
+            gen0 = try! SerializedInfo(serializedBytes: row[0])
             gen1 = {
                 if row.hasNull(atIndex: 1) {
                     return nil
                 } else {
-                    return try! SerializedInfo(serializedData: row[1])
+                    return try! SerializedInfo(serializedBytes: row[1])
                 }
             }()
         }
@@ -426,12 +426,12 @@ public extension DbUser {
         public var gen0: SerializedInfo
         public var gen1: SerializedInfo?
         public init(row: Row) {
-            gen0 = try! SerializedInfo(serializedData: row[0])
+            gen0 = try! SerializedInfo(serializedBytes: row[0])
             gen1 = {
                 if row.hasNull(atIndex: 1) {
                     return nil
                 } else {
-                    return try! SerializedInfo(serializedData: row[1])
+                    return try! SerializedInfo(serializedBytes: row[1])
                 }
             }()
         }

@@ -43,7 +43,7 @@ fn main() {
 
     // Run the swift tests
     assert!(Command::new("xcodebuild")
-        .args(&[
+        .args([
             "test",
             "-project",
             "GRDBPerformance.xcodeproj",

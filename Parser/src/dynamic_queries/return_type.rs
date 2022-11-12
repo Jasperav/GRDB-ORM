@@ -142,7 +142,7 @@ impl<'a> ReturnType<'a> {
                 {
                     let row_index = create_row_index(&decoder.row_index());
                     let decode = format!(
-                        "try! {}(serializedData: {})",
+                        "try! {}(serializedBytes: {})",
                         swift_property.swift_type.type_name, row_index
                     );
                     let decode = wrap_null_check(

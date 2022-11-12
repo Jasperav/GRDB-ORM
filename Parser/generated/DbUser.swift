@@ -34,7 +34,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public var bool: Bool
     public private(set) var serializedInfo: Data
     public func serializedInfoAutoConvert() -> SerializedInfo {
-        try! SerializedInfo(serializedData: serializedInfo)
+        try! SerializedInfo(serializedBytes: serializedInfo)
     }
 
     public mutating func serializedInfoAutoSet(serializedInfo: SerializedInfo) {
@@ -46,7 +46,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         guard let serializedInfoNullable = serializedInfoNullable else {
             return nil
         }
-        return try! SerializedInfo(serializedData: serializedInfoNullable)
+        return try! SerializedInfo(serializedBytes: serializedInfoNullable)
     }
 
     public mutating func serializedInfoNullableAutoSet(serializedInfoNullable: SerializedInfo?) {
