@@ -4,8 +4,8 @@ import GRDB
 public enum SerializedInfo: Equatable {
     case data(String)
 
-    public init(serializedData: Data) {
-        self = SerializedInfo.data(String(decoding: serializedData, as: UTF8.self))
+    public init(serializedBytes: Data) {
+        self = SerializedInfo.data(String(decoding: serializedBytes, as: UTF8.self))
     }
 
     public func serializedData() -> Data {

@@ -74,7 +74,7 @@ impl SwiftProperty {
             prefix, self.swift_property_name, serialize_question_mark,
         );
         let deserialize = format!(
-            "{}try! {}(serializedData: {})",
+            "{}try! {}(serializedBytes: {})",
             deserialize_return_if_nil,
             self.swift_type.type_name.replace('?', ""),
             self.swift_property_name

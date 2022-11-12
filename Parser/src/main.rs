@@ -107,12 +107,12 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
     let config = Config {
-        visibility: Visibility::from_str(&*properties::VISIBILITY),
+        visibility: Visibility::from_str(&properties::VISIBILITY),
         output_dir: Path::new(&*properties::OUTPUT_DIR).to_owned(),
         custom_mapping,
         dynamic_queries,
-        suffix_swift_structs: &*properties::SUFFIX_SWIFT_STRUCTS,
-        prefix_swift_structs: &*properties::PREFIX_SWIFT_STRUCTS,
+        suffix_swift_structs: &properties::SUFFIX_SWIFT_STRUCTS,
+        prefix_swift_structs: &properties::PREFIX_SWIFT_STRUCTS,
         use_swiftformat: *properties::USE_SWIFTFORMAT,
         use_swiftlint: *properties::USE_SWIFTLINT,
         sqlite_location: properties::SQLITE_LOCATION.to_owned(),

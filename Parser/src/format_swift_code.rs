@@ -10,7 +10,7 @@ pub fn format_swift_code(config: &Config, safe_output_dir: &Path) {
         let output = Command::new("swiftformat")
             .current_dir(safe_output_dir)
             // TODO Not sure how the --swiftversion flag works, can't get it to work
-            .args(&["."])
+            .args(["."])
             .output()
             .unwrap_or_else(|_| panic!("Problem formatting code in: {:#?}", safe_output_dir));
 
@@ -29,7 +29,7 @@ pub fn format_swift_code(config: &Config, safe_output_dir: &Path) {
 
         let output = Command::new("swiftlint")
             .current_dir(safe_output_dir)
-            .args(&["--fix"])
+            .args(["--fix"])
             .output()
             .unwrap();
 
