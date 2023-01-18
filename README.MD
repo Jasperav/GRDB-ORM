@@ -31,13 +31,13 @@ The queries are validated when generating a Swift `func` for them
 - Generated code decodes rows by using indexes exclusively (so not by name)
 
 ## How to use it
-1. Make sure you have a SQLite database somewhere that mimics your iOS/macOS database 
+1. Install cargo: https://doc.rust-lang.org/cargo/getting-started/installation.html
+2. Make sure you have a SQLite database somewhere that mimics your iOS/macOS database 
    (or point the configuration to your iOS/macOS database directly)
-2. Clone this project
-3. Navigate inside the Parser dir
-4. [Add your configuration](#add-your-configuration)
-5. Run the parser: Run `cargo run` in the Parser dir
-6. Copy paste the generated files from your output dir in your Xcode project
+3. Clone this project
+4. Navigate inside the Parser dir
+5. [Add your configuration](#add-your-configuration)
+6. Run the parser: Run `cargo run` in the Parser dir
 
 ## Add your configuration
 1. Go to the [.env](Parser/config/.env) file and fill at least `SQLITE_LOCATION` and `OUTPUT_DIR`
