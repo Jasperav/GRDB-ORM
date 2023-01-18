@@ -2,8 +2,8 @@
 
 Compatibility: [GRDB 6.3.1](https://github.com/groue/GRDB.swift), Swift 5.7\
 License: [MIT](/LICENSE)\
-CI: [![asdasd](https://img.shields.io/github/workflow/status/jasperav/GRDB-ORM/GeneratedCode/master?label=Generated%20Swift%20code)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AGeneratedCode)
-[![asdasd](https://img.shields.io/github/workflow/status/jasperav/GRDB-ORM/Parser/master?label=Parser)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AParser)
+CI: [![GC](https://img.shields.io/github/actions/workflow/status/jasperav/GRDB-ORM/gencode.yaml?branch=master)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AGeneratedCode)
+[![Parser](https://img.shields.io/github/actions/workflow/status/jasperav/GRDB-ORM/parser.yaml?branch=master)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AParser)
 
 *The code generates `struct`s for the mapped tables and all `struct`s implements `Codable` for coding values to/from the database. 
 This can NOT (yet) be customized.*
