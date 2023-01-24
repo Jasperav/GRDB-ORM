@@ -1,6 +1,6 @@
 # 🚀 Blazing fast ORM for GRDB.swift
 
-Compatibility: [GRDB 6.3.1](https://github.com/groue/GRDB.swift), Swift 5.7\
+Compatibility: [GRDB 6.6.1](https://github.com/groue/GRDB.swift), Swift 5.7\
 License: [MIT](/LICENSE)\
 CI: [![GC](https://img.shields.io/github/actions/workflow/status/jasperav/GRDB-ORM/gencode.yaml?branch=master)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AGeneratedCode)
 [![Parser](https://img.shields.io/github/actions/workflow/status/jasperav/GRDB-ORM/parser.yaml?branch=master)](https://github.com/Jasperav/GRDB-ORM/actions?query=workflow%3AParser)
