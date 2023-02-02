@@ -20,4 +20,4 @@ jobs:
         run: |
           cd ./GRDBPerformance/
           for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
-          xcodebuild test -project GRDBPerformance.xcodeproj -scheme GRDBPerformanceTests -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.0'
+          xcodebuild test -project GRDBPerformance.xcodeproj -scheme GRDBPerformanceTests -destination 'platform=iOS Simulator,name=iPhone 14 Pro,OS=16.2'
