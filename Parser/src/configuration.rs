@@ -19,6 +19,7 @@ pub struct Config {
     pub all_immutable: bool,
     pub imports: String,
     pub index_optimizer: bool,
+    pub output_dir_android: PathBuf,
 }
 
 impl Config {

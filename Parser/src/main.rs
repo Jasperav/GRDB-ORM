@@ -119,6 +119,7 @@ fn main() {
         all_immutable: *properties::ALL_IMMUTABLE,
         imports: packages,
         index_optimizer: *properties::INDEX_OPTIMIZER,
+        output_dir_android: Path::new(&*properties::OUTPUT_DIR_ANDROID).to_owned(),
     };
 
     println!("Successfully parsed configuration files");

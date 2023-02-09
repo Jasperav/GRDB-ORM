@@ -312,6 +312,7 @@ fn update_generated_code() {
         all_immutable: false,
         imports: "import Foundation\nimport GRDB".to_string(),
         index_optimizer: false,
+        output_dir_android: Default::default(),
     };
 
     parse(metadata, config);
@@ -381,6 +382,7 @@ mod index_optimizer_test {
             all_immutable: false,
             imports: "".to_string(),
             index_optimizer: true,
+            output_dir_android: Default::default(),
         };
 
         parse(metadata, config);

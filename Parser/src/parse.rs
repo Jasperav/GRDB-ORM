@@ -20,6 +20,11 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     // No tables? Something is wrong
     assert!(!tables.tables.is_empty());
 
+    parse_ios(&tables, &config);
+    parse_android(&tables, &config);
+}
+
+fn parse_ios(tables: &Metadata, config: &Config) {
     // Initialize the output dir
     let safe_output_dir = crate::output_dir_initializer::initialize(&config.output_dir);
 
@@ -35,13 +40,23 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
         config: &config,
         safe_output_dir: safe_output_dir.clone(),
     }
-    .write();
+        .write();
 
     // Write the dynamic queries
     Parser::new(&config, &tables).parse_dyn_queries();
 
     // For the Swift code
     crate::format_swift_code::format_swift_code(&config, &safe_output_dir);
+}
+
+fn parse_android(tables: &Metadata, config: &Config) {
+    if config.output_dir_android.exists() && config.output_dir_android.is_dir() {
+        println!("Generating Android room objects...");
+    } else {
+        println!("Won't generate Android objects");
+    }
+
+    let safe_output_dir = crate::output_dir_initializer::initialize(&config.output_dir_android);
 }
 
 /// Parser for the dynamic queries and upserts
