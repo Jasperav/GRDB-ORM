@@ -9,6 +9,7 @@ use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
+use crate::android::AndroidWriter;
 
 pub struct Index {
     pub used: bool,
@@ -21,7 +22,11 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     assert!(!tables.tables.is_empty());
 
     parse_ios(&tables, &config);
-    parse_android(&tables, &config);
+
+    AndroidWriter {
+        metadata: &tables,
+        config: &config,
+    }.parse();
 }
 
 fn parse_ios(tables: &Metadata, config: &Config) {
@@ -47,16 +52,6 @@ fn parse_ios(tables: &Metadata, config: &Config) {
 
     // For the Swift code
     crate::format_swift_code::format_swift_code(&config, &safe_output_dir);
-}
-
-fn parse_android(tables: &Metadata, config: &Config) {
-    if config.output_dir_android.exists() && config.output_dir_android.is_dir() {
-        println!("Generating Android room objects...");
-    } else {
-        println!("Won't generate Android objects");
-    }
-
-    let safe_output_dir = crate::output_dir_initializer::initialize(&config.output_dir_android);
 }
 
 /// Parser for the dynamic queries and upserts

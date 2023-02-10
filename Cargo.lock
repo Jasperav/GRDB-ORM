@@ -394,6 +394,7 @@ dependencies = [
  "dotenv",
  "env_parser",
  "grdb_orm_lib",
+ "heck",
  "lazy_static",
  "regex",
  "rusqlite",

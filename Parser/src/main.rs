@@ -35,6 +35,7 @@ mod table_meta_data;
 
 #[cfg(test)]
 mod generate_generated_code;
+pub mod android;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
