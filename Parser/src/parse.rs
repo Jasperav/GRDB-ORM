@@ -1,3 +1,4 @@
+use crate::android::AndroidWriter;
 use crate::configuration::Config;
 use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QUERY};
 use crate::line_writer::LineWriter;
@@ -9,7 +10,6 @@ use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
-use crate::android::AndroidWriter;
 
 pub struct Index {
     pub used: bool,
@@ -26,7 +26,8 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     AndroidWriter {
         metadata: &tables,
         config: &config,
-    }.parse();
+    }
+    .parse();
 }
 
 fn parse_ios(tables: &Metadata, config: &Config) {
@@ -45,7 +46,7 @@ fn parse_ios(tables: &Metadata, config: &Config) {
         config: &config,
         safe_output_dir: safe_output_dir.clone(),
     }
-        .write();
+    .write();
 
     // Write the dynamic queries
     Parser::new(&config, &tables).parse_dyn_queries();

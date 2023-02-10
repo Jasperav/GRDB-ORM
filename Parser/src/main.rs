@@ -33,9 +33,9 @@ mod swift_property;
 mod swift_struct;
 mod table_meta_data;
 
+pub mod android;
 #[cfg(test)]
 mod generate_generated_code;
-pub mod android;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]

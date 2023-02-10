@@ -1,15 +1,15 @@
-use std::fs::File;
+use crate::configuration::Config;
 use heck::ToUpperCamelCase;
 use inflector::Inflector;
-use sqlite_parser::{Column, Metadata, Type};
-use crate::configuration::Config;
+use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
+use std::fs::File;
 
 pub struct AndroidWriter<'a> {
     pub metadata: &'a Metadata,
     pub config: &'a Config,
 }
 
-impl <'a> AndroidWriter<'a> {
+impl<'a> AndroidWriter<'a> {
     pub fn parse(&self) {
         if self.config.output_dir_android.exists() && self.config.output_dir_android.is_dir() {
             println!("Generating Android room objects...");
@@ -30,12 +30,28 @@ impl <'a> AndroidWriter<'a> {
 
     fn generate_tables(&self) {
         for table in self.metadata.tables.values() {
-            let class_name = format!("{}{}{}", self.config.prefix_swift_structs, table.table_name.to_upper_camel_case(), self.config.suffix_swift_structs);
-            let path = self.config.output_dir_android.join(class_name.clone() + ".kt");
+            let class_name = format!(
+                "{}{}{}",
+                self.config.prefix_swift_structs,
+                table.table_name.to_upper_camel_case(),
+                self.config.suffix_swift_structs
+            );
+            let path = self
+                .config
+                .output_dir_android
+                .join(class_name.clone() + ".kt");
 
             File::create(&path).unwrap();
 
-            let mut contents = vec!["import androidx.room.*".to_string()];
+            let mut contents = vec![
+                "import androidx.room.*".to_string(),
+                "import androidx.room.ForeignKey".to_string(),
+                "import androidx.room.ForeignKey.Companion.NO_ACTION".to_string(),
+                "import androidx.room.ForeignKey.Companion.RESTRICT".to_string(),
+                "import androidx.room.ForeignKey.Companion.SET_NULL".to_string(),
+                "import androidx.room.ForeignKey.Companion.SET_DEFAULT".to_string(),
+                "import androidx.room.ForeignKey.Companion.CASCADE".to_string(),
+            ];
             let mut columns = vec![];
             let mut primary_keys = vec![];
 
@@ -50,14 +66,70 @@ impl <'a> AndroidWriter<'a> {
             }
 
             let primary_keys = primary_keys.join(", ");
+            let indices = if table.indexes.is_empty() {
+                "".to_string()
+            } else {
+                let mut indexes = vec![];
 
-            contents.push(format!("@Entity(tableName = \"{}\", primaryKeys = [{}])\ndata class {class_name}(\n{}\n)", table.table_name, primary_keys, columns.join(",\n")));
+                for index in &table.indexes {
+                    let index = index
+                        .columns
+                        .iter()
+                        .map(|i| format!("\"{}\"", i.name))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+
+                    indexes.push(format!("Index(value = [{index}])"));
+                }
+
+                format!(", indices = [{}]", indexes.join(", "))
+            };
+            let foreign_keys = if table.foreign_keys.is_empty() {
+                "".to_string()
+            } else {
+                let mut foreign_keys = vec![];
+
+                for foreign_key in &table.foreign_keys {
+                    // Currently only 1 column is supported
+                    assert_eq!(1, foreign_key.to_column.len());
+                    assert_eq!(foreign_key.from_column.len(), foreign_key.to_column.len());
+
+                    let mut start = "ForeignKey(\n".to_string();
+
+                    start += &format!(
+                        "entity = {}{}{}::class,\n",
+                        self.config.prefix_swift_structs,
+                        foreign_key.table,
+                        self.config.suffix_swift_structs
+                    );
+                    start += &format!(
+                        "childColumns = [\"{}\"],\n",
+                        foreign_key.from_column[0].name
+                    );
+                    start += &format!("parentColumns = [\"{}\"],\n", foreign_key.to_column[0].name);
+                    start += &format!(
+                        "onDelete = {},\n",
+                        self.convert_to_foreign_key(foreign_key.on_delete)
+                    );
+                    start += &format!(
+                        "onUpdate = {},\n)",
+                        self.convert_to_foreign_key(foreign_key.on_update)
+                    );
+
+                    foreign_keys.push(start);
+                }
+
+                format!(", foreignKeys = [{}]", foreign_keys.join(", "))
+            };
+
+            contents.push(format!("@Entity(\ntableName = \"{}\",\nprimaryKeys = [{}]{indices}\n{foreign_keys})\ndata class {class_name}(\n{}\n)", table.table_name, primary_keys, columns.join(",\n")));
 
             std::fs::write(path, contents.join("\n")).unwrap();
         }
     }
 
     fn kotlin_type(&self, column: &Column) -> String {
+        // TODO: support UUID with converters
         let mut result = match column.the_type {
             Type::Text | Type::String => "String",
             Type::Integer => {
@@ -80,15 +152,26 @@ impl <'a> AndroidWriter<'a> {
                 }
 
                 value.unwrap_or("Int")
-            },
+            }
             Type::Real => "Double",
             Type::Blob => "java.sql.Blob",
-        }.to_string();
+        }
+        .to_string();
 
         if column.nullable {
             result += "?"
         }
 
         result
+    }
+
+    fn convert_to_foreign_key(&self, on_update_and_delete: OnUpdateAndDelete) -> &'static str {
+        match on_update_and_delete {
+            OnUpdateAndDelete::NoAction => "NO_ACTION",
+            OnUpdateAndDelete::Restrict => "RESTRICT",
+            OnUpdateAndDelete::SetNull => "SET_NULL",
+            OnUpdateAndDelete::SetDefault => "SET_DEFAULT",
+            OnUpdateAndDelete::Cascade => "CASCADE",
+        }
     }
 }
