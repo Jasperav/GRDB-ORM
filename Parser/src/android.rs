@@ -135,6 +135,7 @@ import androidx.room.TypeConverters
                 "import androidx.room.ForeignKey.Companion.SET_NULL".to_string(),
                 "import androidx.room.ForeignKey.Companion.SET_DEFAULT".to_string(),
                 "import androidx.room.ForeignKey.Companion.CASCADE".to_string(),
+                "import androidx.room.ColumnInfo".to_string(),
                 "import java.util.*".to_string(),
             ];
             let mut columns = vec![];
@@ -147,7 +148,14 @@ import androidx.room.TypeConverters
                     primary_keys.push(format!("\"{}\"", camel_case.clone()));
                 }
 
-                columns.push(format!("val {}: {}", camel_case, self.kotlin_type(&column)));
+                let annotation = if column.name == "meta" {
+                    // Special value
+                    "@ColumnInfo(typeAffinity = ColumnInfo.BLOB)\n"
+                } else {
+                    ""
+                };
+
+                columns.push(format!("{annotation}val {}: {}", camel_case, self.kotlin_type(&column)));
             }
 
             let primary_keys = primary_keys.join(", ");
@@ -214,50 +222,57 @@ import androidx.room.TypeConverters
     }
 
     fn kotlin_type(&self, column: &Column) -> String {
-        // TODO: remove the manual checking, it should work with type convertors
-        let mut result = match column.the_type {
-            Type::Text | Type::String => {
-                let mut value = None;
+        let mut value = None;
 
-                for mapping in &self.config.custom_mapping {
-                    if mapping
-                        .regexes
-                        .iter()
-                        .any(|regex| regex.is_match(&column.name))
-                    {
-                        if mapping.the_type == "UUID" {
-                            value = Some("UUID")
-                        }
-                    }
-                }
+        for mapping in &self.config.custom_mapping {
+            if mapping
+                .regexes
+                .iter()
+                .any(|regex| regex.is_match(&column.name))
+            {
+                value = Some(mapping.the_type.to_string());
 
-                value.unwrap_or("String")
-            },
-            Type::Integer => {
-                let mut value = None;
-
-                for mapping in &self.config.custom_mapping {
-                    if mapping
-                        .regexes
-                        .iter()
-                        .any(|regex| regex.is_match(&column.name))
-                    {
-                        value = Some(if mapping.the_type == "Bool" {
-                            "Boolean"
-                        } else {
-                            assert_eq!(mapping.the_type, "Int64");
-
-                            "Long"
-                        });
-                    }
-                }
-
-                value.unwrap_or("Int")
+                break;
             }
-            Type::Real => "Double",
-            Type::Blob => "java.sql.Blob",
         }
-            .to_string();
+
+        let new_value = if let Some(val) = value {
+             let result = match val.as_str() {
+                "Bool" => "Boolean".to_string(),
+                "Int64" => "Long".to_string(),
+                 // Special value
+                 "meta" => "ByteArray".to_string(),
+                _ => {
+                    let split = val.split("_").collect::<Vec<_>>();
+
+                    if split.len() <= 1 {
+                        val.to_string()
+                    } else {
+                        // This is a Swift API type, like Data_AppRole, convert it to kotlin
+                        split.last().unwrap().to_string()
+                    }
+                }
+            };
+
+            Some(result)
+        } else {
+            if column.name == "meta" {
+                // Special value
+                Some("ByteArray".to_string())
+            } else {
+                None
+            }
+        };
+
+        let mut result = match new_value {
+            None => match column.the_type {
+                Type::Text | Type::String => "String".to_string(),
+                Type::Integer => "Int".to_string(),
+                Type::Real => "Double".to_string(),
+                Type::Blob => panic!("Should already been mapped: {:#?}, tables: {:#?}", column, self.metadata.tables),
+            }
+            Some(val) => val
+        };
 
         if column.nullable {
             result += "?"
