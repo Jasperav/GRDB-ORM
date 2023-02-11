@@ -10,6 +10,11 @@ pub struct AndroidWriter<'a> {
     pub config: &'a Config,
 }
 
+struct TypeConverter {
+    name: String,
+    to_write: String,
+}
+
 impl<'a> AndroidWriter<'a> {
     pub fn parse(&self) {
         if self.config.output_dir_android.exists() && self.config.output_dir_android.is_dir() {
@@ -28,11 +33,53 @@ impl<'a> AndroidWriter<'a> {
         // Create the folder to put the generated files in
         std::fs::create_dir_all(&entity).unwrap();
 
+        let mappers = self.generate_type_converters(&entity);
+
         self.generate_tables(&entity);
-        self.generate_database(&entity);
+        self.generate_database(&entity, &mappers);
     }
 
-    fn generate_database(&self, path: &PathBuf) {
+    fn generate_type_converters(&self, path: &PathBuf) -> String {
+        if self.config.custom_mapping.is_empty() {
+            return "".to_string()
+        }
+
+        let converters_path = path.join("GeneratedTypeConvertors.kt");
+        let mut mappers = vec![];
+
+        for mapping in &self.config.custom_mapping {
+            // TODO: remove the manual checking, it should work with type convertors
+            if mapping.the_type == "UUID" {
+                let name = "ConverterUUID";
+
+                mappers.push(TypeConverter {
+                    name: name.to_string(),
+                    to_write: format!("class {name} {{
+    @TypeConverter
+    fun fromString(value: String): UUID {{
+        return UUID.fromString(value)
+    }}
+
+    @TypeConverter
+    fun uuidToString(value: UUID): String {{
+        return value.toString()
+    }}
+}}"),
+                });
+            }
+        }
+
+        let to_write = mappers.iter().map(|m| m.to_write.to_string()).collect::<Vec<_>>().join("\n");
+        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{to_write}");
+
+        std::fs::write(converters_path, imports).unwrap();
+
+        let mapped = mappers.into_iter().map(|m| format!("{}::class", m.name)).collect::<Vec<_>>().join(", ");
+
+        format!("@TypeConverters({mapped})")
+    }
+
+    fn generate_database(&self, path: &PathBuf, converters: &str) {
         let db = path.join("GeneratedDatabase.kt");
 
         File::create(&db).unwrap();
@@ -55,8 +102,10 @@ package entity
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
         @Database(entities = [\n{entities}\n], version = 1)
+{converters}
             abstract class GeneratedDatabase : RoomDatabase() {{
             }}
         "
@@ -86,6 +135,7 @@ import androidx.room.RoomDatabase
                 "import androidx.room.ForeignKey.Companion.SET_NULL".to_string(),
                 "import androidx.room.ForeignKey.Companion.SET_DEFAULT".to_string(),
                 "import androidx.room.ForeignKey.Companion.CASCADE".to_string(),
+                "import java.util.*".to_string(),
             ];
             let mut columns = vec![];
             let mut primary_keys = vec![];
@@ -164,9 +214,25 @@ import androidx.room.RoomDatabase
     }
 
     fn kotlin_type(&self, column: &Column) -> String {
-        // TODO: support UUID with converters
+        // TODO: remove the manual checking, it should work with type convertors
         let mut result = match column.the_type {
-            Type::Text | Type::String => "String",
+            Type::Text | Type::String => {
+                let mut value = None;
+
+                for mapping in &self.config.custom_mapping {
+                    if mapping
+                        .regexes
+                        .iter()
+                        .any(|regex| regex.is_match(&column.name))
+                    {
+                        if mapping.the_type == "UUID" {
+                            value = Some("UUID")
+                        }
+                    }
+                }
+
+                value.unwrap_or("String")
+            },
             Type::Integer => {
                 let mut value = None;
 
@@ -191,7 +257,7 @@ import androidx.room.RoomDatabase
             Type::Real => "Double",
             Type::Blob => "java.sql.Blob",
         }
-        .to_string();
+            .to_string();
 
         if column.nullable {
             result += "?"
