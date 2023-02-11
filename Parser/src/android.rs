@@ -3,6 +3,7 @@ use heck::ToUpperCamelCase;
 use inflector::Inflector;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
+use std::path::PathBuf;
 
 pub struct AndroidWriter<'a> {
     pub metadata: &'a Metadata,
@@ -19,16 +20,39 @@ impl<'a> AndroidWriter<'a> {
 
         assert!(self.config.output_dir_android.ends_with("java"));
 
+        let entity = self.config.output_dir_android.join("entity");
+
         // Don't use the generated suffix here, stupid packages...
-        let _ = std::fs::remove_dir_all(&self.config.output_dir_android);
+        let _ = std::fs::remove_dir_all(&entity);
 
         // Create the folder to put the generated files in
-        std::fs::create_dir_all(&self.config.output_dir_android).unwrap();
+        std::fs::create_dir_all(&entity).unwrap();
 
-        self.generate_tables();
+        self.generate_tables(&entity);
+        self.generate_database(&entity);
     }
 
-    fn generate_tables(&self) {
+    fn generate_database(&self, path: &PathBuf) {
+        let db = path.join("GeneratedDatabase.kt");
+
+        File::create(&db).unwrap();
+
+        let entities = self.metadata.tables.iter().map(|t| format!("{}{}{}::class", self.config.prefix_swift_structs, t.0, self.config.suffix_swift_structs)).collect::<Vec<_>>().join(",\n");
+        let contents = format!("
+package entity
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+
+        @Database(entities = [\n{entities}\n], version = 1)
+            abstract class GeneratedDatabase : RoomDatabase() {{
+            }}
+        ");
+
+        std::fs::write(db, contents).unwrap();
+    }
+
+    fn generate_tables(&self, path: &PathBuf) {
         for table in self.metadata.tables.values() {
             let class_name = format!(
                 "{}{}{}",
@@ -36,14 +60,13 @@ impl<'a> AndroidWriter<'a> {
                 table.table_name.to_upper_camel_case(),
                 self.config.suffix_swift_structs
             );
-            let path = self
-                .config
-                .output_dir_android
+            let path = path
                 .join(class_name.clone() + ".kt");
 
             File::create(&path).unwrap();
 
             let mut contents = vec![
+                "package entity".to_string(),
                 "import androidx.room.*".to_string(),
                 "import androidx.room.ForeignKey".to_string(),
                 "import androidx.room.ForeignKey.Companion.NO_ACTION".to_string(),
