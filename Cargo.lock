@@ -378,9 +378,9 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
 name = "sqlite_parser"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f6ab96643884b0aaae3d8ef935f0143bd418eee25a5a02d342e023357827d37"
+checksum = "724647e0ca3dee9f5d4185e239efa7b18c4ec64cba5441bc875eeefe62e09e98"
 dependencies = [
  "rusqlite",
 ]

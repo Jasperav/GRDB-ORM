@@ -37,8 +37,20 @@ impl<'a> AndroidWriter<'a> {
 
         File::create(&db).unwrap();
 
-        let entities = self.metadata.tables.iter().map(|t| format!("{}{}{}::class", self.config.prefix_swift_structs, t.0, self.config.suffix_swift_structs)).collect::<Vec<_>>().join(",\n");
-        let contents = format!("
+        let entities = self
+            .metadata
+            .tables
+            .iter()
+            .map(|t| {
+                format!(
+                    "{}{}{}::class",
+                    self.config.prefix_swift_structs, t.0, self.config.suffix_swift_structs
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(",\n");
+        let contents = format!(
+            "
 package entity
 
 import androidx.room.Database
@@ -47,7 +59,8 @@ import androidx.room.RoomDatabase
         @Database(entities = [\n{entities}\n], version = 1)
             abstract class GeneratedDatabase : RoomDatabase() {{
             }}
-        ");
+        "
+        );
 
         std::fs::write(db, contents).unwrap();
     }
@@ -60,8 +73,7 @@ import androidx.room.RoomDatabase
                 table.table_name.to_upper_camel_case(),
                 self.config.suffix_swift_structs
             );
-            let path = path
-                .join(class_name.clone() + ".kt");
+            let path = path.join(class_name.clone() + ".kt");
 
             File::create(&path).unwrap();
 
