@@ -48,25 +48,31 @@ impl<'a> AndroidWriter<'a> {
         let mut mappers = vec![];
 
         for mapping in &self.config.custom_mapping {
-            // TODO: remove the manual checking, it should work with type convertors
-            if mapping.the_type == "UUID" {
-                let name = "ConverterUUID";
+            if mapping.the_type == "Bool" {
+                continue;
+            }
+                let kotlin_type = self.convert_swift_type_to_kotlin_type(&mapping.the_type);
+                let mut mapped_type = if kotlin_type == "UUID" {
+                    "String"
+                } else {
+                    "ByteArray"
+                };
+                let name = format!("Converter{}", kotlin_type);
 
                 mappers.push(TypeConverter {
                     name: name.to_string(),
                     to_write: format!("class {name} {{
     @TypeConverter
-    fun fromString(value: String): UUID {{
-        return UUID.fromString(value)
+    fun from(value: {mapped_type}): {kotlin_type} {{
+        return {kotlin_type}.parseFrom(value)
     }}
 
     @TypeConverter
-    fun uuidToString(value: UUID): String {{
-        return value.toString()
+    fun to(value: {kotlin_type}): {mapped_type} {{
+        return value.toByteArray()
     }}
 }}"),
                 });
-            }
         }
 
         let to_write = mappers.iter().map(|m| m.to_write.to_string()).collect::<Vec<_>>().join("\n");
@@ -148,7 +154,7 @@ import androidx.room.TypeConverters
                     primary_keys.push(format!("\"{}\"", camel_case.clone()));
                 }
 
-                let annotation = if column.name == "meta" {
+                let annotation = if column.name == "meta" || column.the_type == Type::Blob {
                     // Special value
                     "@ColumnInfo(typeAffinity = ColumnInfo.BLOB)\n"
                 } else {
@@ -243,14 +249,7 @@ import androidx.room.TypeConverters
                  // Special value
                  "meta" => "ByteArray".to_string(),
                 _ => {
-                    let split = val.split("_").collect::<Vec<_>>();
-
-                    if split.len() <= 1 {
-                        val.to_string()
-                    } else {
-                        // This is a Swift API type, like Data_AppRole, convert it to kotlin
-                        split.last().unwrap().to_string()
-                    }
+                    self.convert_swift_type_to_kotlin_type(&val)
                 }
             };
 
@@ -279,6 +278,21 @@ import androidx.room.TypeConverters
         }
 
         result
+    }
+
+    fn convert_swift_type_to_kotlin_type(&self, swift_type: &str) -> String {
+        let split = swift_type.split("_").collect::<Vec<_>>();
+
+        if split.len() <= 1 {
+            if swift_type == "Bool" {
+                "Boolean".to_string()
+            } else {
+                swift_type.to_string()
+            }
+        } else {
+            // This is a Swift API Protobuf type, like Data_AppRole, convert it to kotlin
+            split.last().unwrap().to_string()
+        }
     }
 
     fn convert_to_foreign_key(&self, on_update_and_delete: OnUpdateAndDelete) -> &'static str {
