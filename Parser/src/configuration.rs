@@ -1,5 +1,6 @@
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use std::path::PathBuf;
+use grdb_orm_lib::room::Room;
 
 use crate::custom_mapping::CustomMapping;
 use crate::line_writer::LineWriter;
@@ -20,6 +21,7 @@ pub struct Config {
     pub imports: String,
     pub index_optimizer: bool,
     pub output_dir_android: PathBuf,
+    pub room: Room,
 }
 
 impl Config {

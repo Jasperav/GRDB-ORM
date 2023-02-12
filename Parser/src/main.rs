@@ -1,5 +1,5 @@
 use clap::Parser;
-use configuration::{Config, Visibility};
+pub use configuration::{Config, Visibility};
 use std::env::current_exe;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -7,8 +7,8 @@ use std::time::Duration;
 
 /// Easy way to read a file to a string and call a `transform` method
 macro_rules! read {
-    ($val: ident) => {
-        pub fn read(path: std::path::PathBuf) -> Vec<$val> {
+    ($val: ty) => {
+        pub fn read(path: std::path::PathBuf) -> $val {
             crate::read_file_log(&path);
 
             let content = std::fs::read_to_string(path).unwrap();
@@ -36,6 +36,7 @@ mod table_meta_data;
 pub mod android;
 #[cfg(test)]
 mod generate_generated_code;
+mod room;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -121,6 +122,7 @@ fn main() {
         imports: packages,
         index_optimizer: *properties::INDEX_OPTIMIZER,
         output_dir_android: Path::new(&*properties::OUTPUT_DIR_ANDROID).to_owned(),
+        room: crate::room::read(config_current_dir.join("room.toml")),
     };
 
     println!("Successfully parsed configuration files");

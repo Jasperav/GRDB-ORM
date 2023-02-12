@@ -2,7 +2,7 @@ use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use grdb_orm_lib::toml::Value;
 
-read!(DynamicQuery);
+read!(Vec<DynamicQuery>);
 
 /// Transforms a TOML file to a vec of [DynamicQuery]
 fn transform(content: &str) -> Vec<DynamicQuery> {

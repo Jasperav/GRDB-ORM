@@ -52,7 +52,7 @@ impl<'a> AndroidWriter<'a> {
                 continue;
             }
                 let kotlin_type = self.convert_swift_type_to_kotlin_type(&mapping.the_type);
-                let mut mapped_type = if kotlin_type == "UUID" {
+                let mapped_type = if kotlin_type == "UUID" {
                     "String"
                 } else {
                     "ByteArray"
