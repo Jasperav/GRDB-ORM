@@ -49,27 +49,27 @@ impl<'a> AndroidWriter<'a> {
         let mut mappers = vec![];
 
         for mapping in &self.config.custom_mapping {
-            if mapping.the_type == "Bool" || mapping.the_type == "Int64" {
+            if mapping.the_type == "Bool" || mapping.the_type == "Int64" || mapping.the_type == "UUID" {
                 continue;
             }
                 let kotlin_type = self.convert_swift_type_to_kotlin_type(&mapping.the_type);
-                let mapped_type = if kotlin_type == "UUID" {
-                    "String"
-                } else {
-                    "ByteArray"
-                };
+
+            if self.config.room.skip_type_converters.contains(&kotlin_type) {
+                continue;
+            }
+
                 let name = format!("Converter{}", kotlin_type);
 
                 mappers.push(TypeConverter {
                     name: name.to_string(),
                     to_write: format!("class {name} {{
     @TypeConverter
-    fun from(value: {mapped_type}): {kotlin_type} {{
+    fun from(value: ByteArray): {kotlin_type} {{
         return {kotlin_type}.parseFrom(value)
     }}
 
     @TypeConverter
-    fun to(value: {kotlin_type}): {mapped_type} {{
+    fun to(value: {kotlin_type}): ByteArray {{
         return value.toByteArray()
     }}
 }}"),

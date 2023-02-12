@@ -314,7 +314,7 @@ fn update_generated_code() {
         imports: "import Foundation\nimport GRDB".to_string(),
         index_optimizer: false,
         output_dir_android: Default::default(),
-        room: Room { imports: vec![] },
+        room: Room { imports: vec![], skip_type_converters: vec![] },
     };
 
     parse(metadata, config);
@@ -386,7 +386,7 @@ mod index_optimizer_test {
             imports: "".to_string(),
             index_optimizer: true,
             output_dir_android: Default::default(),
-            room: Room { imports: vec![] },
+            room: Room { imports: vec![], skip_type_converters: vec![] },
         };
 
         parse(metadata, config);
