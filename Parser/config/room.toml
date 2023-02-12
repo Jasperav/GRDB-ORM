@@ -1,3 +1,4 @@
 # Add imports for generated entities
 imports = []
 skip_type_converters = []
+convert_with_gson_type_converters = []

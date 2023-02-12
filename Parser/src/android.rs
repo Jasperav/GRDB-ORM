@@ -58,6 +58,8 @@ impl<'a> AndroidWriter<'a> {
                 continue;
             }
 
+            let parse_from =
+
                 let name = format!("Converter{}", kotlin_type);
 
                 mappers.push(TypeConverter {
