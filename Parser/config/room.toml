@@ -1,2 +1,3 @@
 # Add imports for generated entities
-imports=[]
+imports = []
+skip_type_converters = []

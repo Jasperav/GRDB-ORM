@@ -33,13 +33,14 @@ impl<'a> AndroidWriter<'a> {
         // Create the folder to put the generated files in
         std::fs::create_dir_all(&entity).unwrap();
 
-        let mappers = self.generate_type_converters(&entity);
+        let imports = self.config.room.imports.iter().map(|a| format!("import {a}")).collect::<Vec<_>>().join("\n");
+        let mappers = self.generate_type_converters(&entity, &imports);
 
-        self.generate_tables(&entity);
-        self.generate_database(&entity, &mappers);
+        self.generate_tables(&entity, &imports);
+        self.generate_database(&entity, &mappers, &imports);
     }
 
-    fn generate_type_converters(&self, path: &PathBuf) -> String {
+    fn generate_type_converters(&self, path: &PathBuf, imports: &str) -> String {
         if self.config.custom_mapping.is_empty() {
             return "".to_string()
         }
@@ -48,7 +49,7 @@ impl<'a> AndroidWriter<'a> {
         let mut mappers = vec![];
 
         for mapping in &self.config.custom_mapping {
-            if mapping.the_type == "Bool" {
+            if mapping.the_type == "Bool" || mapping.the_type == "Int64" {
                 continue;
             }
                 let kotlin_type = self.convert_swift_type_to_kotlin_type(&mapping.the_type);
@@ -76,7 +77,7 @@ impl<'a> AndroidWriter<'a> {
         }
 
         let to_write = mappers.iter().map(|m| m.to_write.to_string()).collect::<Vec<_>>().join("\n");
-        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{to_write}");
+        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{imports}\n{to_write}");
 
         std::fs::write(converters_path, imports).unwrap();
 
@@ -85,7 +86,7 @@ impl<'a> AndroidWriter<'a> {
         format!("@TypeConverters({mapped})")
     }
 
-    fn generate_database(&self, path: &PathBuf, converters: &str) {
+    fn generate_database(&self, path: &PathBuf, converters: &str, imports: &str) {
         let db = path.join("GeneratedDatabase.kt");
 
         File::create(&db).unwrap();
@@ -109,6 +110,7 @@ package entity
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+{imports}
 
         @Database(entities = [\n{entities}\n], version = 1)
 {converters}
@@ -120,7 +122,7 @@ import androidx.room.TypeConverters
         std::fs::write(db, contents).unwrap();
     }
 
-    fn generate_tables(&self, path: &PathBuf) {
+    fn generate_tables(&self, path: &PathBuf, imports: &str) {
         for table in self.metadata.tables.values() {
             let class_name = format!(
                 "{}{}{}",
@@ -143,6 +145,7 @@ import androidx.room.TypeConverters
                 "import androidx.room.ForeignKey.Companion.CASCADE".to_string(),
                 "import androidx.room.ColumnInfo".to_string(),
                 "import java.util.*".to_string(),
+                imports.to_string(),
             ];
             let mut columns = vec![];
             let mut primary_keys = vec![];
