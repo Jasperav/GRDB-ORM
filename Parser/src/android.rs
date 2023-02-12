@@ -58,7 +58,11 @@ impl<'a> AndroidWriter<'a> {
                 continue;
             }
 
-            let parse_from =
+            let (parse_from, parse_to) = if self.config.room.convert_with_gson_type_converters.contains(&mapping.the_type) {
+                (format!("gson.fromJson(value.decodeToString(), {kotlin_type}::class.java)"), "gson.toJson(value).encodeToByteArray()".to_string())
+            } else {
+                (format!("{kotlin_type}.parseFrom(value)"), "value.toByteArray()".to_string())
+            };
 
                 let name = format!("Converter{}", kotlin_type);
 
@@ -67,19 +71,19 @@ impl<'a> AndroidWriter<'a> {
                     to_write: format!("class {name} {{
     @TypeConverter
     fun from(value: ByteArray): {kotlin_type} {{
-        return {kotlin_type}.parseFrom(value)
+        return {parse_from}
     }}
 
     @TypeConverter
     fun to(value: {kotlin_type}): ByteArray {{
-        return value.toByteArray()
+        return {parse_to}
     }}
 }}"),
                 });
         }
 
         let to_write = mappers.iter().map(|m| m.to_write.to_string()).collect::<Vec<_>>().join("\n");
-        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{imports}\n{to_write}");
+        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{imports}\nval gson = com.google.gson.Gson()\n{to_write}");
 
         std::fs::write(converters_path, imports).unwrap();
 
