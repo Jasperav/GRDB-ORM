@@ -2,3 +2,4 @@
 imports = []
 skip_type_converters = []
 convert_with_gson_type_converters = []
+unique_indexes = []

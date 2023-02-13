@@ -85,7 +85,7 @@ impl<'a> AndroidWriter<'a> {
         let mut mappers = vec![];
 
         for mapping in &self.config.custom_mapping {
-            if mapping.the_type == "Bool" || mapping.the_type == "Int64" || mapping.the_type == "UUID" {
+            if mapping.the_type == "Bool" || mapping.the_type == "Int64" {
                 continue;
             }
                 let kotlin_type = self.convert_swift_type_to_kotlin_type(&mapping.the_type);
@@ -94,10 +94,14 @@ impl<'a> AndroidWriter<'a> {
                 continue;
             }
 
-            let (parse_from, parse_to) = if self.config.room.convert_with_gson_type_converters.contains(&mapping.the_type) {
-                (format!("gson.fromJson(value.decodeToString(), {kotlin_type}::class.java)"), "gson.toJson(value).encodeToByteArray()".to_string())
+            let (parse_from, parse_to, ty) = if self.config.room.convert_with_gson_type_converters.contains(&mapping.the_type) {
+                (format!("gson.fromJson(value, {kotlin_type}::class.java)"), "gson.toJson(value)".to_string(), "String")
             } else {
-                (format!("{kotlin_type}.parseFrom(value)"), "value.toByteArray()".to_string())
+                if mapping.the_type == "UUID" {
+                    (format!("UUID.fromString(value)"), "value.toString()".to_string(), "String")
+                } else {
+                    (format!("{kotlin_type}.parseFrom(value)"), "value.toByteArray()".to_string(), "ByteArray")
+                }
             };
 
                 let name = format!("Converter{}", kotlin_type);
@@ -106,12 +110,12 @@ impl<'a> AndroidWriter<'a> {
                     name: name.to_string(),
                     to_write: format!("class {name} {{
     @TypeConverter
-    fun from(value: ByteArray): {kotlin_type} {{
+    fun from(value: {ty}): {kotlin_type} {{
         return {parse_from}
     }}
 
     @TypeConverter
-    fun to(value: {kotlin_type}): ByteArray {{
+    fun to(value: {kotlin_type}): {ty} {{
         return {parse_to}
     }}
 }}"),
@@ -209,12 +213,13 @@ import androidx.room.TypeConverters
                     primary_keys.push(format!("\"{}\"", camel_case.clone()));
                 }
 
-                let annotation = if column.name == "meta" || column.the_type == Type::Blob {
-                    // Special value
-                    "@ColumnInfo(typeAffinity = ColumnInfo.BLOB)\n"
-                } else {
-                    ""
-                };
+                let annotation = format!("@ColumnInfo(typeAffinity = ColumnInfo.{})\n", match column.the_type {
+                    Type::Text => "TEXT",
+                    Type::Integer => "INTEGER",
+                    Type::String => "STRING",
+                    Type::Real => "REAL",
+                    Type::Blob => "BLOB"
+                });
 
                 columns.push(format!("{annotation}val {}: {}", camel_case, self.kotlin_type(&column)));
             }
@@ -226,14 +231,18 @@ import androidx.room.TypeConverters
                 let mut indexes = vec![];
 
                 for index in &table.indexes {
-                    let index = index
+                    let mut index_formatted = index
                         .columns
                         .iter()
                         .map(|i| format!("\"{}\"", i.name))
                         .collect::<Vec<_>>()
                         .join(", ");
 
-                    indexes.push(format!("Index(value = [{index}])"));
+                    if index.unique {
+                        index_formatted += ", unique = true";
+                    }
+
+                    indexes.push(format!("Index(value = [{index_formatted}])"));
                 }
 
                 format!(", indices = [{}]", indexes.join(", "))
