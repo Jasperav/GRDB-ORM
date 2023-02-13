@@ -48,6 +48,10 @@ impl Config {
             "var"
         }
     }
+
+    pub fn create_type_name(&self, type_name: &str) -> String {
+        format!("{}{}{}", self.prefix_swift_structs, type_name, self.suffix_swift_structs)
+    }
 }
 
 /// The visibility of the Swift type/property

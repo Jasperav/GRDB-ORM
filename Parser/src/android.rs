@@ -1,5 +1,5 @@
 use crate::configuration::Config;
-use heck::ToUpperCamelCase;
+use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use inflector::Inflector;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
@@ -35,9 +35,45 @@ impl<'a> AndroidWriter<'a> {
 
         let imports = self.config.room.imports.iter().map(|a| format!("import {a}")).collect::<Vec<_>>().join("\n");
         let mappers = self.generate_type_converters(&entity, &imports);
+        let entities = self.generate_tables(&entity, &imports);
+        let daos = self.generate_daos(&entity);
 
-        self.generate_tables(&entity, &imports);
-        self.generate_database(&entity, &mappers, &imports);
+        self.generate_database(&entity, &mappers, &imports, &entities, &daos);
+    }
+
+    fn generate_daos(&self, path: &PathBuf) -> Vec<(String, String)> {
+        let mut daos = vec![];
+
+        for table in self.metadata.tables.values() {
+            let table_name = &table.table_name;
+            let type_name = self.config.create_type_name(&table_name);
+            let dao = format!("{type_name}Dao");
+            let path = path.join(format!("{dao}.kt"));
+            let content = vec![
+                "package entity".to_string(),
+                format!("
+                import androidx.room.*
+                @Dao
+                interface {dao} {{
+                @Delete
+                suspend fun delete(entity: {type_name})
+                @Insert
+                suspend fun insert(entity: {type_name})
+                @Update
+                suspend fun update(entity: {type_name}): Int
+                @Query(\"SELECT * FROM {table_name}\")
+                suspend fun selectAll(): Array<{type_name}>
+                }}
+                "),
+            ];
+
+            std::fs::write(path, content.join("\n")).unwrap();
+
+            // Don't use prefix/suffix here, it looks better when calling the dao functions
+            daos.push((table_name.to_string().to_lower_camel_case() + &"Dao", dao));
+        }
+
+        daos
     }
 
     fn generate_type_converters(&self, path: &PathBuf, imports: &str) -> String {
@@ -92,23 +128,32 @@ impl<'a> AndroidWriter<'a> {
         format!("@TypeConverters({mapped})")
     }
 
-    fn generate_database(&self, path: &PathBuf, converters: &str, imports: &str) {
+    fn generate_database(
+        &self,
+        path: &PathBuf,
+        converters: &str,
+        imports: &str,
+        entities: &[String],
+        daos: &[(String, String)],
+    ) {
         let db = path.join("GeneratedDatabase.kt");
 
         File::create(&db).unwrap();
 
-        let entities = self
-            .metadata
-            .tables
+        let entities = entities
             .iter()
             .map(|t| {
                 format!(
-                    "{}{}{}::class",
-                    self.config.prefix_swift_structs, t.0, self.config.suffix_swift_structs
+                    "{t}::class"
                 )
             })
             .collect::<Vec<_>>()
             .join(",\n");
+        let daos = daos.iter().map(|(dao_method_name, dao)| {
+            format!("abstract fun {dao_method_name}(): {dao}")
+        })
+            .collect::<Vec<_>>()
+            .join("\n");
         let contents = format!(
             "
 package entity
@@ -121,6 +166,7 @@ import androidx.room.TypeConverters
         @Database(entities = [\n{entities}\n], version = 1)
 {converters}
             abstract class GeneratedDatabase : RoomDatabase() {{
+                {daos}
             }}
         "
         );
@@ -128,14 +174,14 @@ import androidx.room.TypeConverters
         std::fs::write(db, contents).unwrap();
     }
 
-    fn generate_tables(&self, path: &PathBuf, imports: &str) {
+    fn generate_tables(&self, path: &PathBuf, imports: &str) -> Vec<String> {
+        let mut entities = vec![];
+
         for table in self.metadata.tables.values() {
-            let class_name = format!(
-                "{}{}{}",
-                self.config.prefix_swift_structs,
-                table.table_name.to_upper_camel_case(),
-                self.config.suffix_swift_structs
-            );
+            let class_name = self.config.create_type_name(&table.table_name.to_upper_camel_case());
+
+            entities.push(class_name.clone());
+
             let path = path.join(class_name.clone() + ".kt");
 
             File::create(&path).unwrap();
@@ -205,10 +251,8 @@ import androidx.room.TypeConverters
                     let mut start = "ForeignKey(\n".to_string();
 
                     start += &format!(
-                        "entity = {}{}{}::class,\n",
-                        self.config.prefix_swift_structs,
-                        foreign_key.table,
-                        self.config.suffix_swift_structs
+                        "entity = {}::class,\n",
+                        self.config.create_type_name(&foreign_key.table)
                     );
                     start += &format!(
                         "childColumns = [\"{}\"],\n",
@@ -234,6 +278,8 @@ import androidx.room.TypeConverters
 
             std::fs::write(path, contents.join("\n")).unwrap();
         }
+
+        entities
     }
 
     fn kotlin_type(&self, column: &Column) -> String {
