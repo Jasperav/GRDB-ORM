@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::configuration::Config;
 use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use inflector::Inflector;
@@ -225,24 +226,45 @@ import androidx.room.TypeConverters
             }
 
             let primary_keys = primary_keys.join(", ");
-            let indices = if table.indexes.is_empty() {
+            let mut unique_indexes = HashSet::<String>::default();
+
+            for unique_index in &self.config.room.unique_indexes {
+                let split = unique_index.split('.').collect::<Vec<_>>();
+
+                assert_eq!(2, split.len());
+
+                if split[0] != table.table_name {
+                    continue;
+                }
+
+                assert!(unique_indexes.insert(split[1].to_string()));
+            }
+
+            let indices = if table.indexes.is_empty() && unique_indexes.is_empty() {
                 "".to_string()
             } else {
                 let mut indexes = vec![];
 
                 for index in &table.indexes {
-                    let mut index_formatted = index
+                    let index_formatted = index
                         .columns
                         .iter()
                         .map(|i| format!("\"{}\"", i.name))
                         .collect::<Vec<_>>()
                         .join(", ");
+                    let replace_unique_index = index.columns.len() == 1 && unique_indexes.remove(&index.columns[0].name);
 
-                    if index.unique {
-                        index_formatted += ", unique = true";
-                    }
+                    let suffix = if index.unique || replace_unique_index {
+                        ", unique = true"
+                    } else {
+                        ""
+                    };
 
-                    indexes.push(format!("Index(value = [{index_formatted}])"));
+                    indexes.push(format!("Index(value = [{index_formatted}]{suffix})"));
+                }
+
+                for unique_index in unique_indexes {
+                    indexes.push(format!("Index(value = [\"{unique_index}\"], unique = true)"));
                 }
 
                 format!(", indices = [{}]", indexes.join(", "))
