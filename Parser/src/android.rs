@@ -51,11 +51,25 @@ impl<'a> AndroidWriter<'a> {
             let type_name = self.config.create_type_name(&table_name);
             let dao = format!("{type_name}Dao");
             let path = path.join(format!("{dao}.kt"));
+            let mut pk_in_query = vec![];
+            let mut pk_in_method = vec![];
+
+            for pk in primary_keys(&table) {
+                pk_in_query.push(format!("{p} = :{p}", p = pk.name));
+                pk_in_method.push(format!("{}: {}", pk.name, self.kotlin_type(pk)));
+            }
+
+            let pk_in_method = pk_in_method.join(", ");
+            let pk_in_query = pk_in_query.join(" and ");
+            let select_all_raw = format!("SELECT * FROM {table_name}");
+            let select_all = format!("@Query(\"{select_all_raw}\")");
+            let select_unique = format!("@Query(\"{select_all_raw} where {pk_in_query}\")");
             let mut content = vec![
                 format!("
                 package entity
                 import androidx.room.*
 import java.util.*
+import androidx.lifecycle.LiveData
 {imports}
 
                 @Dao
@@ -66,8 +80,14 @@ import java.util.*
                 suspend fun insert(entity: {type_name})
                 @Update
                 suspend fun update(entity: {type_name}): Int
-                @Query(\"SELECT * FROM {table_name}\")
+                {select_all}
                 suspend fun selectAll(): Array<{type_name}>
+                {select_all}
+                fun selectAllTrack(): LiveData<Array<{type_name}>>
+                {select_unique}
+                suspend fun selectUnique({pk_in_method}): {type_name}?
+                {select_unique}
+                fun selectUniqueTrack({pk_in_method}): LiveData<{type_name}?>
                 "),
             ];
 
@@ -81,20 +101,10 @@ import java.util.*
                     suspend fun updateAll{update_method}(value: {ty})
                 "));
 
-                let mut arguments_query = vec![];
-                let mut arguments_method = vec![];
-
-                for pk in primary_keys(&table) {
-                    arguments_query.push(format!("{p} = :{p}", p = pk.name));
-                    arguments_method.push(format!("{}: {}", pk.name, self.kotlin_type(pk)));
-                }
-
-                let joined = arguments_query.join(" and ");
-                let update_query = format!("@Query(\"{raw} where {joined}\")");
-                let update_methods = arguments_method.join(", ");
+                let update_query = format!("@Query(\"{raw} where {pk_in_query}\")");
 
                 content.push(format!("{update_query}
-                    suspend fun update{update_method}(value: {ty}, {update_methods})
+                    suspend fun updateUnique{update_method}(value: {ty}, {pk_in_method})
                 "));
             }
 
