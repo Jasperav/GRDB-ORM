@@ -58,24 +58,17 @@ impl<'a> AndroidWriter<'a> {
             }
 
             let mut arguments = vec![];
-            let ty = if let Some(t) = &dyn_query.map_to_different_type {
-                create_ty!(t)
+            let (ty, write_type) = if let Some(t) = &dyn_query.map_to_different_type {
+                (create_ty!(t), false)
             } else {
-                create_ty!(dyn_query.func_name)
+                (create_ty!(dyn_query.func_name), true)
             };
 
             for (table, column, arg) in &dyn_query.parameter_types {
                 let kotlin_type = if table == "Int" {
                     "Int".to_string()
                 } else {
-                    let column = self.metadata.tables.get(table.as_str())
-                        .expect(&format!("Table not found: {table}"))
-                        .columns
-                        .iter()
-                        .find(|c| &c.name == column)
-                        .unwrap();
-
-                    self.kotlin_type(column)
+                    self.kotlin_type_from_table_column(table, column)
                 };
 
                 // Replace every ? with the corresponding placeholder
@@ -85,6 +78,11 @@ impl<'a> AndroidWriter<'a> {
             }
 
             assert!(query.find('?').is_none());
+
+            // https://stackoverflow.com/questions/44184769/android-room-select-query-with-like
+            query = query
+                .replace("%'", " || '%'")
+                .replace("%:", "%' || :");
 
             let (prefix, suffix) = if dyn_query.return_types.is_empty() {
                 ("suspend ", "".to_string())
@@ -104,6 +102,61 @@ impl<'a> AndroidWriter<'a> {
                 query: query + "\n" + &fun,
                 table: dyn_query.extension.clone(),
             });
+
+            if !write_type || dyn_query.return_types.is_empty() {
+                continue;
+            }
+
+            let mut return_types = vec![];
+            let mut prefixes = 0;
+            let mut hash_set = HashSet::new();
+
+            for return_ty in &dyn_query.return_types {
+                let mut return_ty = return_ty.clone();
+                let nullable = if return_ty.contains('?') {
+                    "?"
+                } else {
+                    ""
+                };
+
+                return_ty = return_ty.replace("?", "");
+
+                let table_column = return_ty.split('.').collect::<Vec<_>>();
+
+                let (field, embedded) = if table_column.len() == 1 {
+                    if table_column[0] == "Int" {
+                        ("Int".to_string(), "".to_string())
+                    } else {
+                        let prefix = if dyn_query.return_types.len() == 1 {
+                            "".to_string()
+                        } else {
+                            format!("(prefix = \"p{}\")", prefixes)
+                        };
+
+                        prefixes += 1;
+
+                        (self.config.create_type_name(table_column[0]), format!("@Embedded{prefix}\n"))
+                    }
+                } else {
+                    assert_eq!(2, table_column.len());
+
+                    let kotlin_type = self.kotlin_type_from_table_column(table_column[0], table_column[1]);
+
+                    let name = if hash_set.insert(table_column[1].to_string()) {
+                        table_column[1].to_string()
+                    } else {
+                        format!("arg{}", hash_set.len())
+                    };
+
+                    let info = format!("@ColumnInfo(name = \"{}\")\n", name);
+
+                    (kotlin_type, info)
+                };
+
+                return_types.push(format!("{embedded}val arg{}: {}{nullable}", return_types.len(), field))
+            }
+
+            dyn_queries.push(format!("data class {ty}(\n{})", return_types.join(",\n")))
         }
 
         std::fs::write(path.join("DynQueries.kt"), dyn_queries.join("\n")).unwrap();
@@ -482,6 +535,20 @@ import androidx.room.TypeConverters
         }
 
         result
+    }
+
+    fn kotlin_type_from_table_column(&self, table: &str, column: &str) -> String {
+        let column = self
+            .metadata
+            .tables
+            .get(table)
+            .expect(&format!("Table not found: {table}"))
+            .columns
+            .iter()
+            .find(|c| &c.name == column)
+            .unwrap();
+
+        self.kotlin_type(column)
     }
 
     fn convert_swift_type_to_kotlin_type(&self, swift_type: &str) -> String {
