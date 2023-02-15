@@ -35,15 +35,83 @@ impl<'a> AndroidWriter<'a> {
         // Create the folder to put the generated files in
         std::fs::create_dir_all(&entity).unwrap();
 
-        let imports = self.config.room.imports.iter().map(|a| format!("import {a}")).collect::<Vec<_>>().join("\n");
+        let imports = self.config.room.imports.iter().map(|a| format!("import {a}")).collect::<Vec<_>>().join("\n") + "\nimport java.util.*\nimport androidx.room.*";
+        let dyn_queries = self.generate_dyn_queries(&entity, &imports);
         let mappers = self.generate_type_converters(&entity, &imports);
         let entities = self.generate_tables(&entity, &imports);
-        let daos = self.generate_daos(&entity, &imports);
+        let daos = self.generate_daos(&entity, &imports, dyn_queries);
 
         self.generate_database(&entity, &mappers, &imports, &entities, &daos);
     }
 
-    fn generate_daos(&self, path: &PathBuf, imports: &str,) -> Vec<(String, String)> {
+    fn generate_dyn_queries(&self, path: &PathBuf, imports: &str) -> Vec<DynQueryToWriteInDao> {
+        let mut dyn_queries = vec!["package entity".to_string(), imports.to_string()];
+        let mut to_write_in_dao = vec![];
+
+        for dyn_query in &self.config.dynamic_queries {
+            let mut query = format!("@Query(\"{}\")", dyn_query.query);
+
+            macro_rules! create_ty {
+                ($t: expr) => {
+                    format!("{}{}", dyn_query.extension, $t.to_upper_camel_case())
+                };
+            }
+
+            let mut arguments = vec![];
+            let ty = if let Some(t) = &dyn_query.map_to_different_type {
+                create_ty!(t)
+            } else {
+                create_ty!(dyn_query.func_name)
+            };
+
+            for (table, column, arg) in &dyn_query.parameter_types {
+                let kotlin_type = if table == "Int" {
+                    "Int".to_string()
+                } else {
+                    let column = self.metadata.tables.get(table.as_str())
+                        .expect(&format!("Table not found: {table}"))
+                        .columns
+                        .iter()
+                        .find(|c| &c.name == column)
+                        .unwrap();
+
+                    self.kotlin_type(column)
+                };
+
+                // Replace every ? with the corresponding placeholder
+                query = query.replacen('?', &format!(":{arg}"), 1);
+
+                arguments.push(format!("{arg}: {kotlin_type}"));
+            }
+
+            assert!(query.find('?').is_none());
+
+            let (prefix, suffix) = if dyn_query.return_types.is_empty() {
+                ("suspend ", "".to_string())
+            } else {
+                let inner = if dyn_query.return_types_is_array {
+                    format!("List<{ty}>")
+                } else {
+                    format!("{ty}?")
+                };
+
+                ("", format!(": LiveData<{inner}>"))
+            };
+
+            let fun = format!("{prefix}fun {}({}){suffix}", dyn_query.func_name, arguments.join(", "));
+
+            to_write_in_dao.push(DynQueryToWriteInDao {
+                query: query + "\n" + &fun,
+                table: dyn_query.extension.clone(),
+            });
+        }
+
+        std::fs::write(path.join("DynQueries.kt"), dyn_queries.join("\n")).unwrap();
+
+        to_write_in_dao
+    }
+
+    fn generate_daos(&self, path: &PathBuf, imports: &str, dyn_queries: Vec<DynQueryToWriteInDao>) -> Vec<(String, String)> {
         let mut daos = vec![];
 
         for table in self.metadata.tables.values() {
@@ -67,8 +135,8 @@ impl<'a> AndroidWriter<'a> {
             let mut content = vec![
                 format!("
                 package entity
-                import androidx.room.*
-import java.util.*
+
+
 import androidx.lifecycle.LiveData
 {imports}
 
@@ -108,6 +176,12 @@ import androidx.lifecycle.LiveData
                 "));
             }
 
+            for dyn_query in &dyn_queries {
+                if &dyn_query.table == table_name {
+                    content.push(dyn_query.query.clone());
+                }
+            }
+
             content.push("}".to_string());
 
             std::fs::write(path, content.join("\n")).unwrap();
@@ -138,12 +212,12 @@ import androidx.lifecycle.LiveData
             }
 
             let (parse_from, parse_to, ty) = if self.config.room.convert_with_gson_type_converters.contains(&mapping.the_type) {
-                (format!("gson.fromJson(value, {kotlin_type}::class.java)"), "gson.toJson(value)".to_string(), "String")
+                (format!("gson.fromJson(it, {kotlin_type}::class.java)"), "gson.toJson(value)".to_string(), "String")
             } else {
                 if mapping.the_type == "UUID" {
-                    (format!("UUID.fromString(value)"), "value.toString()".to_string(), "String")
+                    (format!("UUID.fromString(it)"), "value.toString()".to_string(), "String")
                 } else {
-                    (format!("{kotlin_type}.parseFrom(value)"), "value.toByteArray()".to_string(), "ByteArray")
+                    (format!("{kotlin_type}.parseFrom(it)"), "value.toByteArray()".to_string(), "ByteArray")
                 }
             };
 
@@ -153,12 +227,16 @@ import androidx.lifecycle.LiveData
                     name: name.to_string(),
                     to_write: format!("class {name} {{
     @TypeConverter
-    fun from(value: {ty}): {kotlin_type} {{
-        return {parse_from}
+    fun from(value: {ty}?): {kotlin_type}? {{
+        return value?.let {{ {parse_from} }}
     }}
 
     @TypeConverter
-    fun to(value: {kotlin_type}): {ty} {{
+    fun to(value: {kotlin_type}?): {ty}? {{
+        if (value == null) {{
+return null
+           }}
+
         return {parse_to}
     }}
 }}"),
@@ -166,7 +244,7 @@ import androidx.lifecycle.LiveData
         }
 
         let to_write = mappers.iter().map(|m| m.to_write.to_string()).collect::<Vec<_>>().join("\n");
-        let imports = format!("package entity\nimport androidx.room.TypeConverter\nimport java.util.*\n{imports}\nval gson = com.google.gson.Gson()\n{to_write}");
+        let imports = format!("package entity\nimport androidx.room.TypeConverter\n{imports}\nval gson = com.google.gson.Gson()\n{to_write}");
 
         std::fs::write(converters_path, imports).unwrap();
 
@@ -235,7 +313,6 @@ import androidx.room.TypeConverters
 
             let mut contents = vec![
                 "package entity".to_string(),
-                "import androidx.room.*".to_string(),
                 "import androidx.room.ForeignKey".to_string(),
                 "import androidx.room.ForeignKey.Companion.NO_ACTION".to_string(),
                 "import androidx.room.ForeignKey.Companion.RESTRICT".to_string(),
@@ -243,7 +320,6 @@ import androidx.room.TypeConverters
                 "import androidx.room.ForeignKey.Companion.SET_DEFAULT".to_string(),
                 "import androidx.room.ForeignKey.Companion.CASCADE".to_string(),
                 "import androidx.room.ColumnInfo".to_string(),
-                "import java.util.*".to_string(),
                 imports.to_string(),
             ];
             let mut columns = vec![];
@@ -432,4 +508,9 @@ import androidx.room.TypeConverters
             OnUpdateAndDelete::Cascade => "CASCADE",
         }
     }
+}
+
+struct DynQueryToWriteInDao {
+    query: String,
+    table: String,
 }
