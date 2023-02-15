@@ -5,6 +5,7 @@ use inflector::Inflector;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
 use std::path::PathBuf;
+use crate::primary_keys;
 
 pub struct AndroidWriter<'a> {
     pub metadata: &'a Metadata,
@@ -37,12 +38,12 @@ impl<'a> AndroidWriter<'a> {
         let imports = self.config.room.imports.iter().map(|a| format!("import {a}")).collect::<Vec<_>>().join("\n");
         let mappers = self.generate_type_converters(&entity, &imports);
         let entities = self.generate_tables(&entity, &imports);
-        let daos = self.generate_daos(&entity);
+        let daos = self.generate_daos(&entity, &imports);
 
         self.generate_database(&entity, &mappers, &imports, &entities, &daos);
     }
 
-    fn generate_daos(&self, path: &PathBuf) -> Vec<(String, String)> {
+    fn generate_daos(&self, path: &PathBuf, imports: &str,) -> Vec<(String, String)> {
         let mut daos = vec![];
 
         for table in self.metadata.tables.values() {
@@ -50,10 +51,13 @@ impl<'a> AndroidWriter<'a> {
             let type_name = self.config.create_type_name(&table_name);
             let dao = format!("{type_name}Dao");
             let path = path.join(format!("{dao}.kt"));
-            let content = vec![
-                "package entity".to_string(),
+            let mut content = vec![
                 format!("
+                package entity
                 import androidx.room.*
+import java.util.*
+{imports}
+
                 @Dao
                 interface {dao} {{
                 @Delete
@@ -64,9 +68,37 @@ impl<'a> AndroidWriter<'a> {
                 suspend fun update(entity: {type_name}): Int
                 @Query(\"SELECT * FROM {table_name}\")
                 suspend fun selectAll(): Array<{type_name}>
-                }}
                 "),
             ];
+
+            for column in &table.columns {
+                let raw = format!("update {} set {} = :value", table.table_name, column.name);
+                let update_all_query = format!("@Query(\"{raw}\")");
+                let update_method = column.name.to_upper_camel_case();
+                let ty = self.kotlin_type(column);
+
+                content.push(format!("{update_all_query}
+                    suspend fun updateAll{update_method}(value: {ty})
+                "));
+
+                let mut arguments_query = vec![];
+                let mut arguments_method = vec![];
+
+                for pk in primary_keys(&table) {
+                    arguments_query.push(format!("{p} = :{p}", p = pk.name));
+                    arguments_method.push(format!("{}: {}", pk.name, self.kotlin_type(pk)));
+                }
+
+                let joined = arguments_query.join(" and ");
+                let update_query = format!("@Query(\"{raw} where {joined}\")");
+                let update_methods = arguments_method.join(", ");
+
+                content.push(format!("{update_query}
+                    suspend fun update{update_method}(value: {ty}, {update_methods})
+                "));
+            }
+
+            content.push("}".to_string());
 
             std::fs::write(path, content.join("\n")).unwrap();
 
