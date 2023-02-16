@@ -89,22 +89,27 @@ impl<'a> AndroidWriter<'a> {
                 .replace("%'", " || '%'")
                 .replace("%:", "%' || :");
 
-            let (prefix, suffix) = if dyn_query.return_types.is_empty() {
-                ("suspend ", "".to_string())
+            let inner = if dyn_query.return_types_is_array {
+                format!("List<{ty}>")
             } else {
-                let inner = if dyn_query.return_types_is_array {
-                    format!("List<{ty}>")
-                } else {
-                    format!("{ty}?")
-                };
-
-                ("", format!(": LiveData<{inner}>"))
+                format!("{ty}?")
+            };
+            let (prefix, suffix, func_suffix) = if dyn_query.return_types.is_empty() {
+                ("suspend ", "".to_string(), "")
+            } else {
+                ("", format!(": LiveData<{inner}>"), "Tracked")
             };
 
-            let fun = format!("{prefix}fun {}({}){suffix}", dyn_query.func_name, arguments.join(", "));
+            let mut tracked = format!("{prefix}fun {}{func_suffix}({}){suffix}", dyn_query.func_name, arguments.join(", "));
+
+            if !dyn_query.return_types.is_empty() {
+                let untracked = format!("\n{query}\nsuspend fun {}({}): {inner}", dyn_query.func_name, arguments.join(", "));
+
+                tracked += &untracked
+            }
 
             to_write_in_dao.push(DynQueryToWriteInDao {
-                query: query + "\n" + &fun,
+                query: query + "\n" + &tracked,
                 table: dyn_query.extension.clone(),
             });
 
@@ -190,11 +195,13 @@ import androidx.lifecycle.LiveData
                 @Dao
                 interface {dao} {{
                 @Delete
-                suspend fun delete(entity: {type_name})
+                suspend fun deleteUnique(entity: {type_name})
+                @Query(\"delete from {table_name}\")
+                suspend fun deleteAll()
                 @Insert
                 suspend fun insert(entity: {type_name})
                 @Update
-                suspend fun update(entity: {type_name}): Int
+                suspend fun updateUnique(entity: {type_name}): Int
                 {select_all}
                 suspend fun selectAll(): Array<{type_name}>
                 {select_all}
