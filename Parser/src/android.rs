@@ -5,6 +5,8 @@ use inflector::Inflector;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
 use std::path::PathBuf;
+use regex::Regex;
+use grdb_orm_lib::dyn_query::DynamicQuery;
 use crate::primary_keys;
 
 pub struct AndroidWriter<'a> {
@@ -49,7 +51,10 @@ impl<'a> AndroidWriter<'a> {
         let mut to_write_in_dao = vec![];
 
         for dyn_query in &self.config.dynamic_queries {
-            let mut query = format!("@Query(\"{}\")", dyn_query.query);
+            // https://stackoverflow.com/a/75465896/7715250
+            // The query needs to be sanitezed...
+            let mut query = self.sanitize_query(&dyn_query);
+            let mut query = format!("@Query(\"{}\")", query);
 
             macro_rules! create_ty {
                 ($t: expr) => {
@@ -108,10 +113,8 @@ impl<'a> AndroidWriter<'a> {
             }
 
             let mut return_types = vec![];
-            let mut prefixes = 0;
-            let mut hash_set = HashSet::new();
 
-            for return_ty in &dyn_query.return_types {
+            for (index, return_ty) in dyn_query.return_types.iter().enumerate() {
                 let mut return_ty = return_ty.clone();
                 let nullable = if return_ty.contains('?') {
                     "?"
@@ -130,10 +133,8 @@ impl<'a> AndroidWriter<'a> {
                         let prefix = if dyn_query.return_types.len() == 1 {
                             "".to_string()
                         } else {
-                            format!("(prefix = \"p{}\")", prefixes)
+                            format!("(prefix = \"arg{}\")", index)
                         };
-
-                        prefixes += 1;
 
                         (self.config.create_type_name(table_column[0]), format!("@Embedded{prefix}\n"))
                     }
@@ -141,14 +142,7 @@ impl<'a> AndroidWriter<'a> {
                     assert_eq!(2, table_column.len());
 
                     let kotlin_type = self.kotlin_type_from_table_column(table_column[0], table_column[1]);
-
-                    let name = if hash_set.insert(table_column[1].to_string()) {
-                        table_column[1].to_string()
-                    } else {
-                        format!("arg{}", hash_set.len())
-                    };
-
-                    let info = format!("@ColumnInfo(name = \"{}\")\n", name);
+                    let info = format!("@ColumnInfo(name = \"arg{index}{}\")\n", table_column[1]);
 
                     (kotlin_type, info)
                 };
@@ -574,6 +568,59 @@ import androidx.room.TypeConverters
             OnUpdateAndDelete::SetDefault => "SET_DEFAULT",
             OnUpdateAndDelete::Cascade => "CASCADE",
         }
+    }
+
+    fn sanitize_query(&self, dyn_query: &DynamicQuery) -> String {
+        if dyn_query.return_types.len() <= 1 {
+            return dyn_query.query.clone()
+        }
+
+        let regex = Regex::new(r"(\w+)\.").unwrap();
+        let mut matches = regex.captures_iter(&dyn_query.query);
+        let mut new_select_clause = vec![];
+
+        for (index, return_type) in dyn_query.return_types.iter().enumerate() {
+            let table_name_in_query = matches.next().unwrap().get(1).unwrap().as_str();
+
+            // Remove the nullable modifier, it's not needed
+            let return_type = return_type.replace('?', "");
+            let whole_table = return_type.split('.').collect::<Vec<_>>();
+            let column_filter = if whole_table.len() == 1 {
+                None
+            } else {
+                Some(whole_table[1].to_string())
+            };
+
+            let table = whole_table[0];
+            let table = self.metadata.tables.get(table).expect(table);
+            let mut new_select = vec![];
+
+            for column in &table.columns {
+                if let Some(column_filter) = &column_filter {
+                    if column_filter != &column.name {
+                        continue
+                    }
+                }
+
+                let column_name = &column.name;
+
+                new_select.push(format!("{table_name_in_query}.{column_name} as arg{index}{column_name}"));
+            }
+
+            let select_clause = new_select.join(", ");
+
+            new_select_clause.push(select_clause)
+        }
+
+        let mut final_query = &dyn_query.query;
+        let split = final_query.splitn(2, " from ").collect::<Vec<_>>();
+
+        assert_eq!(2, split.len());
+
+        let after_from = split[1];
+        let new_select = "select ".to_string() + &new_select_clause.join(", ") + " from ";
+
+        new_select + after_from
     }
 }
 
