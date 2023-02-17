@@ -104,8 +104,9 @@ impl<'a> AndroidWriter<'a> {
 
             if !dyn_query.return_types.is_empty() {
                 let untracked = format!("\n{query}\nsuspend fun {}({}): {inner}", dyn_query.func_name, arguments.join(", "));
+                let untracked_blocking = format!("\n{query}\nfun {}Blocking({}): {inner}", dyn_query.func_name, arguments.join(", "));
 
-                tracked += &untracked
+                tracked += &(untracked + &untracked_blocking)
             }
 
             to_write_in_dao.push(DynQueryToWriteInDao {
@@ -196,18 +197,30 @@ import androidx.lifecycle.LiveData
                 interface {dao} {{
                 @Delete
                 suspend fun deleteUnique(entity: {type_name})
+                @Delete
+                fun deleteUniqueBlocking(entity: {type_name})
                 @Query(\"delete from {table_name}\")
                 suspend fun deleteAll()
+                @Query(\"delete from {table_name}\")
+                fun deleteAllBlocking()
                 @Insert
                 suspend fun insert(entity: {type_name})
+                @Insert
+                fun insertBlocking(entity: {type_name})
                 @Update
                 suspend fun updateUnique(entity: {type_name}): Int
+                @Update
+                fun updateUniqueBlocking(entity: {type_name}): Int
                 {select_all}
                 suspend fun selectAll(): Array<{type_name}>
+                {select_all}
+                fun selectAllBlocking(): Array<{type_name}>
                 {select_all}
                 fun selectAllTrack(): LiveData<Array<{type_name}>>
                 {select_unique}
                 suspend fun selectUnique({pk_in_method}): {type_name}?
+                {select_unique}
+                fun selectUniqueBlocking({pk_in_method}): {type_name}?
                 {select_unique}
                 fun selectUniqueTrack({pk_in_method}): LiveData<{type_name}?>
                 "),
@@ -221,12 +234,16 @@ import androidx.lifecycle.LiveData
 
                 content.push(format!("{update_all_query}
                     suspend fun updateAll{update_method}(value: {ty})
+                    {update_all_query}
+                    fun updateAll{update_method}Blocking(value: {ty})
                 "));
 
                 let update_query = format!("@Query(\"{raw} where {pk_in_query}\")");
 
                 content.push(format!("{update_query}
                     suspend fun updateUnique{update_method}(value: {ty}, {pk_in_method})
+                    {update_query}
+                    fun updateUnique{update_method}Blocking(value: {ty}, {pk_in_method})
                 "));
             }
 
