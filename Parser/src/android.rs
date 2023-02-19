@@ -253,6 +253,40 @@ import androidx.lifecycle.LiveData
                 }
             }
 
+            for (table_dyn_update, columns) in &self.config.room.dyn_updates {
+                if table_dyn_update != table_name {
+                    continue;
+                }
+
+                assert!(columns.len() >= 2);
+
+                let mut kotlin_types = vec![];
+                let mut query = vec![];
+                let mut update_name = vec![];
+
+                for column in columns {
+                    let column = table.columns.iter().find(|c| &c.name == column).unwrap();
+                    let kotlin_ty = self.kotlin_type(&column);
+
+                    kotlin_types.push(format!("{}: {}", column.name, kotlin_ty));
+                    query.push(format!("{n} = :{n}", n = column.name));
+                    update_name.push(column.name.to_upper_camel_case());
+                }
+
+                let updates = query.join(", ");
+                let raw_query = format!("update {table_name} set {updates} where {pk_in_query}");
+                let q = format!("@Query(\"{raw_query}\")");
+                let method_name = format!("update{}Unique", update_name.join(""));
+                let with_arguments = kotlin_types.join(", ");
+
+                content.push(format!("
+                    {q}
+                    suspend fun {method_name}({with_arguments}): Int
+                    {q}
+                    fun {method_name}Blocking({with_arguments}): Int
+                "));
+            }
+
             content.push("}".to_string());
 
             std::fs::write(path, content.join("\n")).unwrap();
