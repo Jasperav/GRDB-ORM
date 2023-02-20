@@ -235,15 +235,15 @@ import androidx.lifecycle.LiveData
                 content.push(format!("{update_all_query}
                     suspend fun updateAll{update_method}(value: {ty})
                     {update_all_query}
-                    fun updateAll{update_method}Blocking(value: {ty})
+                    fun updateAll{update_method}Blocking(value: {ty}): Int
                 "));
 
                 let update_query = format!("@Query(\"{raw} where {pk_in_query}\")");
 
                 content.push(format!("{update_query}
-                    suspend fun updateUnique{update_method}(value: {ty}, {pk_in_method})
+                    suspend fun updateUnique{update_method}(value: {ty}, {pk_in_method}): Int
                     {update_query}
-                    fun updateUnique{update_method}Blocking(value: {ty}, {pk_in_method})
+                    fun updateUnique{update_method}Blocking(value: {ty}, {pk_in_method}): Int
                 "));
             }
 
@@ -268,9 +268,15 @@ import androidx.lifecycle.LiveData
                     let column = table.columns.iter().find(|c| &c.name == column).unwrap();
                     let kotlin_ty = self.kotlin_type(&column);
 
-                    kotlin_types.push(format!("{}: {}", column.name, kotlin_ty));
-                    query.push(format!("{n} = :{n}", n = column.name));
+                    kotlin_types.push(format!("{}Arg: {}", column.name, kotlin_ty));
+                    query.push(format!("{n} = :{n}Arg", n = column.name));
                     update_name.push(column.name.to_upper_camel_case());
+                }
+
+                for column in primary_keys(table) {
+                    let kotlin_ty = self.kotlin_type(column);
+
+                    kotlin_types.push(format!("{}: {}", column.name, kotlin_ty));
                 }
 
                 let updates = query.join(", ");
