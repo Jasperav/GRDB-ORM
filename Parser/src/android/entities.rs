@@ -135,13 +135,61 @@ impl<'a> AndroidWriter<'a> {
             // Now add the updatable columns
             let updatable_columns = self.updatable_columns(table);
             let pk_class = self.generate_primary_keys(table);
+            let upserts = self.generate_upsert(table);
 
-            contents.push(format!("@Entity(\ntableName = \"{}\",\nprimaryKeys = [{}]{indices}\n{foreign_keys})\ndata class {class_name}(\n{}\n)\n{{ {updatable_columns}\n{pk_class} \n}}", table.table_name, primary_keys, columns.join(",\n")));
+            contents.push(format!("\
+            @Entity(
+                tableName = \"{}\",
+                primaryKeys = [{}]{indices}
+                {foreign_keys})
+            data class {class_name}(
+                {}
+            )
+            {{
+                {upserts}
+                {updatable_columns}
+                {pk_class}
+            }}", table.table_name, primary_keys, columns.join(",\n")));
 
             std::fs::write(path, contents.join("\n")).unwrap();
         }
 
         entities
+    }
+
+    fn generate_upsert(&self, table: &Table) -> String {
+        let mut upsert_dyn = vec![];
+        let mut insert_query = vec![];
+        let mut values = vec![];
+        let mut pk_values = vec![];
+
+        for pk in primary_keys(table) {
+            pk_values.push(pk.name.to_string());
+        }
+
+        for column in &table.columns {
+            insert_query.push(column.name.to_string());
+            upsert_dyn.push(format!("is {}Column -> {{
+            if (processedAtLeastOneColumns) {{
+                upsertQuery += \", \"
+            }}
+            upsertQuery += \"{column}=excluded.{column}\"
+            ", column.name.to_upper_camel_case(), column = column.name));
+            values.push("?");
+        }
+
+        let pk_values = pk_values.join(", ");
+        let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
+
+        format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumnWithValue>) {{
+            if (columns.isEmpty()) {{
+                return
+            }}
+
+            val insertQuery = {insert_query}
+            var upsertQuery = insertQuery + \"on conflict ({pk_values}) do update set \"
+            var processedAtLeastOneColumns = false
+        }}")
     }
 
     fn generate_primary_keys(&self, table: &Table) -> String {
@@ -155,7 +203,11 @@ impl<'a> AndroidWriter<'a> {
 
         let pks = pks.join(",\n");
 
-        format!("data class PrimaryKey(\n{pks}\n)")
+        format!("data class PrimaryKey(
+        {pks}
+     ){{
+
+     }}")
     }
 
     fn updatable_columns(&self, table: &Table) -> String {
@@ -169,8 +221,11 @@ impl<'a> AndroidWriter<'a> {
             let class_name = column_name.to_upper_camel_case();
 
             columns_updatable.push(format!("{}", class_name.to_shouty_snake_case()));
-            columns_updatable_value.push(format!("data class {class_name}(val {column_name}: {kotlin_ty}): UpdatableColumnWithValue()"));
-            switch.push(format!("is {class_name} -> entity.{column_name} = {column_name}"));
+
+            // Add a 'Column' suffix, else it's possible Kotlin things the argument is the sealed class instance
+            // and a compile error occurs
+            columns_updatable_value.push(format!("data class {class_name}Column(val {column_name}: {kotlin_ty}): UpdatableColumnWithValue()"));
+            switch.push(format!("is {class_name}Column -> entity.{column_name} = {column_name}"));
         }
 
         let columns_updatable_value = columns_updatable_value.join("\n");
