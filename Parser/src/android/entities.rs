@@ -319,13 +319,15 @@ impl<'a> AndroidWriter<'a> {
             let owned = columns.into_iter().map(|c| c.clone()).collect();
             let binded = self.bind("query", &owned, true, vec!["value".to_string()]);
 
-            update_single_column.push(format!("fun update{camel_cased}(database: GeneratedDatabase, value: {kotlin_ty}, assertOneRowAffected: Boolean = true) {{
+            update_single_column.push(format!("fun update{camel_cased}(database: GeneratedDatabase, value: {kotlin_ty}, assertOneRowAffected: Boolean = true): Boolean {{
                 {update_query}
                 {binded}
 
                 if (assertOneRowAffected && ex == 0) {{
                     assert(false)
                 }}
+
+                return ex == 1
             }}"))
         }
 
@@ -338,9 +340,9 @@ impl<'a> AndroidWriter<'a> {
      ){{
         {update_single_columns}
 
-        fun updateDynamic(database: GeneratedDatabase, values: List<UpdatableColumnWithValue>, assertOneRowAffected: Boolean = true) {{
+        fun updateDynamic(database: GeneratedDatabase, values: List<UpdatableColumnWithValue>, assertOneRowAffected: Boolean = true): Boolean {{
             if (values.isEmpty()) {{
-                return
+                return false
             }}
 
             {update_dyn_query}
@@ -409,6 +411,8 @@ impl<'a> AndroidWriter<'a> {
         if (assertOneRowAffected && value == 0) {{
             assert(false)
         }}
+
+        return value == 1
         "));
 
         contents.join("\n")
