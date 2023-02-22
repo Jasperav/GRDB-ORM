@@ -3,7 +3,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use heck::{ToShoutySnakeCase, ToUpperCamelCase};
 use inflector::Inflector;
-use sqlite_parser::{Table, Type};
+use sqlite_parser::{Column, Table, Type};
 use crate::android::android::AndroidWriter;
 use crate::primary_keys;
 
@@ -169,19 +169,22 @@ impl<'a> AndroidWriter<'a> {
 
         for column in &table.columns {
             insert_query.push(column.name.to_string());
-            upsert_dyn.push(format!("is {}Column -> {{
-            if (processedAtLeastOneColumns) {{
-                upsertQuery += \", \"
+            upsert_dyn.push(format!("UpdatableColumn.{} -> {{
+                if (processedAtLeastOneColumns) {{
+                    upsertQuery += \", \"
+                }}
+                upsertQuery += \"{column}=excluded.{column}\"\
             }}
-            upsertQuery += \"{column}=excluded.{column}\"
-            ", column.name.to_upper_camel_case(), column = column.name));
+            ", column.name.to_shouty_snake_case(), column = column.name));
             values.push("?");
         }
 
         let pk_values = pk_values.join(", ");
         let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
+        let upsert = upsert_dyn.join("\n");
+        let bind = self.bind("upsertQuery", &table.columns, false, vec![]);
 
-        format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumnWithValue>) {{
+        format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumn>) {{
             if (columns.isEmpty()) {{
                 return
             }}
@@ -189,25 +192,225 @@ impl<'a> AndroidWriter<'a> {
             val insertQuery = {insert_query}
             var upsertQuery = insertQuery + \"on conflict ({pk_values}) do update set \"
             var processedAtLeastOneColumns = false
+
+            for (column in columns) {{
+                when (column) {{
+                    {upsert}
+                }}
+
+                processedAtLeastOneColumns = true
+            }}
+
+            {bind}
+
         }}")
     }
 
-    fn generate_primary_keys(&self, table: &Table) -> String {
-        let mut pks = vec![];
+    fn bind(
+        &self,
+        query: &str,
+        columns: &Vec<Column>,
+        update_or_delete: bool,
+        mut custom_names: Vec<String>,
+    ) -> String {
+        let mut bindings = vec![];
 
-        for pk in primary_keys(table) {
+        for column in columns {
+            let binding = self.bind_single(column, &mut custom_names, bindings.len() + 1, true);
+
+            bindings.push(binding);
+        }
+
+        let bindings = bindings.join("\n");
+        let update_delete = if update_or_delete {
+            "executeUpdateDelete"
+        } else {
+            "execute"
+        };
+
+        format!("val stmt = database.compileStatement({query})
+            {bindings}
+
+        val ex = stmt.{update_delete}()
+        ")
+    }
+
+    fn bind_single(
+        &self,
+        column: &Column,
+        custom_names: &mut Vec<String>,
+        index: usize,
+        use_index_as_binding: bool,
+    ) -> String {
+        let kotlin_ty = self.kotlin_type(column);
+        let without_opt = kotlin_ty.replace('?', "");
+        let name = if custom_names.is_empty() {
+            column.name.to_string()
+        } else {
+            custom_names.remove(0)
+        };
+        let variable_name = format!("val{index}");
+
+        let (default_binding, ty) = if without_opt == "UUID" {
+            (format!("ConverterUUID().to({name})"), "String")
+        } else if kotlin_ty == "Boolean" {
+            (format!("if ({name}) {{ 1L }} else {{ 0L }}"), "Long")
+        } else if without_opt == "Long" {
+            (format!("{name}"), "Long")
+        } else if without_opt == "Int" {
+            (format!("{name}?.toLong()"), "Long")
+        } else if without_opt == "Double" {
+            (format!("{name}"), "Double")
+        } else if column.the_type == Type::Blob {
+            if without_opt == "ByteArray" {
+                (format!("{name}"), "Blob")
+            } else {
+                (format!("Converter{}().to({name})", without_opt.to_upper_camel_case()), "Blob")
+            }
+        } else if column.the_type == Type::Text {
+            (format!("{name}?.let {{ it.toString() }}"), "String")
+        } else {
+            panic!()
+        };
+
+        let (index, post_binding) = if use_index_as_binding {
+            (format!("{index}"), "")
+        } else {
+            (format!("index") , "index += 1")
+        };
+
+        format!("val {variable_name} = {default_binding}
+            if ({variable_name} == null) {{
+                stmt.bindNull({index});
+            }} else {{
+                stmt.bind{ty}({index}, {variable_name});
+            }}
+            {post_binding}")
+    }
+
+    fn generate_primary_keys(
+        &self, table: &Table) -> String {
+        let mut pks = vec![];
+        let mut pk_in_query = vec![];
+        let mut primary_keys = primary_keys(table);
+
+        for pk in &primary_keys {
             let kotlin_ty = self.kotlin_type(pk);
 
             pks.push(format!("val {}: {kotlin_ty}", pk.name));
+            pk_in_query.push(format!("{} = ?", pk.name));
         }
 
+        let pks_in_query = pk_in_query.join(" and ");
+        let mut update_single_column = vec![];
+
+        for column in &table.columns {
+            let camel_cased = &column.name.to_upper_camel_case();
+            let kotlin_ty = self.kotlin_type(column);
+            let update_query = format!("val query = \"update {} set {} = ? where {}\"", table.table_name, column.name, pks_in_query);
+
+            let mut column_different_name = column.clone();
+
+            column_different_name.name = "value".to_string();
+
+            let mut columns = vec![column];
+
+            columns.extend(primary_keys.clone());
+            let owned = columns.into_iter().map(|c| c.clone()).collect();
+            let binded = self.bind("query", &owned, true, vec!["value".to_string()]);
+
+            update_single_column.push(format!("fun update{camel_cased}(database: GeneratedDatabase, value: {kotlin_ty}, assertOneRowAffected: Boolean) {{
+                {update_query}
+                {binded}
+
+                if (assertOneRowAffected && ex == 0) {{
+                    assert(false)
+                }}
+            }}"))
+        }
+
+        let update_dyn_query = self.update_dyn_query(table);
         let pks = pks.join(",\n");
+        let update_single_columns = update_single_column.join("\n");
 
         format!("data class PrimaryKey(
         {pks}
      ){{
+        {update_single_columns}
 
+        fun updateDynamic(values: List<UpdatableColumnWithValue>, assertOneRowAffected: Boolean) {{
+            if (values.isEmpty()) {{
+                return
+            }}
+
+            {update_dyn_query}
+        }}
      }}")
+    }
+
+    fn update_dyn_query(&self, table: &Table) -> String {
+        let mut where_clause = vec![];
+        let mut bindings_pk = vec![];
+        let mut index = 0;
+
+        for pk in primary_keys(table) {
+            where_clause.push(format!("{} = ?", pk.name));
+
+            bindings_pk.push(self.bind_single(pk, &mut vec![], index, false));
+        }
+
+        let bindings_pk = bindings_pk.join("\n");
+        let where_clause = "where ".to_string() + &where_clause.join(" and ");
+        let mut contents = vec![
+            format!("val pkQuery = \"{where_clause}\""),
+            format!("val updateQuery = \"update {} set \"", table.table_name),
+            format!("var index = 1"),
+            format!("var closures = mutableListOf<(SupportSQLiteStatement) -> Unit>()
+            for (column in values) {{
+                when (column) {{
+            "),
+        ];
+
+        for column in &table.columns {
+            let column_name = &column.name;
+            let updatable_column = format!("{}Column", column_name.to_upper_camel_case());
+            let bind = self.bind_single(column, &mut vec![], index, false);
+
+            index += 1;
+
+            contents.push(format!("is {updatable_column} -> {{
+                if (!closures.isEmpty()) {{
+                    updateQuery += \", \"
+                }}
+
+                updateQuery += \"{column_name} = ?\"
+
+                closures.add({{
+                    val stmt = it
+                    {bind}
+                }})
+            }}"))
+        }
+
+        contents.push(format!("}}
+        }}
+        val finalQuery = updateQuery + \" \" + pkQuery
+        val stmt = database.compileStatement(finalQuery)
+
+        for (closure in closures) {{
+            closure(stmt)
+        }}
+
+        {bindings_pk}
+
+        val value = stmt.execute()
+
+        if (assertOneRowAffected && value == 0) {{
+            assert(false)
+        }}
+        "));
+
+        contents.join("\n")
     }
 
     fn updatable_columns(&self, table: &Table) -> String {

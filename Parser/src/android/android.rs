@@ -4,6 +4,7 @@ use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
 use std::path::PathBuf;
+use std::process::Command;
 use regex::Regex;
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use crate::primary_keys;
@@ -43,6 +44,12 @@ impl<'a> AndroidWriter<'a> {
         let daos = self.generate_daos(&entity, &imports, dyn_queries);
 
         self.generate_database(&entity, &mappers, &imports, &entities, &daos);
+
+        Command::new("ktlint")
+            .arg("-F")
+            .current_dir(&self.config.output_dir_android)
+            .status()
+            .unwrap();
     }
 
     fn generate_dyn_queries(&self, path: &PathBuf, imports: &str) -> Vec<DynQueryToWriteInDao> {
@@ -250,47 +257,6 @@ import androidx.lifecycle.LiveData
                 if &dyn_query.table == table_name {
                     content.push(dyn_query.query.clone());
                 }
-            }
-
-            // TODO: can be deleted probably after the updatable colums are added
-            for (table_dyn_update, columns) in &self.config.room.dyn_updates {
-                if table_dyn_update != table_name {
-                    continue;
-                }
-
-                assert!(columns.len() >= 2);
-
-                let mut kotlin_types = vec![];
-                let mut query = vec![];
-                let mut update_name = vec![];
-
-                for column in columns {
-                    let column = table.columns.iter().find(|c| &c.name == column).unwrap();
-                    let kotlin_ty = self.kotlin_type(&column);
-
-                    kotlin_types.push(format!("{}Arg: {}", column.name, kotlin_ty));
-                    query.push(format!("{n} = :{n}Arg", n = column.name));
-                    update_name.push(column.name.to_upper_camel_case());
-                }
-
-                for column in primary_keys(table) {
-                    let kotlin_ty = self.kotlin_type(column);
-
-                    kotlin_types.push(format!("{}: {}", column.name, kotlin_ty));
-                }
-
-                let updates = query.join(", ");
-                let raw_query = format!("update {table_name} set {updates} where {pk_in_query}");
-                let q = format!("@Query(\"{raw_query}\")");
-                let method_name = format!("update{}Unique", update_name.join(""));
-                let with_arguments = kotlin_types.join(", ");
-
-                content.push(format!("
-                    {q}
-                    suspend fun {method_name}({with_arguments}): Int
-                    {q}
-                    fun {method_name}Blocking({with_arguments}): Int
-                "));
             }
 
             content.push("}".to_string());
