@@ -338,7 +338,7 @@ impl<'a> AndroidWriter<'a> {
      ){{
         {update_single_columns}
 
-        fun updateDynamic(values: List<UpdatableColumnWithValue>, assertOneRowAffected: Boolean) {{
+        fun updateDynamic(database: GeneratedDatabase, values: List<UpdatableColumnWithValue>, assertOneRowAffected: Boolean) {{
             if (values.isEmpty()) {{
                 return
             }}
@@ -357,15 +357,17 @@ impl<'a> AndroidWriter<'a> {
             where_clause.push(format!("{} = ?", pk.name));
 
             bindings_pk.push(self.bind_single(pk, &mut vec![], index, false));
+
+            index += 1
         }
 
         let bindings_pk = bindings_pk.join("\n");
         let where_clause = "where ".to_string() + &where_clause.join(" and ");
         let mut contents = vec![
             format!("val pkQuery = \"{where_clause}\""),
-            format!("val updateQuery = \"update {} set \"", table.table_name),
+            format!("var updateQuery = \"update {} set \"", table.table_name),
             format!("var index = 1"),
-            format!("var closures = mutableListOf<(SupportSQLiteStatement) -> Unit>()
+            format!("val closures = mutableListOf<(androidx.sqlite.db.SupportSQLiteStatement) -> Unit>()
             for (column in values) {{
                 when (column) {{
             "),
@@ -374,21 +376,20 @@ impl<'a> AndroidWriter<'a> {
         for column in &table.columns {
             let column_name = &column.name;
             let updatable_column = format!("{}Column", column_name.to_upper_camel_case());
-            let bind = self.bind_single(column, &mut vec![], index, false);
+            let bind = self.bind_single(column, &mut vec![format!("column.{}", column.name)], index, false);
 
             index += 1;
 
-            contents.push(format!("is {updatable_column} -> {{
-                if (!closures.isEmpty()) {{
+            contents.push(format!("is UpdatableColumnWithValue.{updatable_column} -> {{
+                if (closures.isNotEmpty()) {{
                     updateQuery += \", \"
                 }}
 
                 updateQuery += \"{column_name} = ?\"
 
-                closures.add({{
-                    val stmt = it
+                closures.add{{ stmt ->
                     {bind}
-                }})
+                }}
             }}"))
         }
 
@@ -403,7 +404,7 @@ impl<'a> AndroidWriter<'a> {
 
         {bindings_pk}
 
-        val value = stmt.execute()
+        val value = stmt.executeUpdateDelete()
 
         if (assertOneRowAffected && value == 0) {{
             assert(false)
