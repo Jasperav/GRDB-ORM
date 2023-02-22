@@ -175,7 +175,7 @@ impl<'a> AndroidWriter<'a> {
                 }}
                 upsertQuery += \"{column}=excluded.{column}\"\
             }}
-            ", column.name.to_shouty_snake_case(), column = column.name));
+            ", column.name.to_upper_camel_case(), column = column.name));
             values.push("?");
         }
 
@@ -422,21 +422,24 @@ impl<'a> AndroidWriter<'a> {
         let mut columns_updatable_value = vec![];
         let mut columns_updatable = vec![];
         let mut switch = vec![];
+        let mut mapping_to_column_without_val = vec![];
 
         for column in &table.columns {
             let kotlin_ty = self.kotlin_type(column);
             let column_name = &column.name;
             let class_name = column_name.to_upper_camel_case();
 
-            columns_updatable.push(format!("{}", class_name.to_shouty_snake_case()));
+            columns_updatable.push(format!("{class_name}"));
 
             // Add a 'Column' suffix, else it's possible Kotlin things the argument is the sealed class instance
             // and a compile error occurs
             columns_updatable_value.push(format!("data class {class_name}Column(val {column_name}: {kotlin_ty}): UpdatableColumnWithValue()"));
             switch.push(format!("is {class_name}Column -> entity.{column_name} = {column_name}"));
+            mapping_to_column_without_val.push(format!("is {class_name}Column -> UpdatableColumn.{class_name}"));
         }
 
         let columns_updatable_value = columns_updatable_value.join("\n");
+        let mapping_to_column_without_val = mapping_to_column_without_val.join("\n");
         let columns_updatable = columns_updatable.join(",\n");
         let switch = switch.join("\n");
         let table_name = self.config.create_type_name(&table.table_name);
@@ -446,6 +449,11 @@ impl<'a> AndroidWriter<'a> {
         fun update(entity: {table_name}) {{
             when (this) {{
                 {switch}
+            }}
+        }}
+       fun toUpdatableColumn(): UpdatableColumn {{
+            return when (this) {{
+                {mapping_to_column_without_val}
             }}
         }}
         }}
