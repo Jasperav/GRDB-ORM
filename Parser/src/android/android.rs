@@ -232,27 +232,6 @@ import androidx.lifecycle.LiveData
                 "),
             ];
 
-            for column in &table.columns {
-                let raw = format!("update {} set {} = :value", table.table_name, column.name);
-                let update_all_query = format!("@Query(\"{raw}\")");
-                let update_method = column.name.to_upper_camel_case();
-                let ty = self.kotlin_type(column);
-
-                content.push(format!("{update_all_query}
-                    suspend fun updateAll{update_method}(value: {ty})
-                    {update_all_query}
-                    fun updateAll{update_method}Blocking(value: {ty}): Int
-                "));
-
-                let update_query = format!("@Query(\"{raw} where {pk_in_query}\")");
-
-                content.push(format!("{update_query}
-                    suspend fun updateUnique{update_method}(value: {ty}, {pk_in_method}): Int
-                    {update_query}
-                    fun updateUnique{update_method}Blocking(value: {ty}, {pk_in_method}): Int
-                "));
-            }
-
             for dyn_query in &dyn_queries {
                 if &dyn_query.table == table_name {
                     content.push(dyn_query.query.clone());
