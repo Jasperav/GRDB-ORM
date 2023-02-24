@@ -171,9 +171,9 @@ impl<'a> AndroidWriter<'a> {
             insert_query.push(column.name.to_string());
             upsert_dyn.push(format!("UpdatableColumn.{} -> {{
                 if (processedAtLeastOneColumns) {{
-                    upsertQuery += \", \"
+                    query += \", \"
                 }}
-                upsertQuery += \"{column}=excluded.{column}\"\
+                query += \"{column}=excluded.{column}\"\
             }}
             ", column.name.to_upper_camel_case(), column = column.name));
             values.push("?");
@@ -181,8 +181,9 @@ impl<'a> AndroidWriter<'a> {
 
         let pk_values = pk_values.join(", ");
         let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
+        let insert_or_ignore_query = insert_query.replace("insert into", "insert or ignore into");
         let upsert = upsert_dyn.join("\n");
-        let bind = self.bind("upsertQuery", &table.columns, false, vec![]);
+        let bind = self.bind("query", &table.columns, false, vec![]);
 
         format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumn>) {{
             if (columns.isEmpty()) {{
@@ -190,7 +191,7 @@ impl<'a> AndroidWriter<'a> {
             }}
 
             val insertQuery = {insert_query}
-            var upsertQuery = insertQuery + \"on conflict ({pk_values}) do update set \"
+            var query = insertQuery + \"on conflict ({pk_values}) do update set \"
             var processedAtLeastOneColumns = false
 
             for (column in columns) {{
@@ -203,6 +204,11 @@ impl<'a> AndroidWriter<'a> {
 
             {bind}
 
+        }}
+        fun insertOrIgnore(database: GeneratedDatabase) {{
+            val query = {insert_or_ignore_query}
+
+            {bind}
         }}")
     }
 
@@ -293,15 +299,37 @@ impl<'a> AndroidWriter<'a> {
         let mut pks = vec![];
         let mut pk_in_query = vec![];
         let mut primary_keys = primary_keys(table);
+        let mut delete_query = format!("delete from {} where ", table.table_name);
+        let mut delete_bindings = vec![];
 
         for pk in &primary_keys {
             let kotlin_ty = self.kotlin_type(pk);
 
             pks.push(format!("val {}: {kotlin_ty}", pk.name));
             pk_in_query.push(format!("{} = ?", pk.name));
+            delete_bindings.push(self.bind_single(pk, &mut vec![], delete_bindings.len() + 1, true));
         }
 
         let pks_in_query = pk_in_query.join(" and ");
+        let delete_bindings = delete_bindings.join("\n");
+
+        delete_query += &pks_in_query;
+
+        let delete_query = format!("fun delete(database: GeneratedDatabase, assertOneRowAffected: Boolean = true): Boolean {{
+            val query = \"{delete_query}\"
+            val stmt = database.compileStatement(query)
+
+            {delete_bindings}
+
+            val changed = stmt.executeUpdateDelete()
+
+            if (assertOneRowAffected && changed == 0) {{
+                 assert(false)
+            }}
+
+            return changed == 1
+        }}");
+
         let mut update_single_column = vec![];
 
         for column in &table.columns {
@@ -347,6 +375,8 @@ impl<'a> AndroidWriter<'a> {
 
             {update_dyn_query}
         }}
+
+        {delete_query}
      }}")
     }
 
