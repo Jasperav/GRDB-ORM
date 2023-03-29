@@ -182,6 +182,7 @@ impl<'a> AndroidWriter<'a> {
         let pk_values = pk_values.join(", ");
         let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
         let insert_or_ignore_query = insert_query.replace("insert into", "insert or ignore into");
+        let replace_query = insert_query.replace("insert into", "replace into");
         let upsert = upsert_dyn.join("\n");
         let bind = self.bind("query", &table.columns, false, vec![]);
 
@@ -209,7 +210,13 @@ impl<'a> AndroidWriter<'a> {
             val query = {insert_or_ignore_query}
 
             {bind}
-        }}")
+        }}
+        fun replace(database: GeneratedDatabase) {{
+            val query = {replace_query}
+
+            {bind}
+        }}
+        ")
     }
 
     fn bind(
@@ -301,6 +308,7 @@ impl<'a> AndroidWriter<'a> {
         let mut primary_keys = primary_keys(table);
         let mut delete_query = format!("delete from {} where ", table.table_name);
         let mut delete_bindings = vec![];
+        let mut convert_to_pk = vec![];
 
         for pk in &primary_keys {
             let kotlin_ty = self.kotlin_type(pk);
@@ -308,6 +316,7 @@ impl<'a> AndroidWriter<'a> {
             pks.push(format!("val {}: {kotlin_ty}", pk.name));
             pk_in_query.push(format!("{} = ?", pk.name));
             delete_bindings.push(self.bind_single(pk, &mut vec![], delete_bindings.len() + 1, true));
+            convert_to_pk.push(pk.name.clone());
         }
 
         let pks_in_query = pk_in_query.join(" and ");
@@ -362,6 +371,9 @@ impl<'a> AndroidWriter<'a> {
         let update_dyn_query = self.update_dyn_query(table);
         let pks = pks.join(",\n");
         let update_single_columns = update_single_column.join("\n");
+        let convert = format!("fun primaryKey(): PrimaryKey{{
+            return PrimaryKey({})
+        }}", convert_to_pk.join(", "));
 
         format!("data class PrimaryKey(
         {pks}
@@ -377,7 +389,9 @@ impl<'a> AndroidWriter<'a> {
         }}
 
         {delete_query}
-     }}")
+     }}
+
+     {convert}")
     }
 
     fn update_dyn_query(&self, table: &Table) -> String {
