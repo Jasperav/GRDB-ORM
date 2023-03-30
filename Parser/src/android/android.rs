@@ -228,6 +228,8 @@ import androidx.lifecycle.LiveData
                 {select_unique}
                 fun selectUniqueBlocking({pk_in_method}): {type_name}?
                 {select_unique}
+                fun selectUniqueExpectBlocking({pk_in_method}): {type_name}
+                {select_unique}
                 fun selectUniqueTrack({pk_in_method}): LiveData<{type_name}?>
                 "),
             ];

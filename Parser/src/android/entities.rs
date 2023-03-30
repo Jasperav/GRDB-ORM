@@ -211,6 +211,11 @@ impl<'a> AndroidWriter<'a> {
 
             {bind}
         }}
+        fun insert(database: GeneratedDatabase) {{
+            val query = {insert_query}
+
+            {bind}
+        }}
         fun replace(database: GeneratedDatabase) {{
             val query = {replace_query}
 
