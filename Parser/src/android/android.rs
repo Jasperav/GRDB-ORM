@@ -195,6 +195,7 @@ impl<'a> AndroidWriter<'a> {
             let select_all_raw = format!("SELECT * FROM {table_name}");
             let select_all = format!("@Query(\"{select_all_raw}\")");
             let select_unique = format!("@Query(\"{select_all_raw} where {pk_in_query}\")");
+            let exists_unique_query = format!("@Query(\"select exists(select 1 from {table_name} where {pk_in_query})\")");
             let mut content = vec![
                 format!("
                 package entity
@@ -227,6 +228,8 @@ import androidx.lifecycle.LiveData
                 fun selectAllBlocking(): Array<{type_name}>
                 {select_all}
                 fun selectAllTrack(): LiveData<Array<{type_name}>>
+                {exists_unique_query}
+                fun existsUnique({pk_in_method}) : Boolean
                 {select_unique}
                 suspend fun selectUnique({pk_in_method}): {type_name}?
                 {select_unique}
