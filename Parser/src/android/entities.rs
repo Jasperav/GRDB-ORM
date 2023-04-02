@@ -162,21 +162,41 @@ impl<'a> AndroidWriter<'a> {
         let mut insert_query = vec![];
         let mut values = vec![];
         let mut pk_values = vec![];
+        let mut static_queries = vec![];
+        let mut upserts = vec![];
 
         for pk in primary_keys(table) {
             pk_values.push(pk.name.to_string());
         }
 
         for column in &table.columns {
+            let name = column.name.clone();
+            let upper_camel_cased = name.to_upper_camel_case();
+            let ty = self.kotlin_type(column);
+
             insert_query.push(column.name.to_string());
             upsert_dyn.push(format!("UpdatableColumn.{} -> {{
                 if (processedAtLeastOneColumns) {{
                     query += \", \"
                 }}
-                query += \"{column}=excluded.{column}\"\
+                query += \"{name}=excluded.{name}\"\
             }}
-            ", column.name.to_upper_camel_case(), column = column.name));
+            ", upper_camel_cased));
             values.push("?");
+
+            let bind_single = self.bind_single(column, &mut vec![], 0, true);
+            let query = format!("delete from {} where {name} = ?", table.table_name);
+
+            static_queries.push(format!("fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
+                val stmt = database.compileStatement(\"{query}\")
+
+                {bind_single}
+
+                stmt.execute()
+            }}"));
+            upserts.push(format!("fun upsert{upper_camel_cased}(database: GeneratedDatabase) {{
+                upsertDynamic(database, listOf(UpdatableColumn.{upper_camel_cased}))
+            }}"));
         }
 
         let pk_values = pk_values.join(", ");
@@ -185,6 +205,8 @@ impl<'a> AndroidWriter<'a> {
         let replace_query = insert_query.replace("insert into", "replace into");
         let upsert = upsert_dyn.join("\n");
         let bind = self.bind("query", &table.columns, false, vec![]);
+        let static_queries = static_queries.join("\n\n");
+        let upserts = upserts.join("\n\n");
 
         format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumn>) {{
             if (columns.isEmpty()) {{
@@ -220,6 +242,12 @@ impl<'a> AndroidWriter<'a> {
             val query = {replace_query}
 
             {bind}
+        }}
+
+        {upserts}
+
+        companion object {{
+            {static_queries}
         }}
         ")
     }
@@ -307,7 +335,9 @@ impl<'a> AndroidWriter<'a> {
     }
 
     fn generate_primary_keys(
-        &self, table: &Table) -> String {
+        &self,
+        table: &Table,
+    ) -> String {
         let mut pks = vec![];
         let mut pk_in_query = vec![];
         let mut primary_keys = primary_keys(table);

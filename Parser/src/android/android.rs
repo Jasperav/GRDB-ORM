@@ -108,7 +108,11 @@ impl<'a> AndroidWriter<'a> {
 
             let mut tracked = format!("{prefix}fun {}{func_suffix}({}){suffix}", dyn_query.func_name, arguments.join(", "));
 
-            if !dyn_query.return_types.is_empty() {
+            if dyn_query.return_types.is_empty() {
+                let untracked_blocking = format!("\n{query}\nfun {}Blocking({})", dyn_query.func_name, arguments.join(", "));
+
+                tracked += &untracked_blocking;
+            } else {
                 let untracked = format!("\n{query}\nsuspend fun {}({}): {inner}", dyn_query.func_name, arguments.join(", "));
                 let untracked_blocking = format!("\n{query}\nfun {}Blocking({}): {inner}", dyn_query.func_name, arguments.join(", "));
 
