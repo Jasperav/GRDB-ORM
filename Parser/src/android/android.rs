@@ -52,6 +52,14 @@ impl<'a> AndroidWriter<'a> {
             .unwrap();
     }
 
+    pub fn convert_parameter_type_to_kotlin_type(&self, table: &str, column: &str) -> String {
+        if table == "Int" {
+            "Int".to_string()
+        } else {
+            self.kotlin_type_from_table_column(table, column)
+        }
+    }
+
     fn generate_dyn_queries(&self, path: &PathBuf, imports: &str) -> Vec<DynQueryToWriteInDao> {
         let mut dyn_queries = vec!["package entity".to_string(), imports.to_string()];
         let mut to_write_in_dao = vec![];
@@ -76,11 +84,7 @@ impl<'a> AndroidWriter<'a> {
             };
 
             for (table, column, arg) in &dyn_query.parameter_types {
-                let kotlin_type = if table == "Int" {
-                    "Int".to_string()
-                } else {
-                    self.kotlin_type_from_table_column(table, column)
-                };
+                let kotlin_type = self.convert_parameter_type_to_kotlin_type(table, column);
 
                 // Replace every ? with the corresponding placeholder
                 query = query.replacen('?', &format!(":{arg}"), 1);
@@ -417,8 +421,8 @@ import androidx.room.TypeConverters
         result
     }
 
-    fn kotlin_type_from_table_column(&self, table: &str, column: &str) -> String {
-        let column = self
+    pub fn kotlin_column_from_table_column(&self, table: &str, column: &str) -> Column {
+        self
             .metadata
             .tables
             .get(table)
@@ -426,9 +430,14 @@ import androidx.room.TypeConverters
             .columns
             .iter()
             .find(|c| &c.name == column)
-            .unwrap();
+            .unwrap()
+            .clone()
+    }
 
-        self.kotlin_type(column)
+    fn kotlin_type_from_table_column(&self, table: &str, column: &str) -> String {
+        let column = self.kotlin_column_from_table_column(table, column);
+
+        self.kotlin_type(&column)
     }
 
     fn convert_swift_type_to_kotlin_type(&self, swift_type: &str) -> String {

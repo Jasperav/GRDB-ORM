@@ -199,6 +199,57 @@ impl<'a> AndroidWriter<'a> {
             }}"));
         }
 
+        // TODO: if this doesn't work with updating live data, just delete it and use the DAO
+        for query in &self.config.dynamic_queries {
+            if query.extension.to_lowercase() != table.table_name.to_lowercase() || query.query.trim().starts_with("select") {
+                continue;
+            }
+
+            let mut parameters = vec![];
+            let mut binding = vec![];
+            let mut custom_names = vec![];
+
+            for (table, column, arg) in &query.parameter_types {
+                let mut kotlin_type = self.convert_parameter_type_to_kotlin_type(table, column);
+
+                let column = if table == "Int" {
+
+                    let c = Column {
+                        id: 0,
+                        name: arg.to_string(),
+                        the_type: Type::Integer,
+                        nullable: false,
+                        part_of_pk: false,
+                    };
+
+                    // Hack
+                    if self.kotlin_type(&c) == "Boolean" {
+                        kotlin_type = "Boolean".to_string();
+                    }
+
+                    c
+                } else {
+                    self.kotlin_column_from_table_column(table, column)
+                };
+
+                parameters.push(format!("{}: {}", arg, kotlin_type));
+                binding.push(column);
+                custom_names.push(arg.to_string())
+            }
+
+            let b = self.bind(&query.query, &binding, false, custom_names);
+
+            let mut parameters = parameters.join(", ");
+
+            if !parameters.is_empty() {
+                parameters = ", ".to_string() + &parameters;
+            }
+
+            static_queries.push(format!("fun {}(database: GeneratedDatabase{}) {{
+                {b}
+             }}", query.func_name, parameters));
+        }
+
         let pk_values = pk_values.join(", ");
         let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
         let insert_or_ignore_query = insert_query.replace("insert into", "insert or ignore into");
@@ -272,6 +323,12 @@ impl<'a> AndroidWriter<'a> {
             "executeUpdateDelete"
         } else {
             "execute"
+        };
+
+        let query = if query.starts_with("\"") {
+            query.to_string()
+        } else {
+            format!("\"{query}\"")
         };
 
         format!("val stmt = database.compileStatement({query})
