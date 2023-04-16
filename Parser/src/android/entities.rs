@@ -185,10 +185,20 @@ impl<'a> AndroidWriter<'a> {
             values.push("?");
 
             let bind_single = self.bind_single(column, &mut vec![], 0, true);
-            let query = format!("delete from {} where {name} = ?", table.table_name);
+            let delete_query = format!("delete from {} where {name} = ?", table.table_name);
+            let update_query = format!("update {} set {name} = ?", table.table_name);
 
             static_queries.push(format!("fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
-                val stmt = database.compileStatement(\"{query}\")
+                val stmt = database.compileStatement(\"{delete_query}\")
+                assert(database.inTransaction())
+
+                {bind_single}
+
+                stmt.execute()
+            }}
+            fun update{upper_camel_cased}AllRows(database: GeneratedDatabase, {name}: {ty}) {{
+                val stmt = database.compileStatement(\"{update_query}\")
+                assert(database.inTransaction())
 
                 {bind_single}
 
@@ -201,7 +211,7 @@ impl<'a> AndroidWriter<'a> {
 
         // TODO: if this doesn't work with updating live data, just delete it and use the DAO
         for query in &self.config.dynamic_queries {
-            if query.extension.to_lowercase() != table.table_name.to_lowercase() || query.query.trim().starts_with("select") {
+            if (query.extension.to_lowercase() != table.table_name.to_lowercase() && query.extension.to_lowercase() != self.config.create_type_name(&table.table_name).to_lowercase()) || query.query.trim().starts_with("select") {
                 continue;
             }
 
@@ -260,6 +270,7 @@ impl<'a> AndroidWriter<'a> {
         let upserts = upserts.join("\n\n");
 
         format!("        fun upsertDynamic(database: GeneratedDatabase, columns: List<UpdatableColumn>) {{
+            assert(database.inTransaction())
             if (columns.isEmpty()) {{
                 return
             }}
@@ -281,16 +292,19 @@ impl<'a> AndroidWriter<'a> {
         }}
         fun insertOrIgnore(database: GeneratedDatabase) {{
             val query = {insert_or_ignore_query}
+            assert(database.inTransaction())
 
             {bind}
         }}
         fun insert(database: GeneratedDatabase) {{
             val query = {insert_query}
+            assert(database.inTransaction())
 
             {bind}
         }}
         fun replace(database: GeneratedDatabase) {{
             val query = {replace_query}
+            assert(database.inTransaction())
 
             {bind}
         }}
@@ -325,10 +339,10 @@ impl<'a> AndroidWriter<'a> {
             "execute"
         };
 
-        let query = if query.starts_with("\"") {
-            query.to_string()
-        } else {
+        let query = if query.contains(" ") {
             format!("\"{query}\"")
+        } else {
+            query.to_string()
         };
 
         format!("val stmt = database.compileStatement({query})
@@ -418,6 +432,7 @@ impl<'a> AndroidWriter<'a> {
 
         let delete_query = format!("fun delete(database: GeneratedDatabase, assertOneRowAffected: Boolean = true): Boolean {{
             val query = \"{delete_query}\"
+            assert(database.inTransaction())
             val stmt = database.compileStatement(query)
 
             {delete_bindings}
@@ -451,6 +466,7 @@ impl<'a> AndroidWriter<'a> {
             update_single_column.push(format!("fun update{camel_cased}(database: GeneratedDatabase, value: {kotlin_ty}, assertOneRowAffected: Boolean = true): Boolean {{
                 {update_query}
                 {binded}
+                assert(database.inTransaction())
 
                 if (assertOneRowAffected && ex == 0) {{
                     assert(false)

@@ -199,6 +199,7 @@ impl<'a> AndroidWriter<'a> {
             let select_all_raw = format!("SELECT * FROM {table_name}");
             let select_all = format!("@Query(\"{select_all_raw}\")");
             let select_unique = format!("@Query(\"{select_all_raw} where {pk_in_query}\")");
+            let count_query = format!("@Query(\"select count(1) from {table_name}\")");
             let exists_unique_query = format!("@Query(\"select exists(select 1 from {table_name} where {pk_in_query})\")");
             let mut content = vec![
                 format!("
@@ -222,6 +223,8 @@ import androidx.lifecycle.LiveData
                 suspend fun insert(entity: {type_name})
                 @Insert
                 fun insertBlocking(entity: {type_name})
+                {count_query}
+                fun countAll(): Int
                 @Update
                 suspend fun updateUnique(entity: {type_name}): Int
                 @Update
