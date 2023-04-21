@@ -184,7 +184,7 @@ impl<'a> AndroidWriter<'a> {
             ", upper_camel_cased));
             values.push("?");
 
-            let bind_single = self.bind_single(column, &mut vec![], 0, true);
+            let bind_single = self.bind_single(column, &mut vec![], 1, true);
             let delete_query = format!("delete from {} where {name} = ?", table.table_name);
             let update_query = format!("update {} set {name} = ?", table.table_name);
 
@@ -359,6 +359,8 @@ impl<'a> AndroidWriter<'a> {
         index: usize,
         use_index_as_binding: bool,
     ) -> String {
+        assert!(index > 0);
+
         let kotlin_ty = self.kotlin_type(column);
         let without_opt = kotlin_ty.replace('?', "");
         let name = if custom_names.is_empty() {
@@ -505,7 +507,7 @@ impl<'a> AndroidWriter<'a> {
     fn update_dyn_query(&self, table: &Table) -> String {
         let mut where_clause = vec![];
         let mut bindings_pk = vec![];
-        let mut index = 0;
+        let mut index = 1;
 
         for pk in primary_keys(table) {
             where_clause.push(format!("{} = ?", pk.name));
