@@ -387,7 +387,11 @@ impl<'a> AndroidWriter<'a> {
                 (format!("Converter{}().to({name})", without_opt.to_upper_camel_case()), "Blob")
             }
         } else if column.the_type == Type::Text {
-            (format!("{name}?.let {{ it.toString() }}"), "String")
+            if self.config.room.convert_with_gson_type_converters.contains(&kotlin_ty) {
+                (format!("Converter{kotlin_ty}().to({name})"), "String")
+            } else {
+                (format!("{name}?.let {{ it.toString() }}"), "String")
+            }
         } else {
             panic!()
         };

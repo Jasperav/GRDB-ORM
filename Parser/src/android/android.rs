@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use regex::Regex;
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use crate::custom_mapping::CustomMapping;
 use crate::primary_keys;
 
 pub struct AndroidWriter<'a> {
@@ -371,19 +372,15 @@ import androidx.room.TypeConverters
         std::fs::write(db, contents).unwrap();
     }
 
+    pub fn custom_mapping_matches(&self, column: &Column) -> Option<&'a CustomMapping> {
+        self.config.custom_mapping.iter().find(|c| c.regexes.iter().any(|regex| regex.is_match(&column.name)))
+    }
+
     pub(crate) fn kotlin_type(&self, column: &Column) -> String {
         let mut value = None;
 
-        for mapping in &self.config.custom_mapping {
-            if mapping
-                .regexes
-                .iter()
-                .any(|regex| regex.is_match(&column.name))
-            {
-                value = Some(mapping.the_type.to_string());
-
-                break;
-            }
+        if let Some(v) = self.custom_mapping_matches(column) {
+            value = Some(v.the_type.to_string());
         }
 
         let new_value = if let Some(val) = value {
