@@ -1,18 +1,20 @@
-use std::collections::HashSet;
-use std::fs::File;
-use std::path::PathBuf;
+use crate::android::android::AndroidWriter;
+use crate::primary_keys;
 use heck::{ToShoutySnakeCase, ToUpperCamelCase};
 use inflector::Inflector;
 use sqlite_parser::{Column, Table, Type};
-use crate::android::android::AndroidWriter;
-use crate::primary_keys;
+use std::collections::HashSet;
+use std::fs::File;
+use std::path::PathBuf;
 
 impl<'a> AndroidWriter<'a> {
     pub(crate) fn generate_tables(&self, path: &PathBuf, imports: &str) -> Vec<String> {
         let mut entities = vec![];
 
         for table in self.metadata.tables.values() {
-            let class_name = self.config.create_type_name(&table.table_name.to_upper_camel_case());
+            let class_name = self
+                .config
+                .create_type_name(&table.table_name.to_upper_camel_case());
 
             entities.push(class_name.clone());
 
@@ -41,15 +43,22 @@ impl<'a> AndroidWriter<'a> {
                     primary_keys.push(format!("\"{}\"", camel_case.clone()));
                 }
 
-                let annotation = format!("@ColumnInfo(typeAffinity = ColumnInfo.{})\n", match column.the_type {
-                    Type::Text => "TEXT",
-                    Type::Integer => "INTEGER",
-                    Type::String => "STRING",
-                    Type::Real => "REAL",
-                    Type::Blob => "BLOB"
-                });
+                let annotation = format!(
+                    "@ColumnInfo(typeAffinity = ColumnInfo.{})\n",
+                    match column.the_type {
+                        Type::Text => "TEXT",
+                        Type::Integer => "INTEGER",
+                        Type::String => "STRING",
+                        Type::Real => "REAL",
+                        Type::Blob => "BLOB",
+                    }
+                );
 
-                columns.push(format!("{annotation}var {}: {}", camel_case, self.kotlin_type(&column)));
+                columns.push(format!(
+                    "{annotation}var {}: {}",
+                    camel_case,
+                    self.kotlin_type(&column)
+                ));
             }
 
             let primary_keys = primary_keys.join(", ");
@@ -79,7 +88,8 @@ impl<'a> AndroidWriter<'a> {
                         .map(|i| format!("\"{}\"", i.name))
                         .collect::<Vec<_>>()
                         .join(", ");
-                    let replace_unique_index = index.columns.len() == 1 && unique_indexes.remove(&index.columns[0].name);
+                    let replace_unique_index =
+                        index.columns.len() == 1 && unique_indexes.remove(&index.columns[0].name);
 
                     let suffix = if index.unique || replace_unique_index {
                         ", unique = true"
@@ -91,7 +101,9 @@ impl<'a> AndroidWriter<'a> {
                 }
 
                 for unique_index in unique_indexes {
-                    indexes.push(format!("Index(value = [\"{unique_index}\"], unique = true)"));
+                    indexes.push(format!(
+                        "Index(value = [\"{unique_index}\"], unique = true)"
+                    ));
                 }
 
                 format!(", indices = [{}]", indexes.join(", "))
@@ -137,7 +149,8 @@ impl<'a> AndroidWriter<'a> {
             let pk_class = self.generate_primary_keys(table);
             let upserts = self.generate_upsert(table);
 
-            contents.push(format!("\
+            contents.push(format!(
+                "\
             @Entity(
                 tableName = \"{}\",
                 primaryKeys = [{}]{indices}
@@ -149,7 +162,11 @@ impl<'a> AndroidWriter<'a> {
                 {upserts}
                 {updatable_columns}
                 {pk_class}
-            }}", table.table_name, primary_keys, columns.join(",\n")));
+            }}",
+                table.table_name,
+                primary_keys,
+                columns.join(",\n")
+            ));
 
             std::fs::write(path, contents.join("\n")).unwrap();
         }
@@ -175,20 +192,24 @@ impl<'a> AndroidWriter<'a> {
             let ty = self.kotlin_type(column);
 
             insert_query.push(column.name.to_string());
-            upsert_dyn.push(format!("UpdatableColumn.{} -> {{
+            upsert_dyn.push(format!(
+                "UpdatableColumn.{} -> {{
                 if (processedAtLeastOneColumns) {{
                     query += \", \"
                 }}
                 query += \"{name}=excluded.{name}\"\
             }}
-            ", upper_camel_cased));
+            ",
+                upper_camel_cased
+            ));
             values.push("?");
 
             let bind_single = self.bind_single(column, &mut vec![], 1, true);
             let delete_query = format!("delete from {} where {name} = ?", table.table_name);
             let update_query = format!("update {} set {name} = ?", table.table_name);
 
-            static_queries.push(format!("fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
+            static_queries.push(format!(
+                "fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
                 val stmt = database.compileStatement(\"{delete_query}\")
                 assert(database.inTransaction())
 
@@ -203,15 +224,25 @@ impl<'a> AndroidWriter<'a> {
                 {bind_single}
 
                 stmt.execute()
-            }}"));
-            upserts.push(format!("fun upsert{upper_camel_cased}(database: GeneratedDatabase) {{
+            }}"
+            ));
+            upserts.push(format!(
+                "fun upsert{upper_camel_cased}(database: GeneratedDatabase) {{
                 upsertDynamic(database, listOf(UpdatableColumn.{upper_camel_cased}))
-            }}"));
+            }}"
+            ));
         }
 
         // TODO: if this doesn't work with updating live data, just delete it and use the DAO
         for query in &self.config.dynamic_queries {
-            if (query.extension.to_lowercase() != table.table_name.to_lowercase() && query.extension.to_lowercase() != self.config.create_type_name(&table.table_name).to_lowercase()) || query.query.trim().starts_with("select") {
+            if (query.extension.to_lowercase() != table.table_name.to_lowercase()
+                && query.extension.to_lowercase()
+                    != self
+                        .config
+                        .create_type_name(&table.table_name)
+                        .to_lowercase())
+                || query.query.trim().starts_with("select")
+            {
                 continue;
             }
 
@@ -223,7 +254,6 @@ impl<'a> AndroidWriter<'a> {
                 let mut kotlin_type = self.convert_parameter_type_to_kotlin_type(table, column);
 
                 let column = if table == "Int" {
-
                     let c = Column {
                         id: 0,
                         name: arg.to_string(),
@@ -255,13 +285,18 @@ impl<'a> AndroidWriter<'a> {
                 parameters = ", ".to_string() + &parameters;
             }
 
-            static_queries.push(format!("fun {}(database: GeneratedDatabase{}) {{
+            static_queries.push(format!(
+                "fun {}(database: GeneratedDatabase{}) {{
                 {b}
-             }}", query.func_name, parameters));
+             }}",
+                query.func_name, parameters
+            ));
         }
 
         let pk_values = pk_values.join(", ");
-        let insert_query = format!("\"insert into {}(", table.table_name) + &(insert_query.join(", ") + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
+        let insert_query = format!("\"insert into {}(", table.table_name)
+            + &(insert_query.join(", ")
+                + &((") VALUES (".to_string() + &values.join(", ")) + ")\""));
         let insert_or_ignore_query = insert_query.replace("insert into", "insert or ignore into");
         let replace_query = insert_query.replace("insert into", "replace into");
         let upsert = upsert_dyn.join("\n");
@@ -345,11 +380,13 @@ impl<'a> AndroidWriter<'a> {
             query.to_string()
         };
 
-        format!("val stmt = database.compileStatement({query})
+        format!(
+            "val stmt = database.compileStatement({query})
             {bindings}
 
         val ex = stmt.{update_delete}()
-        ")
+        "
+        )
     }
 
     fn bind_single(
@@ -384,10 +421,21 @@ impl<'a> AndroidWriter<'a> {
             if without_opt == "ByteArray" {
                 (format!("{name}"), "Blob")
             } else {
-                (format!("Converter{}().to({name})", without_opt.to_upper_camel_case()), "Blob")
+                (
+                    format!(
+                        "Converter{}().to({name})",
+                        without_opt.to_upper_camel_case()
+                    ),
+                    "Blob",
+                )
             }
         } else if column.the_type == Type::Text {
-            if self.config.room.convert_with_gson_type_converters.contains(&kotlin_ty) {
+            if self
+                .config
+                .room
+                .convert_with_gson_type_converters
+                .contains(&kotlin_ty)
+            {
                 (format!("Converter{kotlin_ty}().to({name})"), "String")
             } else {
                 (format!("{name}?.let {{ it.toString() }}"), "String")
@@ -399,22 +447,21 @@ impl<'a> AndroidWriter<'a> {
         let (index, post_binding) = if use_index_as_binding {
             (format!("{index}"), "")
         } else {
-            (format!("index") , "index += 1")
+            (format!("index"), "index += 1")
         };
 
-        format!("val {variable_name} = {default_binding}
+        format!(
+            "val {variable_name} = {default_binding}
             if ({variable_name} == null) {{
                 stmt.bindNull({index});
             }} else {{
                 stmt.bind{ty}({index}, {variable_name});
             }}
-            {post_binding}")
+            {post_binding}"
+        )
     }
 
-    fn generate_primary_keys(
-        &self,
-        table: &Table,
-    ) -> String {
+    fn generate_primary_keys(&self, table: &Table) -> String {
         let mut pks = vec![];
         let mut pk_in_query = vec![];
         let mut primary_keys = primary_keys(table);
@@ -427,7 +474,12 @@ impl<'a> AndroidWriter<'a> {
 
             pks.push(format!("val {}: {kotlin_ty}", pk.name));
             pk_in_query.push(format!("{} = ?", pk.name));
-            delete_bindings.push(self.bind_single(pk, &mut vec![], delete_bindings.len() + 1, true));
+            delete_bindings.push(self.bind_single(
+                pk,
+                &mut vec![],
+                delete_bindings.len() + 1,
+                true,
+            ));
             convert_to_pk.push(pk.name.clone());
         }
 
@@ -457,7 +509,10 @@ impl<'a> AndroidWriter<'a> {
         for column in &table.columns {
             let camel_cased = &column.name.to_upper_camel_case();
             let kotlin_ty = self.kotlin_type(column);
-            let update_query = format!("val query = \"update {} set {} = ? where {}\"", table.table_name, column.name, pks_in_query);
+            let update_query = format!(
+                "val query = \"update {} set {} = ? where {}\"",
+                table.table_name, column.name, pks_in_query
+            );
 
             let mut column_different_name = column.clone();
 
@@ -485,9 +540,12 @@ impl<'a> AndroidWriter<'a> {
         let update_dyn_query = self.update_dyn_query(table);
         let pks = pks.join(",\n");
         let update_single_columns = update_single_column.join("\n");
-        let convert = format!("fun primaryKey(): PrimaryKey{{
+        let convert = format!(
+            "fun primaryKey(): PrimaryKey{{
             return PrimaryKey({})
-        }}", convert_to_pk.join(", "));
+        }}",
+            convert_to_pk.join(", ")
+        );
 
         format!("data class PrimaryKey(
         {pks}
@@ -536,11 +594,17 @@ impl<'a> AndroidWriter<'a> {
         for column in &table.columns {
             let column_name = &column.name;
             let updatable_column = format!("{}Column", column_name.to_upper_camel_case());
-            let bind = self.bind_single(column, &mut vec![format!("column.{}", column.name)], index, false);
+            let bind = self.bind_single(
+                column,
+                &mut vec![format!("column.{}", column.name)],
+                index,
+                false,
+            );
 
             index += 1;
 
-            contents.push(format!("is UpdatableColumnWithValue.{updatable_column} -> {{
+            contents.push(format!(
+                "is UpdatableColumnWithValue.{updatable_column} -> {{
                 if (closures.isNotEmpty()) {{
                     updateQuery += \", \"
                 }}
@@ -550,10 +614,12 @@ impl<'a> AndroidWriter<'a> {
                 closures.add{{ stmt ->
                     {bind}
                 }}
-            }}"))
+            }}"
+            ))
         }
 
-        contents.push(format!("}}
+        contents.push(format!(
+            "}}
         }}
         val finalQuery = updateQuery + \" \" + pkQuery
         val stmt = database.compileStatement(finalQuery)
@@ -571,7 +637,8 @@ impl<'a> AndroidWriter<'a> {
         }}
 
         return value == 1
-        "));
+        "
+        ));
 
         contents.join("\n")
     }
@@ -592,8 +659,12 @@ impl<'a> AndroidWriter<'a> {
             // Add a 'Column' suffix, else it's possible Kotlin things the argument is the sealed class instance
             // and a compile error occurs
             columns_updatable_value.push(format!("data class {class_name}Column(val {column_name}: {kotlin_ty}): UpdatableColumnWithValue()"));
-            switch.push(format!("is {class_name}Column -> entity.{column_name} = {column_name}"));
-            mapping_to_column_without_val.push(format!("is {class_name}Column -> UpdatableColumn.{class_name}"));
+            switch.push(format!(
+                "is {class_name}Column -> entity.{column_name} = {column_name}"
+            ));
+            mapping_to_column_without_val.push(format!(
+                "is {class_name}Column -> UpdatableColumn.{class_name}"
+            ));
         }
 
         let columns_updatable_value = columns_updatable_value.join("\n");
@@ -602,7 +673,8 @@ impl<'a> AndroidWriter<'a> {
         let switch = switch.join("\n");
         let table_name = self.config.create_type_name(&table.table_name);
 
-        format!("sealed class UpdatableColumnWithValue {{
+        format!(
+            "sealed class UpdatableColumnWithValue {{
         {columns_updatable_value}
         fun update(entity: {table_name}) {{
             when (this) {{
@@ -618,6 +690,7 @@ impl<'a> AndroidWriter<'a> {
         enum class UpdatableColumn {{
         {columns_updatable}
         }}
-        ")
+        "
+        )
     }
 }

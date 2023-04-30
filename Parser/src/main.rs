@@ -1,10 +1,10 @@
 use clap::Parser;
 pub use configuration::{Config, Visibility};
+use sqlite_parser::{Column, Table};
 use std::env::current_exe;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::time::Duration;
-use sqlite_parser::{Column, Table};
 
 /// Easy way to read a file to a string and call a `transform` method
 macro_rules! read {
@@ -148,5 +148,9 @@ fn some_kind_of_uppercase_first_letter(s: &str) -> String {
 }
 
 fn primary_keys(table: &Table) -> Vec<&Column> {
-    table.columns.iter().filter(|c| c.part_of_pk).collect::<Vec<_>>()
+    table
+        .columns
+        .iter()
+        .filter(|c| c.part_of_pk)
+        .collect::<Vec<_>>()
 }

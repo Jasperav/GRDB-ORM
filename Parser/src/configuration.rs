@@ -1,6 +1,6 @@
 use grdb_orm_lib::dyn_query::DynamicQuery;
-use std::path::PathBuf;
 use grdb_orm_lib::room::Room;
+use std::path::PathBuf;
 
 use crate::custom_mapping::CustomMapping;
 use crate::line_writer::LineWriter;
@@ -50,7 +50,10 @@ impl Config {
     }
 
     pub fn create_type_name(&self, type_name: &str) -> String {
-        format!("{}{}{}", self.prefix_swift_structs, type_name, self.suffix_swift_structs)
+        format!(
+            "{}{}{}",
+            self.prefix_swift_structs, type_name, self.suffix_swift_structs
+        )
     }
 }
 
