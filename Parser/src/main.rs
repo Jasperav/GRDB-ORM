@@ -104,7 +104,6 @@ fn main() {
     let packages = (*properties::PACKAGES).clone() + "|Foundation|GRDB";
     let packages = packages
         .split('|')
-        .into_iter()
         .filter(|s| s != &"|")
         .map(|i| format!("import {}", i))
         .collect::<Vec<_>>()
