@@ -75,7 +75,7 @@ impl<'a> AndroidWriter<'a> {
         for dyn_query in &self.config.dynamic_queries {
             // https://stackoverflow.com/a/75465896/7715250
             // The query needs to be sanitezed...
-            let start_query = self.sanitize_query(&dyn_query);
+            let start_query = self.sanitize_query(dyn_query);
             let mut query = format!("@Query(\"{}\")", start_query);
 
             macro_rules! create_ty {
@@ -160,7 +160,7 @@ impl<'a> AndroidWriter<'a> {
                 let mut return_ty = return_ty.clone();
                 let nullable = if return_ty.contains('?') { "?" } else { "" };
 
-                return_ty = return_ty.replace("?", "");
+                return_ty = return_ty.replace('?', "");
 
                 let table_column = return_ty.split('.').collect::<Vec<_>>();
 
@@ -214,13 +214,13 @@ impl<'a> AndroidWriter<'a> {
 
         for table in self.metadata.tables.values() {
             let table_name = &table.table_name;
-            let type_name = self.config.create_type_name(&table_name);
+            let type_name = self.config.create_type_name(table_name);
             let dao = format!("{type_name}Dao");
             let path = path.join(format!("{dao}.kt"));
             let mut pk_in_query = vec![];
             let mut pk_in_method = vec![];
 
-            for pk in primary_keys(&table) {
+            for pk in primary_keys(table) {
                 pk_in_query.push(format!("{p} = :{p}", p = pk.name));
                 pk_in_method.push(format!("{}: {}", pk.name, self.kotlin_type(pk)));
             }
@@ -292,7 +292,7 @@ import androidx.lifecycle.LiveData
             std::fs::write(path, content.join("\n")).unwrap();
 
             // Don't use prefix/suffix here, it looks better when calling the dao functions
-            daos.push((table_name.to_string().to_lower_camel_case() + &"Dao", dao));
+            daos.push((table_name.to_string().to_lower_camel_case() + "Dao", dao));
         }
 
         daos
@@ -340,20 +340,18 @@ import androidx.lifecycle.LiveData
                     "gson.toJson(value)".to_string(),
                     "String",
                 )
+            } else if mapping.the_type == "UUID" {
+                (
+                    "UUID.fromString(it)".to_string(),
+                    "value.toString()".to_string(),
+                    "String",
+                )
             } else {
-                if mapping.the_type == "UUID" {
-                    (
-                        format!("UUID.fromString(it)"),
-                        "value.toString()".to_string(),
-                        "String",
-                    )
-                } else {
-                    (
-                        format!("{kotlin_type}.parseFrom(it)"),
-                        "value.toByteArray()".to_string(),
-                        "ByteArray",
-                    )
-                }
+                (
+                    format!("{kotlin_type}.parseFrom(it)"),
+                    "value.toByteArray()".to_string(),
+                    "ByteArray",
+                )
             };
 
             let name = format!("Converter{}", kotlin_type);
@@ -477,13 +475,11 @@ import androidx.room.TypeConverters
             };
 
             Some(result)
+        } else if column.name == "meta" {
+            // Special value
+            Some("ByteArray".to_string())
         } else {
-            if column.name == "meta" {
-                // Special value
-                Some("ByteArray".to_string())
-            } else {
-                None
-            }
+            None
         };
 
         let mut result = match new_value {
@@ -510,7 +506,7 @@ import androidx.room.TypeConverters
         self.metadata
             .tables
             .get(table)
-            .expect(&format!("Table not found: {table}"))
+            .unwrap_or_else(|| panic!("Table not found: {table}"))
             .columns
             .iter()
             .find(|c| &c.name == column)
@@ -525,7 +521,7 @@ import androidx.room.TypeConverters
     }
 
     fn convert_swift_type_to_kotlin_type(&self, swift_type: &str) -> String {
-        let split = swift_type.split("_").collect::<Vec<_>>();
+        let split = swift_type.split('_').collect::<Vec<_>>();
 
         if split.len() <= 1 {
             if swift_type == "Bool" {

@@ -76,8 +76,7 @@ impl<'a> Parser<'a> {
                     .find(|f| {
                         f.from_column
                             .iter()
-                            .find(|c| set.contains(&c.name))
-                            .is_some()
+                            .any(|c| set.contains(&c.name))
                     })
                     .is_some();
 

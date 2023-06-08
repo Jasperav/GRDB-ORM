@@ -57,7 +57,7 @@ impl<'a> AndroidWriter<'a> {
                 columns.push(format!(
                     "{annotation}var {}: {}",
                     camel_case,
-                    self.kotlin_type(&column)
+                    self.kotlin_type(column)
                 ));
             }
 
@@ -374,7 +374,7 @@ impl<'a> AndroidWriter<'a> {
             "execute"
         };
 
-        let query = if query.contains(" ") {
+        let query = if query.contains(' ') {
             format!("\"{query}\"")
         } else {
             query.to_string()
@@ -412,14 +412,14 @@ impl<'a> AndroidWriter<'a> {
         } else if kotlin_ty == "Boolean" {
             (format!("if ({name}) {{ 1L }} else {{ 0L }}"), "Long")
         } else if without_opt == "Long" {
-            (format!("{name}"), "Long")
+            (name, "Long")
         } else if without_opt == "Int" {
             (format!("{name}?.toLong()"), "Long")
         } else if without_opt == "Double" {
-            (format!("{name}"), "Double")
+            (name, "Double")
         } else if column.the_type == Type::Blob {
             if without_opt == "ByteArray" {
-                (format!("{name}"), "Blob")
+                (name, "Blob")
             } else {
                 (
                     format!(
@@ -447,7 +447,7 @@ impl<'a> AndroidWriter<'a> {
         let (index, post_binding) = if use_index_as_binding {
             (format!("{index}"), "")
         } else {
-            (format!("index"), "index += 1")
+            ("index".to_string(), "index += 1")
         };
 
         format!(
@@ -521,7 +521,7 @@ impl<'a> AndroidWriter<'a> {
             let mut columns = vec![column];
 
             columns.extend(primary_keys.clone());
-            let owned = columns.into_iter().map(|c| c.clone()).collect();
+            let owned = columns.into_iter().cloned().collect();
             let binded = self.bind("query", &owned, true, vec!["value".to_string()]);
 
             update_single_column.push(format!("fun update{camel_cased}(database: GeneratedDatabase, value: {kotlin_ty}, assertOneRowAffected: Boolean = true): Boolean {{
@@ -654,7 +654,7 @@ impl<'a> AndroidWriter<'a> {
             let column_name = &column.name;
             let class_name = column_name.to_upper_camel_case();
 
-            columns_updatable.push(format!("{class_name}"));
+            columns_updatable.push(class_name.to_string());
 
             // Add a 'Column' suffix, else it's possible Kotlin things the argument is the sealed class instance
             // and a compile error occurs

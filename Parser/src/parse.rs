@@ -41,24 +41,24 @@ fn parse_ios(tables: &Metadata, config: &Config) {
     let safe_output_dir = crate::output_dir_initializer::initialize(&config.output_dir);
 
     // Write the shared enum
-    crate::shared::write(&config);
+    crate::shared::write(config);
 
     // Write the metadata
-    crate::metadata::write(&config, &tables);
+    crate::metadata::write(config, tables);
 
     // Write the tables
     TableWriter {
-        tables: &tables,
-        config: &config,
+        tables,
+        config,
         safe_output_dir: safe_output_dir.clone(),
     }
     .write();
 
     // Write the dynamic queries
-    Parser::new(&config, &tables).parse_dyn_queries();
+    Parser::new(config, tables).parse_dyn_queries();
 
     // For the Swift code
-    crate::format_swift_code::format_swift_code(&config, &safe_output_dir);
+    crate::format_swift_code::format_swift_code(config, &safe_output_dir);
 }
 
 /// Parser for the dynamic queries and upserts
