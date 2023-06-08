@@ -6,7 +6,7 @@ use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use regex::Regex;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct AndroidWriter<'a> {
@@ -68,7 +68,7 @@ impl<'a> AndroidWriter<'a> {
         }
     }
 
-    fn generate_dyn_queries(&self, path: &PathBuf, imports: &str) -> Vec<DynQueryToWriteInDao> {
+    fn generate_dyn_queries(&self, path: &Path, imports: &str) -> Vec<DynQueryToWriteInDao> {
         let mut dyn_queries = vec!["package entity".to_string(), imports.to_string()];
         let mut to_write_in_dao = vec![];
 
@@ -206,7 +206,7 @@ impl<'a> AndroidWriter<'a> {
 
     fn generate_daos(
         &self,
-        path: &PathBuf,
+        path: &Path,
         imports: &str,
         dyn_queries: Vec<DynQueryToWriteInDao>,
     ) -> Vec<(String, String)> {
@@ -298,7 +298,7 @@ import androidx.lifecycle.LiveData
         daos
     }
 
-    fn generate_type_converters(&self, path: &PathBuf, imports: &str) -> String {
+    fn generate_type_converters(&self, path: &Path, imports: &str) -> String {
         if self.config.custom_mapping.is_empty() {
             return "".to_string();
         }
@@ -411,7 +411,7 @@ return null
 
     fn generate_database(
         &self,
-        path: &PathBuf,
+        path: &Path,
         converters: &str,
         imports: &str,
         entities: &[String],
@@ -509,7 +509,7 @@ import androidx.room.TypeConverters
             .unwrap_or_else(|| panic!("Table not found: {table}"))
             .columns
             .iter()
-            .find(|c| &c.name == column)
+            .find(|c| c.name == column)
             .unwrap()
             .clone()
     }

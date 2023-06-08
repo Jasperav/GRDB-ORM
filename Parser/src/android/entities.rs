@@ -1,14 +1,14 @@
-use crate::android::android::AndroidWriter;
+use crate::android::kotlin::AndroidWriter;
 use crate::primary_keys;
 use heck::ToUpperCamelCase;
 use inflector::Inflector;
 use sqlite_parser::{Column, Table, Type};
 use std::collections::HashSet;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 impl<'a> AndroidWriter<'a> {
-    pub(crate) fn generate_tables(&self, path: &PathBuf, imports: &str) -> Vec<String> {
+    pub(crate) fn generate_tables(&self, path: &Path, imports: &str) -> Vec<String> {
         let mut entities = vec![];
 
         for table in self.metadata.tables.values() {
