@@ -1,5 +1,6 @@
 use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use grdb_orm_lib::serde::Deserialize;
 use grdb_orm_lib::toml::Value;
 
 read!(Vec<DynamicQuery>);
@@ -10,7 +11,14 @@ fn transform(content: &str) -> Vec<DynamicQuery> {
     let tables = value.as_table().unwrap();
     let queries = tables
         .iter()
-        .map(|(_, table)| grdb_orm_lib::toml::de::from_str(&table.to_string()).unwrap())
+        .map(|(_, table)| {
+            DynamicQuery::deserialize(grdb_orm_lib::toml::de::ValueDeserializer::new(
+                &table.to_string(),
+            ))
+            .unwrap();
+
+            grdb_orm_lib::toml::de::from_str(&table.to_string()).unwrap()
+        })
         .collect::<Vec<DynamicQuery>>();
 
     validate(&queries);
