@@ -15,11 +15,9 @@ fn transform(content: &str) -> Vec<DynamicQuery> {
             DynamicQuery::deserialize(grdb_orm_lib::toml::de::ValueDeserializer::new(
                 &table.to_string(),
             ))
-            .unwrap();
-
-            grdb_orm_lib::toml::de::from_str(&table.to_string()).unwrap()
+            .unwrap()
         })
-        .collect::<Vec<DynamicQuery>>();
+        .collect::<Vec<_>>();
 
     validate(&queries);
 
