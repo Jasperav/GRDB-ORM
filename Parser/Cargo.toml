@@ -16,4 +16,5 @@ clap = { workspace = true }
 regex = { workspace = true }
 dotenv = { workspace = true }
 rusqlite = { workspace = true }
+heck = { workspace = true }
 grdb_orm_lib = { path = "../grdb_orm_lib" }

@@ -2,6 +2,7 @@ use crate::configuration::{Config, Visibility};
 use crate::custom_mapping::CustomMapping;
 use crate::parse::parse;
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use grdb_orm_lib::room::Room;
 use regex::Regex;
 use sqlite_parser::Metadata;
 use std::env::current_dir;
@@ -312,6 +313,8 @@ fn update_generated_code() {
         all_immutable: false,
         imports: "import Foundation\nimport GRDB".to_string(),
         index_optimizer: false,
+        output_dir_android: Default::default(),
+        room: Room { imports: vec![], skip_type_converters: vec![], convert_with_gson_type_converters: vec![], unique_indexes: vec![], gson_type_adapters: vec![] },
     };
 
     parse(metadata, config);
@@ -342,6 +345,7 @@ mod index_optimizer_test {
     use crate::parse::parse;
     use crate::{Config, Visibility};
     use grdb_orm_lib::dyn_query::DynamicQuery;
+    use grdb_orm_lib::room::Room;
     use std::env::current_dir;
 
     fn setup(query: &str, add_index: bool) {
@@ -381,6 +385,14 @@ mod index_optimizer_test {
             all_immutable: false,
             imports: "".to_string(),
             index_optimizer: true,
+            output_dir_android: Default::default(),
+            room: Room {
+                imports: vec![],
+                skip_type_converters: vec![],
+                convert_with_gson_type_converters: vec![],
+                unique_indexes: vec![],
+                gson_type_adapters: vec![],
+            },
         };
 
         parse(metadata, config);

@@ -7,7 +7,7 @@ pub struct CustomMapping {
     pub regexes: Vec<Regex>,
 }
 
-read!(CustomMapping);
+read!(Vec<CustomMapping>);
 
 fn transform(content: &str) -> Vec<CustomMapping> {
     let mut custom_mapping = vec![];

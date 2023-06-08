@@ -1,3 +1,4 @@
+use crate::android::AndroidWriter;
 use crate::configuration::Config;
 use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QUERY};
 use crate::line_writer::LineWriter;
@@ -20,28 +21,44 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
     // No tables? Something is wrong
     assert!(!tables.tables.is_empty());
 
+    parse_ios(&tables, &config);
+
+    if config.output_dir_android.parent().is_none() {
+        println!("Won't output android room objects because the output dir does not exists");
+
+        return;
+    }
+
+    AndroidWriter {
+        metadata: &tables,
+        config: &config,
+    }
+    .parse();
+}
+
+fn parse_ios(tables: &Metadata, config: &Config) {
     // Initialize the output dir
     let safe_output_dir = crate::output_dir_initializer::initialize(&config.output_dir);
 
     // Write the shared enum
-    crate::shared::write(&config);
+    crate::shared::write(config);
 
     // Write the metadata
-    crate::metadata::write(&config, &tables);
+    crate::metadata::write(config, tables);
 
     // Write the tables
     TableWriter {
-        tables: &tables,
-        config: &config,
+        tables,
+        config,
         safe_output_dir: safe_output_dir.clone(),
     }
     .write();
 
     // Write the dynamic queries
-    Parser::new(&config, &tables).parse_dyn_queries();
+    Parser::new(config, tables).parse_dyn_queries();
 
     // For the Swift code
-    crate::format_swift_code::format_swift_code(&config, &safe_output_dir);
+    crate::format_swift_code::format_swift_code(config, &safe_output_dir);
 }
 
 /// Parser for the dynamic queries and upserts

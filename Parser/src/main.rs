@@ -1,5 +1,6 @@
 use clap::Parser;
-use configuration::{Config, Visibility};
+pub use configuration::{Config, Visibility};
+use sqlite_parser::{Column, Table};
 use std::env::current_exe;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
@@ -7,8 +8,8 @@ use std::time::Duration;
 
 /// Easy way to read a file to a string and call a `transform` method
 macro_rules! read {
-    ($val: ident) => {
-        pub fn read(path: std::path::PathBuf) -> Vec<$val> {
+    ($val: ty) => {
+        pub fn read(path: std::path::PathBuf) -> $val {
             crate::read_file_log(&path);
 
             let content = std::fs::read_to_string(path).unwrap();
@@ -33,8 +34,10 @@ mod swift_property;
 mod swift_struct;
 mod table_meta_data;
 
+pub mod android;
 #[cfg(test)]
 mod generate_generated_code;
+mod room;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -107,7 +110,7 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
     let config = Config {
-        visibility: Visibility::from_str(&properties::VISIBILITY),
+        visibility: Visibility::from_str_ok(&properties::VISIBILITY),
         output_dir: Path::new(&*properties::OUTPUT_DIR).to_owned(),
         custom_mapping,
         dynamic_queries,
@@ -119,6 +122,8 @@ fn main() {
         all_immutable: *properties::ALL_IMMUTABLE,
         imports: packages,
         index_optimizer: *properties::INDEX_OPTIMIZER,
+        output_dir_android: Path::new(&*properties::OUTPUT_DIR_ANDROID).to_owned(),
+        room: crate::room::read(config_current_dir.join("room.toml")),
     };
 
     println!("Successfully parsed configuration files");
@@ -140,4 +145,12 @@ fn some_kind_of_uppercase_first_letter(s: &str) -> String {
         None => panic!(),
         Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
     }
+}
+
+fn primary_keys(table: &Table) -> Vec<&Column> {
+    table
+        .columns
+        .iter()
+        .filter(|c| c.part_of_pk)
+        .collect::<Vec<_>>()
 }

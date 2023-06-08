@@ -566,15 +566,15 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 6.6.1;
+				version = 6.15.0;
 			};
 		};
 		69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDBQuery";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.1;
+				kind = exactVersion;
+				version = 0.7.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

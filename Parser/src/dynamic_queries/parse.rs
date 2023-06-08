@@ -8,7 +8,7 @@ use crate::swift_property::{
 };
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use sqlite_parser::{Column, Type};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub const PARAMETERIZED_IN_QUERY: &str = "%PARAM_IN%";
 
@@ -36,13 +36,15 @@ impl<'a> Parser<'a> {
 
         if self.config.index_optimizer {
             println!("Using index optimizer, finding indexes...");
+
             let mut prepared = connection
-                .prepare("select name from sqlite_master where type = 'index'")
+                .prepare("select name, tbl_name from sqlite_master where type = 'index'")
                 .unwrap();
             let mut rows = prepared.query([]).unwrap();
 
             while let Some(row) = rows.next().unwrap() {
                 let name: String = row.get(0).unwrap();
+                let tbl_name: String = row.get(1).unwrap();
 
                 if is_auto_generated_index(&name) {
                     // Fine, auto generated index
@@ -53,20 +55,32 @@ impl<'a> Parser<'a> {
                     .prepare(&format!("PRAGMA index_info('{}')", name))
                     .unwrap();
                 let mut rows = prepared.query([]).unwrap();
-                let mut amount = 0;
+                let mut names = vec![];
 
-                while rows.next().unwrap().is_some() {
-                    amount += 1;
+                while let Some(row) = rows.next().unwrap() {
+                    let name: String = row.get(2).unwrap();
+
+                    names.push(name);
                 }
 
-                assert_ne!(0, amount);
+                assert_ne!(0, names.len());
+
+                let set: HashSet<_> = names.clone().into_iter().collect();
+                let is_foreign_key = self
+                    .tables
+                    .tables
+                    .get(&tbl_name)
+                    .unwrap()
+                    .foreign_keys
+                    .iter()
+                    .any(|f| f.from_column.iter().any(|c| set.contains(&c.name)));
 
                 assert!(indexes
                     .insert(
                         name,
                         Index {
-                            used: false,
-                            amount_of_columns: amount,
+                            used: is_foreign_key,
+                            amount_of_columns: names.len() as i32,
                         }
                     )
                     .is_none());

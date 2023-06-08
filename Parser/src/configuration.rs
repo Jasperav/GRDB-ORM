@@ -1,4 +1,5 @@
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use grdb_orm_lib::room::Room;
 use std::path::PathBuf;
 
 use crate::custom_mapping::CustomMapping;
@@ -19,6 +20,8 @@ pub struct Config {
     pub all_immutable: bool,
     pub imports: String,
     pub index_optimizer: bool,
+    pub output_dir_android: PathBuf,
+    pub room: Room,
 }
 
 impl Config {
@@ -45,6 +48,13 @@ impl Config {
             "var"
         }
     }
+
+    pub fn create_type_name(&self, type_name: &str) -> String {
+        format!(
+            "{}{}{}",
+            self.prefix_swift_structs, type_name, self.suffix_swift_structs
+        )
+    }
 }
 
 /// The visibility of the Swift type/property
@@ -54,7 +64,7 @@ pub enum Visibility {
 }
 
 impl Visibility {
-    pub fn from_str(s: &str) -> Self {
+    pub fn from_str_ok(s: &str) -> Self {
         match s.to_lowercase().as_str() {
             "public" => Self::Public,
             "internal" => Self::Internal,
