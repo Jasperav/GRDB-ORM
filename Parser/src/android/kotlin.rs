@@ -6,7 +6,7 @@ use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use regex::Regex;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 
 pub struct AndroidWriter<'a> {

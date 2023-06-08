@@ -110,7 +110,7 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
     let config = Config {
-        visibility: Visibility::from_str(&properties::VISIBILITY),
+        visibility: Visibility::from_str_ok(&properties::VISIBILITY),
         output_dir: Path::new(&*properties::OUTPUT_DIR).to_owned(),
         custom_mapping,
         dynamic_queries,

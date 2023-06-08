@@ -5,7 +5,7 @@ use inflector::Inflector;
 use sqlite_parser::{Column, Table, Type};
 use std::collections::HashSet;
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 impl<'a> AndroidWriter<'a> {
     pub(crate) fn generate_tables(&self, path: &Path, imports: &str) -> Vec<String> {

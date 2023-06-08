@@ -73,12 +73,7 @@ impl<'a> Parser<'a> {
                     .unwrap()
                     .foreign_keys
                     .iter()
-                    .find(|f| {
-                        f.from_column
-                            .iter()
-                            .any(|c| set.contains(&c.name))
-                    })
-                    .is_some();
+                    .any(|f| f.from_column.iter().any(|c| set.contains(&c.name)));
 
                 assert!(indexes
                     .insert(

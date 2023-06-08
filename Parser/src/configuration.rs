@@ -64,7 +64,7 @@ pub enum Visibility {
 }
 
 impl Visibility {
-    pub fn from_str(s: &str) -> Self {
+    pub fn from_str_ok(s: &str) -> Self {
         match s.to_lowercase().as_str() {
             "public" => Self::Public,
             "internal" => Self::Internal,
