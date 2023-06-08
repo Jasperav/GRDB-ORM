@@ -12,17 +12,17 @@ authors = ["Jasper Visser <jasperav@hotmail.com>"]
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
-sqlite_parser = "0.1.17"
+sqlite_parser = "0.1.18"
 lazy_static = "1.4.0"
 Inflector = "0.11.4"
-heck = "0.4.0"
-clap = { version = "4.0.23", features = ["derive"] }
-regex = "1.7.0"
+heck = "0.4.1"
+clap = { version = "4.3.2", features = ["derive"] }
+regex = "1.8.4"
 dotenv = "0.15"
-serde = { version = "1.0.147", features = ["derive"] }
-toml = "0.5.9"
+serde = { version = "1.0.164", features = ["derive"] }
+toml = "0.7.4"
 env_parser = { version = "0.1.6", features = ["to_lazy_static"] }
 
 [workspace.dependencies.rusqlite]
-version = "0.28.0"
+version = "0.29.0"
 features = ["bundled"]

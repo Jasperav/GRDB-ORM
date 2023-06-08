@@ -1,6 +1,6 @@
 use crate::android::android::AndroidWriter;
 use crate::primary_keys;
-use heck::{ToShoutySnakeCase, ToUpperCamelCase};
+use heck::ToUpperCamelCase;
 use inflector::Inflector;
 use sqlite_parser::{Column, Table, Type};
 use std::collections::HashSet;
@@ -464,7 +464,7 @@ impl<'a> AndroidWriter<'a> {
     fn generate_primary_keys(&self, table: &Table) -> String {
         let mut pks = vec![];
         let mut pk_in_query = vec![];
-        let mut primary_keys = primary_keys(table);
+        let primary_keys = primary_keys(table);
         let mut delete_query = format!("delete from {} where ", table.table_name);
         let mut delete_bindings = vec![];
         let mut convert_to_pk = vec![];

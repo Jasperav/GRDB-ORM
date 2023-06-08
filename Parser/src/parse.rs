@@ -23,6 +23,12 @@ pub(crate) fn parse(tables: Metadata, config: Config) {
 
     parse_ios(&tables, &config);
 
+    if config.output_dir_android.parent().is_none() {
+        println!("Won't output android room objects because the output dir does not exists");
+
+        return
+    }
+
     AndroidWriter {
         metadata: &tables,
         config: &config,

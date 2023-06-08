@@ -5,7 +5,6 @@ use grdb_orm_lib::dyn_query::DynamicQuery;
 use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use regex::Regex;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};
-use std::collections::HashSet;
 use std::fs::File;
 use std::path::PathBuf;
 use std::process::Command;
@@ -76,8 +75,8 @@ impl<'a> AndroidWriter<'a> {
         for dyn_query in &self.config.dynamic_queries {
             // https://stackoverflow.com/a/75465896/7715250
             // The query needs to be sanitezed...
-            let mut query = self.sanitize_query(&dyn_query);
-            let mut query = format!("@Query(\"{}\")", query);
+            let start_query = self.sanitize_query(&dyn_query);
+            let mut query = format!("@Query(\"{}\")", start_query);
 
             macro_rules! create_ty {
                 ($t: expr) => {
@@ -323,7 +322,13 @@ import androidx.lifecycle.LiveData
                 .convert_with_gson_type_converters
                 .contains(&mapping.the_type)
             {
-                let convert = if self.config.room.gson_type_adapters.iter().any(|a| a[0] == kotlin_type) {
+                let convert = if self
+                    .config
+                    .room
+                    .gson_type_adapters
+                    .iter()
+                    .any(|a| a[0] == kotlin_type)
+                {
                     // This is needed, else some weird END_DOCUMENT errors will appear
                     format!("com.google.gson.stream.JsonReader(java.io.StringReader(it)), com.google.gson.reflect.TypeToken.get({kotlin_type}::class.java)")
                 } else {
@@ -591,7 +596,7 @@ import androidx.room.TypeConverters
             new_select_clause.push(select_clause)
         }
 
-        let mut final_query = &dyn_query.query;
+        let final_query = &dyn_query.query;
         let split = final_query.splitn(2, " from ").collect::<Vec<_>>();
 
         assert_eq!(2, split.len());
