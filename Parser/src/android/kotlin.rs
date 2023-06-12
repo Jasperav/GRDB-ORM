@@ -1,3 +1,4 @@
+use crate::android::generate_kotlin_package;
 use crate::configuration::Config;
 use crate::custom_mapping::CustomMapping;
 use crate::primary_keys;
@@ -26,8 +27,6 @@ impl<'a> AndroidWriter<'a> {
         } else {
             println!("Won't generate Android objects");
         }
-
-        assert!(self.config.output_dir_android.ends_with("java"));
 
         let entity = self.config.output_dir_android.join("entity");
 
@@ -60,6 +59,22 @@ impl<'a> AndroidWriter<'a> {
             .unwrap();
     }
 
+    pub fn interfaces_for_ty(&self, ty: &str) -> String {
+        let t = match self
+            .config
+            .type_interfaces_custom_code
+            .iter()
+            .find(|t| t.ty == ty)
+        {
+            None => return " {".to_string(),
+            Some(t) => t,
+        };
+
+        let interfaces = t.interfaces.join(", ");
+
+        format!(": {interfaces} {{\n{}\n", t.custom_code)
+    }
+
     pub fn convert_parameter_type_to_kotlin_type(&self, table: &str, column: &str) -> String {
         if table == "Int" {
             "Int".to_string()
@@ -69,7 +84,8 @@ impl<'a> AndroidWriter<'a> {
     }
 
     fn generate_dyn_queries(&self, path: &Path, imports: &str) -> Vec<DynQueryToWriteInDao> {
-        let mut dyn_queries = vec!["package entity".to_string(), imports.to_string()];
+        let package = generate_kotlin_package(path);
+        let mut dyn_queries = vec![package, imports.to_string()];
         let mut to_write_in_dao = vec![];
 
         for dyn_query in &self.config.dynamic_queries {
@@ -196,7 +212,12 @@ impl<'a> AndroidWriter<'a> {
                 ))
             }
 
-            dyn_queries.push(format!("data class {ty}(\n{})", return_types.join(",\n")))
+            let custom_code = self.interfaces_for_ty(&ty);
+
+            dyn_queries.push(format!(
+                "data class {ty}(\n{}) {custom_code}}}",
+                return_types.join(",\n")
+            ))
         }
 
         std::fs::write(path.join("DynQueries.kt"), dyn_queries.join("\n")).unwrap();
@@ -211,6 +232,7 @@ impl<'a> AndroidWriter<'a> {
         dyn_queries: Vec<DynQueryToWriteInDao>,
     ) -> Vec<(String, String)> {
         let mut daos = vec![];
+        let package = generate_kotlin_package(path);
 
         for table in self.metadata.tables.values() {
             let table_name = &table.table_name;
@@ -236,7 +258,7 @@ impl<'a> AndroidWriter<'a> {
             );
             let mut content = vec![format!(
                 "
-                package entity
+                {package}
 
 
 import androidx.lifecycle.LiveData
@@ -303,6 +325,7 @@ import androidx.lifecycle.LiveData
             return "".to_string();
         }
 
+        let package = generate_kotlin_package(path);
         let converters_path = path.join("GeneratedTypeConvertors.kt");
         let mut mappers = vec![];
 
@@ -396,7 +419,9 @@ return null
 
         gson += ".create()";
 
-        let imports = format!("package entity\nimport androidx.room.TypeConverter\n{imports}\nval gson = {gson}\n{to_write}");
+        let imports = format!(
+            "{package}import androidx.room.TypeConverter\n{imports}\nval gson = {gson}\n{to_write}"
+        );
 
         std::fs::write(converters_path, imports).unwrap();
 
@@ -417,6 +442,7 @@ return null
         entities: &[String],
         daos: &[(String, String)],
     ) {
+        let package = generate_kotlin_package(path);
         let db = path.join("GeneratedDatabase.kt");
 
         File::create(&db).unwrap();
@@ -433,7 +459,7 @@ return null
             .join("\n");
         let contents = format!(
             "
-package entity
+{package}
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

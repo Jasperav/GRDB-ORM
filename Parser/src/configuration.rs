@@ -1,5 +1,5 @@
 use grdb_orm_lib::dyn_query::DynamicQuery;
-use grdb_orm_lib::room::Room;
+use grdb_orm_lib::room::{Room, TypeInterfacesCustomCode};
 use std::path::PathBuf;
 
 use crate::custom_mapping::CustomMapping;
@@ -22,6 +22,7 @@ pub struct Config {
     pub index_optimizer: bool,
     pub output_dir_android: PathBuf,
     pub room: Room,
+    pub type_interfaces_custom_code: Vec<TypeInterfacesCustomCode>,
 }
 
 impl Config {

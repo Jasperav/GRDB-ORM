@@ -1,3 +1,4 @@
+use crate::android::generate_kotlin_package;
 use crate::android::kotlin::AndroidWriter;
 use crate::primary_keys;
 use heck::ToUpperCamelCase;
@@ -18,12 +19,13 @@ impl<'a> AndroidWriter<'a> {
 
             entities.push(class_name.clone());
 
+            let package = generate_kotlin_package(path);
             let path = path.join(class_name.clone() + ".kt");
 
             File::create(&path).unwrap();
 
             let mut contents = vec![
-                "package entity".to_string(),
+                package,
                 "import androidx.room.ForeignKey".to_string(),
                 "import androidx.room.ForeignKey.Companion.NO_ACTION".to_string(),
                 "import androidx.room.ForeignKey.Companion.RESTRICT".to_string(),
@@ -148,6 +150,7 @@ impl<'a> AndroidWriter<'a> {
             let updatable_columns = self.updatable_columns(table);
             let pk_class = self.generate_primary_keys(table);
             let upserts = self.generate_upsert(table);
+            let custom_code = self.interfaces_for_ty(&class_name);
 
             contents.push(format!(
                 "\
@@ -157,8 +160,7 @@ impl<'a> AndroidWriter<'a> {
                 {foreign_keys})
             data class {class_name}(
                 {}
-            )
-            {{
+            ) {custom_code}
                 {upserts}
                 {updatable_columns}
                 {pk_class}
