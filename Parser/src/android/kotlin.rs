@@ -66,13 +66,13 @@ impl<'a> AndroidWriter<'a> {
             .iter()
             .find(|t| t.ty == ty)
         {
-            None => return "(".to_string(),
+            None => return " {".to_string(),
             Some(t) => t,
         };
 
         let interfaces = t.interfaces.join(", ");
 
-        format!(": {interfaces} (\n{}\n", t.custom_code)
+        format!(": {interfaces} {{\n{}\n", t.custom_code)
     }
 
     pub fn convert_parameter_type_to_kotlin_type(&self, table: &str, column: &str) -> String {
@@ -215,7 +215,7 @@ impl<'a> AndroidWriter<'a> {
             let custom_code = self.interfaces_for_ty(&ty);
 
             dyn_queries.push(format!(
-                "data class {ty}{custom_code}\n{})",
+                "data class {ty}(\n{}) {custom_code}}}",
                 return_types.join(",\n")
             ))
         }
