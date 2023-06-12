@@ -1,6 +1,6 @@
 use grdb_orm_lib::room::TypeInterfacesCustomCode;
 use grdb_orm_lib::serde::Deserialize;
-use grdb_orm_lib::toml::{Deserializer, Value};
+use grdb_orm_lib::toml::Value;
 
 read!(Vec<TypeInterfacesCustomCode>);
 
