@@ -158,10 +158,9 @@ impl<'a> AndroidWriter<'a> {
                 tableName = \"{}\",
                 primaryKeys = [{}]{indices}
                 {foreign_keys})
-            data class {class_name}{custom_code}
+            data class {class_name}(
                 {}
-            )
-            {{
+            ) {custom_code}
                 {upserts}
                 {updatable_columns}
                 {pk_class}
