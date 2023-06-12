@@ -150,6 +150,7 @@ impl<'a> AndroidWriter<'a> {
             let updatable_columns = self.updatable_columns(table);
             let pk_class = self.generate_primary_keys(table);
             let upserts = self.generate_upsert(table);
+            let custom_code = self.interfaces_for_ty(&class_name);
 
             contents.push(format!(
                 "\
@@ -157,7 +158,7 @@ impl<'a> AndroidWriter<'a> {
                 tableName = \"{}\",
                 primaryKeys = [{}]{indices}
                 {foreign_keys})
-            data class {class_name}(
+            data class {class_name}{custom_code}
                 {}
             )
             {{

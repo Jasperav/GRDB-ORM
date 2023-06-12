@@ -59,6 +59,22 @@ impl<'a> AndroidWriter<'a> {
             .unwrap();
     }
 
+    pub fn interfaces_for_ty(&self, ty: &str) -> String {
+        let t = match self
+            .config
+            .type_interfaces_custom_code
+            .iter()
+            .find(|t| t.ty == ty)
+        {
+            None => return "{".to_string(),
+            Some(t) => t,
+        };
+
+        let interfaces = t.interfaces.join(", ");
+
+        format!(": {interfaces} {{\n{}\n", t.custom_code)
+    }
+
     pub fn convert_parameter_type_to_kotlin_type(&self, table: &str, column: &str) -> String {
         if table == "Int" {
             "Int".to_string()
@@ -196,7 +212,12 @@ impl<'a> AndroidWriter<'a> {
                 ))
             }
 
-            dyn_queries.push(format!("data class {ty}(\n{})", return_types.join(",\n")))
+            let custom_code = self.interfaces_for_ty(&ty);
+
+            dyn_queries.push(format!(
+                "data class {ty}{custom_code}\n{})",
+                return_types.join(",\n")
+            ))
         }
 
         std::fs::write(path.join("DynQueries.kt"), dyn_queries.join("\n")).unwrap();

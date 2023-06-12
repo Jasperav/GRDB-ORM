@@ -38,6 +38,7 @@ pub mod android;
 #[cfg(test)]
 mod generate_generated_code;
 mod room;
+mod type_interfaces_custom_code;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -123,6 +124,9 @@ fn main() {
         index_optimizer: *properties::INDEX_OPTIMIZER,
         output_dir_android: Path::new(&*properties::OUTPUT_DIR_ANDROID).to_owned(),
         room: crate::room::read(config_current_dir.join("room.toml")),
+        type_interfaces_custom_code: crate::type_interfaces_custom_code::read(
+            config_current_dir.join("type_interfaces_custom_code.toml"),
+        ),
     };
 
     println!("Successfully parsed configuration files");

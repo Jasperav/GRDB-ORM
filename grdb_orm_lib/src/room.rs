@@ -6,3 +6,10 @@ pub struct Room {
     pub unique_indexes: Vec<String>,
     pub gson_type_adapters: Vec<Vec<String>>,
 }
+
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct TypeInterfacesCustomCode {
+    pub ty: String,
+    pub interfaces: Vec<String>,
+    pub custom_code: String,
+}
