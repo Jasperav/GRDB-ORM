@@ -66,13 +66,13 @@ impl<'a> AndroidWriter<'a> {
             .iter()
             .find(|t| t.ty == ty)
         {
-            None => return "{".to_string(),
+            None => return "(".to_string(),
             Some(t) => t,
         };
 
         let interfaces = t.interfaces.join(", ");
 
-        format!(": {interfaces} {{\n{}\n", t.custom_code)
+        format!(": {interfaces} (\n{}\n", t.custom_code)
     }
 
     pub fn convert_parameter_type_to_kotlin_type(&self, table: &str, column: &str) -> String {
