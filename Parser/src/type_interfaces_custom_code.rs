@@ -6,10 +6,17 @@ use grdb_orm_lib::toml::{Deserializer, Value};
 read!(Vec<TypeInterfacesCustomCode>);
 
 fn transform(content: &str) -> Vec<TypeInterfacesCustomCode> {
-    let deserialize: Vec<TypeInterfacesCustomCode> = grdb_orm_lib::toml::from_str(content).unwrap();
-    let uniques = deserialize.iter().map(|d| &d.ty).collect::<HashSet<_>>();
+    let value: Value = content.parse().unwrap();
+    let tables = value.as_table().unwrap();
+    let mut types = vec![];
 
-    assert_eq!(uniques.len(), deserialize.len());
+    for (_, value) in tables {
+        let deserialized = TypeInterfacesCustomCode::deserialize(value).unwrap();
 
-    deserialize
+        assert!(!types.iter().any(|t| t.ty == deserialized.ty));
+
+        types.push(deserialized);
+    }
+
+    types
 }
