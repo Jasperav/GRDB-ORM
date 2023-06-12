@@ -50,7 +50,7 @@ impl<'a> AndroidWriter<'a> {
         let entities = self.generate_tables(&entity, &imports);
         let daos = self.generate_daos(&entity, &imports, dyn_queries);
 
-        self.generate_database(&entity, &mappers, &imports, &entities, &daos);
+        self.generate_database(&entity, &mappers, &entities, &daos);
 
         Command::new("ktlint")
             .arg("-F")
@@ -438,7 +438,6 @@ return null
         &self,
         path: &Path,
         converters: &str,
-        imports: &str,
         entities: &[String],
         daos: &[(String, String)],
     ) {
@@ -464,7 +463,6 @@ return null
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-{imports}
 
         @Database(entities = [\n{entities}\n], version = 1)
 {converters}
