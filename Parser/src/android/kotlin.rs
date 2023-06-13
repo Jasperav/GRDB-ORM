@@ -464,16 +464,21 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteStatement
+import java.util.logging.Level
+import java.util.logging.Logger
 
         @Database(entities = [\n{entities}\n], version = 1)
 {converters}
             abstract class GeneratedDatabase : RoomDatabase() {{
+                val logger = Logger.getLogger(GeneratedDatabase::class.java.name)
                 private val cache = hashMapOf<String, SupportSQLiteStatement>()
 
                 fun compileCached(query: String): SupportSQLiteStatement {{
                     assert(inTransaction())
 
                     val existing = cache[query]
+
+                    logger.log(Level.INFO, \"Will execute query, cached: ${{existing != null}}, query: $query\")
 
                     if (existing != null) {{
                         existing.clearBindings()
