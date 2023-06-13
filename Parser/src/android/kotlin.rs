@@ -463,10 +463,30 @@ return null
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteStatement
 
         @Database(entities = [\n{entities}\n], version = 1)
 {converters}
             abstract class GeneratedDatabase : RoomDatabase() {{
+                private val cache = hashMapOf<String, SupportSQLiteStatement>()
+
+                fun compileCached(query: String): SupportSQLiteStatement {{
+                    assert(inTransaction())
+
+                    val existing = cache[query]
+
+                    if (existing != null) {{
+                        existing.clearBindings()
+
+                        return existing
+                    }}
+
+                    val stmt = compileStatement(query)
+
+                    cache[query] = stmt
+
+                    return stmt
+                }}
                 {daos}
             }}
         "
