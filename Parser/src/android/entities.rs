@@ -212,7 +212,7 @@ impl<'a> AndroidWriter<'a> {
 
             static_queries.push(format!(
                 "fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
-                val stmt = database.compileStatement(\"{delete_query}\")
+                val stmt = database.compileCached(\"{delete_query}\")
                 assert(database.inTransaction())
 
                 {bind_single}
@@ -220,7 +220,7 @@ impl<'a> AndroidWriter<'a> {
                 stmt.execute()
             }}
             fun update{upper_camel_cased}AllRows(database: GeneratedDatabase, {name}: {ty}) {{
-                val stmt = database.compileStatement(\"{update_query}\")
+                val stmt = database.compileCached(\"{update_query}\")
                 assert(database.inTransaction())
 
                 {bind_single}
@@ -383,7 +383,7 @@ impl<'a> AndroidWriter<'a> {
         };
 
         format!(
-            "val stmt = database.compileStatement({query})
+            "val stmt = database.compileCached({query})
             {bindings}
 
         val ex = stmt.{update_delete}()
@@ -493,7 +493,7 @@ impl<'a> AndroidWriter<'a> {
         let delete_query = format!("fun delete(database: GeneratedDatabase, assertOneRowAffected: Boolean = true): Boolean {{
             val query = \"{delete_query}\"
             assert(database.inTransaction())
-            val stmt = database.compileStatement(query)
+            val stmt = database.compileCached(query)
 
             {delete_bindings}
 
@@ -624,7 +624,7 @@ impl<'a> AndroidWriter<'a> {
             "}}
         }}
         val finalQuery = updateQuery + \" \" + pkQuery
-        val stmt = database.compileStatement(finalQuery)
+        val stmt = database.compileCached(finalQuery)
 
         for (closure in closures) {{
             closure(stmt)
