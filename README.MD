@@ -110,3 +110,6 @@ Run executable 'new_version' to generate a new version
 ## Why is this written in Rust and not in Swift?
 - I wrote the `SQLiteParser` dependency also in Rust
 - Rust has better support for parsing the configuration files (.toml)
+
+### Used in production
+https://www.beezleapp.com/ - Beezle Social allows users to connect which are nearby, discover local events now
