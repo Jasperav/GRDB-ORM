@@ -127,6 +127,8 @@ fn main() {
         type_interfaces_custom_code: crate::type_interfaces_custom_code::read(
             config_current_dir.join("type_interfaces_custom_code.toml"),
         ),
+        android_package_name: properties::ANDROID_PACKAGE_NAME.to_owned(),
+        android_verbose_sql_logging: *properties::ANDROID_ENABLE_VERBOSE_SQL_ARGUMENT_LOGGING,
     };
 
     println!("Successfully parsed configuration files");

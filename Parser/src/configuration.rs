@@ -23,6 +23,8 @@ pub struct Config {
     pub output_dir_android: PathBuf,
     pub room: Room,
     pub type_interfaces_custom_code: Vec<TypeInterfacesCustomCode>,
+    pub android_package_name: String,
+    pub android_verbose_sql_logging: bool,
 }
 
 impl Config {

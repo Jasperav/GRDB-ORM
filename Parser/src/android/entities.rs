@@ -212,7 +212,7 @@ impl<'a> AndroidWriter<'a> {
 
             static_queries.push(format!(
                 "fun deleteBy{upper_camel_cased}(database: GeneratedDatabase, {name}: {ty}) {{
-                val stmt = database.compileCached(\"{delete_query}\")
+                val stmt = database.compileCached(\"{delete_query}\", {name})
                 assert(database.inTransaction())
 
                 {bind_single}
@@ -220,7 +220,7 @@ impl<'a> AndroidWriter<'a> {
                 stmt.execute()
             }}
             fun update{upper_camel_cased}AllRows(database: GeneratedDatabase, {name}: {ty}) {{
-                val stmt = database.compileCached(\"{update_query}\")
+                val stmt = database.compileCached(\"{update_query}\", {name})
                 assert(database.inTransaction())
 
                 {bind_single}
@@ -362,8 +362,11 @@ impl<'a> AndroidWriter<'a> {
         mut custom_names: Vec<String>,
     ) -> String {
         let mut bindings = vec![];
+        let mut names = vec![];
 
         for column in columns {
+            names.push(custom_names.get(0).unwrap_or(&column.name).to_owned());
+
             let binding = self.bind_single(column, &mut custom_names, bindings.len() + 1, true);
 
             bindings.push(binding);
@@ -375,15 +378,19 @@ impl<'a> AndroidWriter<'a> {
         } else {
             "execute"
         };
-
         let query = if query.contains(' ') {
             format!("\"{query}\"")
         } else {
             query.to_string()
         };
+        let mut joined = names.join(", ");
+
+        if !joined.is_empty() {
+            joined = ", ".to_string() + &joined;
+        }
 
         format!(
-            "val stmt = database.compileCached({query})
+            "val stmt = database.compileCached({query}{joined})
             {bindings}
 
         val ex = stmt.{update_delete}()
@@ -470,6 +477,7 @@ impl<'a> AndroidWriter<'a> {
         let mut delete_query = format!("delete from {} where ", table.table_name);
         let mut delete_bindings = vec![];
         let mut convert_to_pk = vec![];
+        let mut names = vec![];
 
         for pk in &primary_keys {
             let kotlin_ty = self.kotlin_type(pk);
@@ -483,17 +491,19 @@ impl<'a> AndroidWriter<'a> {
                 true,
             ));
             convert_to_pk.push(pk.name.clone());
+            names.push(pk.name.to_string());
         }
 
         let pks_in_query = pk_in_query.join(" and ");
         let delete_bindings = delete_bindings.join("\n");
+        let names = names.join(", ");
 
         delete_query += &pks_in_query;
 
         let delete_query = format!("fun delete(database: GeneratedDatabase, assertOneRowAffected: Boolean = true): Boolean {{
             val query = \"{delete_query}\"
             assert(database.inTransaction())
-            val stmt = database.compileCached(query)
+            val stmt = database.compileCached(query, {names})
 
             {delete_bindings}
 
@@ -584,6 +594,7 @@ impl<'a> AndroidWriter<'a> {
         let bindings_pk = bindings_pk.join("\n");
         let where_clause = "where ".to_string() + &where_clause.join(" and ");
         let mut contents = vec![
+            format!("val names = mutableListOf<String>()"),
             format!("val pkQuery = \"{where_clause}\""),
             format!("var updateQuery = \"update {} set \"", table.table_name),
             format!("var index = 1"),
@@ -602,6 +613,21 @@ impl<'a> AndroidWriter<'a> {
                 index,
                 false,
             );
+            let name_bind = format!("val{index}");
+            let logging = if self.config.android_package_name.is_empty()
+                || !self.config.android_verbose_sql_logging
+            {
+                "".to_string()
+            } else {
+                format!(
+                    "
+if ({}.BuildConfig.DEBUG) {{
+    names.add({name_bind}?.toString() ?: \"null\")
+}}
+                ",
+                    self.config.android_package_name
+                )
+            };
 
             index += 1;
 
@@ -615,6 +641,7 @@ impl<'a> AndroidWriter<'a> {
 
                 closures.add{{ stmt ->
                     {bind}
+                    {logging}
                 }}
             }}"
             ))
@@ -624,7 +651,7 @@ impl<'a> AndroidWriter<'a> {
             "}}
         }}
         val finalQuery = updateQuery + \" \" + pkQuery
-        val stmt = database.compileCached(finalQuery)
+        val stmt = database.compileCached(finalQuery, names)
 
         for (closure in closures) {{
             closure(stmt)
