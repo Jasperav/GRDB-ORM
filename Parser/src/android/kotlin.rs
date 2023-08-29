@@ -460,8 +460,7 @@ return null
             "".to_string()
         } else {
             let query_logging = if self.config.android_verbose_sql_logging {
-                format!("var queryFormatted = query
-
+                "var queryFormatted = query
     for (arg in arguments.reversed()) {{
         // Make sure that this doesn't change the wrong values
         val s = arg?.toString()?.replace(\"?\", \"!QUESTION_MARK_REPLACED!\") ?: \"null\"
@@ -470,11 +469,11 @@ return null
         queryFormatted = queryFormatted.replaceRange(lastIndex, lastIndex + 1, s)
     }}
 
-    assert(queryFormatted.count {{ it == '?' }} == 0)")
+    assert(queryFormatted.count {{ it == '?' }} == 0)"
             } else {
                 "
                 // Note that you can enable verbose argument logging but this will slow down your app
-                val queryFormatted = query".to_string()
+                val queryFormatted = query"
             };
 
             format!("

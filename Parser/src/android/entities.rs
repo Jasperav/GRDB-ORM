@@ -614,7 +614,9 @@ impl<'a> AndroidWriter<'a> {
                 false,
             );
             let name_bind = format!("val{index}");
-            let logging = if self.config.android_package_name.is_empty() || !self.config.android_verbose_sql_logging {
+            let logging = if self.config.android_package_name.is_empty()
+                || !self.config.android_verbose_sql_logging
+            {
                 "".to_string()
             } else {
                 format!(
