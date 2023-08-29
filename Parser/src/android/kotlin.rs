@@ -456,6 +456,38 @@ return null
             .map(|(dao_method_name, dao)| format!("abstract fun {dao_method_name}(): {dao}"))
             .collect::<Vec<_>>()
             .join("\n");
+        let logging = if self.config.android_package_name.is_empty() {
+            "".to_string()
+        } else {
+            let query_logging = if self.config.android_verbose_sql_logging {
+                format!("var queryFormatted = query
+
+    for (arg in arguments.reversed()) {{
+        // Make sure that this doesn't change the wrong values
+        val s = arg?.toString()?.replace(\"?\", \"!QUESTION_MARK_REPLACED!\") ?: \"null\"
+        val lastIndex = queryFormatted.lastIndexOf(\"?\")
+
+        queryFormatted = queryFormatted.replaceRange(lastIndex, lastIndex + 1, s)
+    }}
+
+    assert(queryFormatted.count {{ it == '?' }} == 0)")
+            } else {
+                "
+                // Note that you can enable verbose argument logging but this will slow down your app
+                val queryFormatted = query".to_string()
+            };
+
+            format!("
+if ({}.BuildConfig.DEBUG) {{
+    assert(query.count {{ it == '?' }} == arguments.size)
+
+    {query_logging}
+
+    logger.log(Level.INFO, \"Will execute query, cached: ${{existing != null}}, query: $queryFormatted\")
+}}
+            ", self.config.android_package_name)
+        };
+
         let contents = format!(
             "
 {package}
@@ -473,12 +505,12 @@ import java.util.logging.Logger
                 val logger = Logger.getLogger(GeneratedDatabase::class.java.name)
                 private val cache = hashMapOf<String, SupportSQLiteStatement>()
 
-                fun compileCached(query: String): SupportSQLiteStatement {{
+                fun compileCached(query: String, vararg arguments: Any?): SupportSQLiteStatement {{
                     assert(inTransaction())
 
                     val existing = cache[query]
 
-                    logger.log(Level.INFO, \"Will execute query, cached: ${{existing != null}}, query: $query\")
+                    {logging}
 
                     if (existing != null) {{
                         existing.clearBindings()

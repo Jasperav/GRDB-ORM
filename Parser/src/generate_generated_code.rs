@@ -316,6 +316,8 @@ fn update_generated_code() {
         output_dir_android: Default::default(),
         room: Room { imports: vec![], skip_type_converters: vec![], convert_with_gson_type_converters: vec![], unique_indexes: vec![], gson_type_adapters: vec![], },
         type_interfaces_custom_code: vec![],
+        android_package_name: "".to_string(),
+        android_verbose_sql_logging: false,
     };
 
     parse(metadata, config);
@@ -395,6 +397,8 @@ mod index_optimizer_test {
                 gson_type_adapters: vec![],
             },
             type_interfaces_custom_code: vec![],
+            android_package_name: "".to_string(),
+            android_verbose_sql_logging: false,
         };
 
         parse(metadata, config);
