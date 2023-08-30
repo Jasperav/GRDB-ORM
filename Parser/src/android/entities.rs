@@ -365,7 +365,9 @@ impl<'a> AndroidWriter<'a> {
         let mut names = vec![];
 
         for column in columns {
-            names.push(custom_names.get(0).unwrap_or(&column.name).to_owned());
+            if self.config.android_verbose_sql_logging {
+                names.push(custom_names.get(0).unwrap_or(&column.name).to_owned());
+            }
 
             let binding = self.bind_single(column, &mut custom_names, bindings.len() + 1, true);
 
@@ -491,7 +493,10 @@ impl<'a> AndroidWriter<'a> {
                 true,
             ));
             convert_to_pk.push(pk.name.clone());
-            names.push(pk.name.to_string());
+
+            if (self.config.android_verbose_sql_logging) {
+                names.push(pk.name.to_string());
+            }
         }
 
         let pks_in_query = pk_in_query.join(" and ");
