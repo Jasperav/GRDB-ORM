@@ -494,7 +494,7 @@ impl<'a> AndroidWriter<'a> {
             ));
             convert_to_pk.push(pk.name.clone());
 
-            if (self.config.android_verbose_sql_logging) {
+            if self.config.android_verbose_sql_logging {
                 names.push(pk.name.to_string());
             }
         }
