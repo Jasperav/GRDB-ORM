@@ -461,6 +461,8 @@ return null
         } else {
             let query_logging = if self.config.android_verbose_sql_logging {
                 "var queryFormatted = query
+assert(query.count {{ it == '?' }} == arguments.size)
+
     for (arg in arguments.reversed()) {{
         // Make sure that this doesn't change the wrong values
         val s = arg?.toString()?.replace(\"?\", \"!QUESTION_MARK_REPLACED!\") ?: \"null\"
@@ -478,8 +480,6 @@ return null
 
             format!("
 if ({}.BuildConfig.DEBUG) {{
-    assert(query.count {{ it == '?' }} == arguments.size)
-
     {query_logging}
 
     logger.log(Level.INFO, \"Will execute query, cached: ${{existing != null}}, query: $queryFormatted\")
