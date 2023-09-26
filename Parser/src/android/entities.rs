@@ -1,5 +1,5 @@
-use crate::android::generate_kotlin_package;
 use crate::android::kotlin::AndroidWriter;
+use crate::android::{generate_kotlin_package, SUPPRESS_WILDCARD_IMPORTS};
 use crate::primary_keys;
 use heck::ToUpperCamelCase;
 use inflector::Inflector;
@@ -25,6 +25,7 @@ impl<'a> AndroidWriter<'a> {
             File::create(&path).unwrap();
 
             let mut contents = vec![
+                SUPPRESS_WILDCARD_IMPORTS.to_string(),
                 package,
                 "import androidx.room.ForeignKey".to_string(),
                 "import androidx.room.ForeignKey.Companion.NO_ACTION".to_string(),
