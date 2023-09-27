@@ -1,4 +1,4 @@
-use crate::android::generate_kotlin_package;
+use crate::android::{generate_kotlin_package, SUPPRESS_ALL};
 use crate::configuration::Config;
 use crate::custom_mapping::CustomMapping;
 use crate::primary_keys;
@@ -85,7 +85,7 @@ impl<'a> AndroidWriter<'a> {
 
     fn generate_dyn_queries(&self, path: &Path, imports: &str) -> Vec<DynQueryToWriteInDao> {
         let package = generate_kotlin_package(path);
-        let mut dyn_queries = vec![package, imports.to_string()];
+        let mut dyn_queries = vec![SUPPRESS_ALL.to_string(), package, imports.to_string()];
         let mut to_write_in_dao = vec![];
 
         for dyn_query in &self.config.dynamic_queries {
@@ -258,6 +258,8 @@ impl<'a> AndroidWriter<'a> {
             );
             let mut content = vec![format!(
                 "
+{SUPPRESS_ALL}
+
                 {package}
 
 
@@ -420,7 +422,7 @@ return null
         gson += ".create()";
 
         let imports = format!(
-            "{package}import androidx.room.TypeConverter\n{imports}\nval gson = {gson}\n{to_write}"
+            "{SUPPRESS_ALL}\n{package}import androidx.room.TypeConverter\n{imports}\nval gson = {gson}\n{to_write}"
         );
 
         std::fs::write(converters_path, imports).unwrap();
@@ -489,6 +491,8 @@ if ({}.BuildConfig.DEBUG) {{
 
         let contents = format!(
             "
+{SUPPRESS_ALL}
+
 {package}
 
 import androidx.room.Database
