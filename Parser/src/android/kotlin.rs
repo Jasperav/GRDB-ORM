@@ -85,11 +85,7 @@ impl<'a> AndroidWriter<'a> {
 
     fn generate_dyn_queries(&self, path: &Path, imports: &str) -> Vec<DynQueryToWriteInDao> {
         let package = generate_kotlin_package(path);
-        let mut dyn_queries = vec![
-            SUPPRESS_ALL.to_string(),
-            package,
-            imports.to_string(),
-        ];
+        let mut dyn_queries = vec![SUPPRESS_ALL.to_string(), package, imports.to_string()];
         let mut to_write_in_dao = vec![];
 
         for dyn_query in &self.config.dynamic_queries {
