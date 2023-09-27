@@ -506,7 +506,7 @@ import androidx.sqlite.db.SupportSQLiteStatement
 import java.util.logging.Level
 import java.util.logging.Logger
 
-        @Database(entities = [\n{entities}\n], version = 1)
+        @Database(entities = [\n{entities}\n], version = 1, exportSchema = false)
 {converters}
             abstract class GeneratedDatabase : RoomDatabase() {{
                 val logger = Logger.getLogger(GeneratedDatabase::class.java.name)
