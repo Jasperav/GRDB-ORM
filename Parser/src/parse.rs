@@ -243,7 +243,7 @@ pub(crate) fn test_query(
         }
 
         if !bypassed && dyn_query.bypass_index_optimizer {
-            panic!("Did not bypass");
+            panic!("Did not bypass but query should be ignored, probably set property bypass_index_optimizer to false");
         }
     }
 
