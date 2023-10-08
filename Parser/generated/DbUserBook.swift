@@ -60,7 +60,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.insertUniqueQuery, statementArguments: arguments)
 
@@ -81,7 +85,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.insertOrIgnoreUniqueQuery, statementArguments: arguments)
 
@@ -97,7 +105,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.replaceUniqueQuery, statementArguments: arguments)
 
@@ -113,7 +125,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             realToDouble
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertRealToDoubleQuery, statementArguments: arguments)
 
@@ -146,7 +162,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "delete from UserBook where bookUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -161,7 +181,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "delete from UserBook where userUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -176,7 +200,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "delete from UserBook where realToDouble = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -190,7 +218,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
             userUuid.uuidString
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.updateUniqueQuery, statementArguments: arguments)
 
@@ -296,7 +328,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: upsertQuery)
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -319,7 +355,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "update UserBook set bookUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -334,7 +374,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "update UserBook set userUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -349,7 +393,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
         let statement = try db.cachedStatement(sql: "update UserBook set realToDouble = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -401,7 +449,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             let statement = try db.cachedStatement(sql: Self.selectQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             return try DbUserBook.fetchOne(statement)
         }
@@ -426,7 +478,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             let statement = try db.cachedStatement(sql: Self.selectExistsQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             // This always returns a row
             return try Bool.fetchOne(statement)!
@@ -443,7 +499,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             Logging.log(Self.deleteQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -463,7 +523,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             Logging.log(DbUserBook.UpdatableColumn.updateBookUuidQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -483,7 +547,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             Logging.log(DbUserBook.UpdatableColumn.updateUserUuidQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -503,7 +571,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             Logging.log(DbUserBook.UpdatableColumn.updateRealToDoubleQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -565,7 +637,11 @@ public struct DbUserBook: FetchableRecord, PersistableRecord, Codable, Equatable
 
             let statement = try db.cachedStatement(sql: finalQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 

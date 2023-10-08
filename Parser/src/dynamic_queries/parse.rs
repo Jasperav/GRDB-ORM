@@ -1,7 +1,7 @@
 use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Index, Parser};
-use crate::some_kind_of_uppercase_first_letter;
+use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
 use crate::swift_property::{
     create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty, SwiftType,
     SwiftTypeWithTypeName,
@@ -450,7 +450,7 @@ impl<'a> Parser<'a> {
         ));
 
         if has_arguments {
-            self.add_line("statement.setUncheckedArguments(arguments)");
+            self.add_line(SET_ARGUMENTS);
         }
 
         match &query {

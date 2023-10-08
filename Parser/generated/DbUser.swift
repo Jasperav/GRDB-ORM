@@ -122,19 +122,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -144,7 +144,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.insertUniqueQuery, statementArguments: arguments)
 
@@ -162,19 +166,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -184,7 +188,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.insertOrIgnoreUniqueQuery, statementArguments: arguments)
 
@@ -197,19 +205,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -219,7 +227,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.replaceUniqueQuery, statementArguments: arguments)
 
@@ -232,19 +244,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -254,7 +266,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertFirstNameQuery, statementArguments: arguments)
 
@@ -267,19 +283,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -289,7 +305,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertJsonStructQuery, statementArguments: arguments)
 
@@ -302,19 +322,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -324,7 +344,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertJsonStructOptionalQuery, statementArguments: arguments)
 
@@ -337,19 +361,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -359,7 +383,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertJsonStructArrayQuery, statementArguments: arguments)
 
@@ -372,19 +400,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -394,7 +422,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertJsonStructArrayOptionalQuery, statementArguments: arguments)
 
@@ -407,19 +439,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -429,7 +461,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertIntegerQuery, statementArguments: arguments)
 
@@ -442,19 +478,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -464,7 +500,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertBoolQuery, statementArguments: arguments)
 
@@ -477,19 +517,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -499,7 +539,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertSerializedInfoQuery, statementArguments: arguments)
 
@@ -512,19 +556,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -534,7 +578,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             try! serializedInfoNullable?.serializedData()
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.upsertSerializedInfoNullableQuery, statementArguments: arguments)
 
@@ -567,7 +615,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where userUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -582,7 +634,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where firstName = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -590,7 +646,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genDeleteByJsonStruct(db: Database, jsonStruct: JsonType) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -600,7 +656,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where jsonStruct = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -608,7 +668,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genDeleteByJsonStructOptional(db: Database, jsonStructOptional: JsonType) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructOptional)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -618,7 +678,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where jsonStructOptional = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -626,7 +690,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genDeleteByJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -636,7 +700,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where jsonStructArray = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -644,7 +712,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genDeleteByJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArrayOptional)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -654,7 +722,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where jsonStructArrayOptional = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -669,7 +741,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where integer = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -684,7 +760,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where bool = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -699,7 +779,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where serializedInfo = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -714,7 +798,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "delete from User where serializedInfoNullable = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -724,19 +812,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let arguments: StatementArguments = try [
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -747,7 +835,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             userUuid.uuidString
         ]
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         Logging.log(Self.updateUniqueQuery, statementArguments: arguments)
 
@@ -944,19 +1036,19 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         let arguments: StatementArguments = try [
             userUuid.uuidString,
             firstName,
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(self.jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(self.jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }(),
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             },
@@ -970,7 +1062,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: upsertQuery)
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -993,7 +1089,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set userUuid = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1008,7 +1108,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set firstName = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1016,7 +1120,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructAllRows(db: Database, jsonStruct: JsonType) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -1026,7 +1130,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set jsonStruct = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1034,7 +1142,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructOptionalAllRows(db: Database, jsonStructOptional: JsonType?) throws {
         let arguments: StatementArguments = try [
-            try try jsonStructOptional.map {
+            jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             }
@@ -1044,7 +1152,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set jsonStructOptional = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1052,7 +1164,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructArrayAllRows(db: Database, jsonStructArray: [JsonType]) throws {
         let arguments: StatementArguments = try [
-            try {
+            {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
             }()
@@ -1062,7 +1174,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set jsonStructArray = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1070,7 +1186,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     public
     static func genUpdateJsonStructArrayOptionalAllRows(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
         let arguments: StatementArguments = try [
-            try try jsonStructArrayOptional.map {
+            jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
             }
@@ -1080,7 +1196,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set jsonStructArrayOptional = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1095,7 +1215,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set integer = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1110,7 +1234,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set bool = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1125,7 +1253,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set serializedInfo = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1140,7 +1272,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         let statement = try db.cachedStatement(sql: "update User set serializedInfoNullable = ?")
 
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
 
         try statement.execute()
     }
@@ -1188,7 +1324,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             let statement = try db.cachedStatement(sql: Self.selectQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             return try DbUser.fetchOne(statement)
         }
@@ -1212,7 +1352,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             let statement = try db.cachedStatement(sql: Self.selectExistsQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             // This always returns a row
             return try Bool.fetchOne(statement)!
@@ -1228,7 +1372,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(Self.deleteQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1247,7 +1395,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateUserUuidQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1266,7 +1418,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateFirstNameQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1277,7 +1433,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStruct(db: Database, jsonStruct: JsonType, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try {
+                {
                     let data = try Shared.jsonEncoder.encode(jsonStruct)
                     return String(data: data, encoding: .utf8)!
                 }(),
@@ -1288,7 +1444,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateJsonStructQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1299,7 +1459,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStructOptional(db: Database, jsonStructOptional: JsonType?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try try jsonStructOptional.map {
+                jsonStructOptional.map {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 },
@@ -1310,7 +1470,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateJsonStructOptionalQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1321,7 +1485,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStructArray(db: Database, jsonStructArray: [JsonType], assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try {
+                {
                     let data = try Shared.jsonEncoder.encode(jsonStructArray)
                     return String(data: data, encoding: .utf8)!
                 }(),
@@ -1332,7 +1496,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateJsonStructArrayQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1343,7 +1511,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
         public func genUpdateJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                try try jsonStructArrayOptional.map {
+                jsonStructArrayOptional.map {
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 },
@@ -1354,7 +1522,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateJsonStructArrayOptionalQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1373,7 +1545,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateIntegerQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1392,7 +1568,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateBoolQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1411,7 +1591,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateSerializedInfoQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1430,7 +1614,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             Logging.log(DbUser.UpdatableColumn.updateSerializedInfoNullableQuery, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 
@@ -1477,7 +1665,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try {
+                    try arguments += [{
                         let data = try Shared.jsonEncoder.encode(value)
                         return String(data: data, encoding: .utf8)!
                     }()]
@@ -1488,7 +1676,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try try value.map {
+                    try arguments += [value.map {
                         let data = try Shared.jsonEncoder.encode($0)
                         return String(data: data, encoding: .utf8)!
                     }]
@@ -1499,7 +1687,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try {
+                    try arguments += [{
                         let data = try Shared.jsonEncoder.encode(value)
                         return String(data: data, encoding: .utf8)!
                     }()]
@@ -1510,7 +1698,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                         updateQuery += ", "
                     }
 
-                    arguments += [try try value.map {
+                    try arguments += [value.map {
                         let data = try Shared.jsonEncoder.encode($0)
                         return String(data: data, encoding: .utf8)!
                     }]
@@ -1559,7 +1747,11 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
 
             let statement = try db.cachedStatement(sql: finalQuery)
 
-            statement.setUncheckedArguments(arguments)
+            #if DEBUG
+                try statement.setArguments(arguments)
+            #else
+                statement.setUncheckedArguments(arguments)
+            #endif
 
             try statement.execute()
 

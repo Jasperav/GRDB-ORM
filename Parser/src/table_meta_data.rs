@@ -1,4 +1,5 @@
 use crate::line_writer::{parameter_types_separated_colon, LineWriter};
+use crate::SET_ARGUMENTS;
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
 
 /// Holds information about the current processing table
@@ -30,7 +31,7 @@ impl<'a> TableMetaData<'a> {
 
             Logging.log({query}, statementArguments: arguments)
 
-            statement.setUncheckedArguments(arguments)
+            {SET_ARGUMENTS}
 
             try statement.execute()
 

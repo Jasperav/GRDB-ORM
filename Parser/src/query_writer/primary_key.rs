@@ -2,6 +2,7 @@ use crate::query_writer::{write_static_queries, WriteResult};
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
+use crate::SET_ARGUMENTS;
 
 pub const SELECT_QUERY: &str = "selectQuery";
 pub const SELECT_EXISTS_QUERY: &str = "selectExistsQuery";
@@ -89,7 +90,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             let statement = try db.cachedStatement(sql: Self.{query})
 
-            statement.setUncheckedArguments(arguments)
+            {SET_ARGUMENTS}
 
             return try {}.fetchOne(statement)
         }}
@@ -134,7 +135,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
             let statement = try db.cachedStatement(sql: Self.{query})
 
-            statement.setUncheckedArguments(arguments)
+            {SET_ARGUMENTS}
 
             // This always returns a row
             return try Bool.fetchOne(statement)!
@@ -328,7 +329,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
 
                 let statement = try db.cachedStatement(sql: finalQuery)
 
-                statement.setUncheckedArguments(arguments)
+                {SET_ARGUMENTS}
 
                 try statement.execute()
 

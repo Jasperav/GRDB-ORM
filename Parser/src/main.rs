@@ -40,6 +40,8 @@ mod generate_generated_code;
 mod room;
 mod type_interfaces_custom_code;
 
+pub const SET_ARGUMENTS: &str = "#if DEBUG\ntry statement.setArguments(arguments)\n#else\nstatement.setUncheckedArguments(arguments)\n#endif";
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
