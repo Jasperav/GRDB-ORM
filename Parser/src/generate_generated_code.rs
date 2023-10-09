@@ -128,6 +128,24 @@ fn update_generated_code() {
             },
             DynamicQuery {
                 extension: "User".to_string(),
+                func_name: "like".to_string(),
+                parameter_types: vec![
+                    ("User".to_string(), "firstName".to_string(), "firstName0".to_string()),
+                    ("User".to_string(), "firstName".to_string(), "firstName1".to_string()),
+                    ("User".to_string(), "firstName".to_string(), "firstName2".to_string()),
+                    ("User".to_string(), "firstName".to_string(), "firstName3".to_string()),
+                    ("User".to_string(), "firstName".to_string(), "firstName4".to_string()),
+                ],
+                return_types: vec![
+                    "User".to_string(),
+                ],
+                return_types_is_array: true,
+                query: "select User.* from User where User.firstName LIKE '%?%' or User.firstName = ? or User.firstName LIKE '%?' or User.firstName LIKE '?%' or User.firstName = ?".to_string(),
+                map_to_different_type: None,
+                bypass_index_optimizer: false,
+            },
+            DynamicQuery {
+                extension: "User".to_string(),
                 func_name: "findByUsername".to_string(),
                 parameter_types: vec![(
                     "User".to_string(),
@@ -409,12 +427,6 @@ mod index_optimizer_test {
     fn test_unused_index() {
         setup("select * from User", true);
     }
-
-    // #[test]
-    // #[should_panic]
-    // fn test_index_not_full() {
-    //     setup("select * from User where something_random = 'b' and name = 'a'", true);
-    // }
 
     #[test]
     #[should_panic]

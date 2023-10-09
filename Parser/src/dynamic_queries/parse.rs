@@ -1,12 +1,13 @@
 use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{test_query, Index, Parser};
-use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
 use crate::swift_property::{
     create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty, SwiftType,
     SwiftTypeWithTypeName,
 };
+use crate::{some_kind_of_uppercase_first_letter, SET_ARGUMENTS};
 use grdb_orm_lib::dyn_query::DynamicQuery;
+use regex::Regex;
 use sqlite_parser::{Column, Type};
 use std::collections::{HashMap, HashSet};
 
@@ -386,17 +387,62 @@ impl<'a> Parser<'a> {
     ) {
         let has_arguments = !swift_properties.is_empty();
 
-        self.add_line(format!(
-            "var query = \"\"\"\n{}\n\"\"\"",
-            dynamic_query.query
-        ));
+        // Because of https://github.com/groue/GRDB.swift#sqlite-error-21-wrong-number-of-statement-arguments-with-like-queries, extra work has to be done
+        // to correctly support like operators
+        assert!(
+            !dynamic_query.query.contains(" like '"),
+            "Use capitalized LIKE"
+        );
+
+        #[derive(Clone, Debug)]
+        struct Liked {
+            argument_index: usize,
+            replace_with: String,
+        }
+
+        let like_regex = Regex::new(r" LIKE '([^']*)'").unwrap();
+        let mut temp_dyn_query = dynamic_query.query.clone();
+        let mut like_indexes: Vec<Liked> = vec![];
+        let replaced = like_regex
+            .replace_all(&dynamic_query.query, |caps: &regex::Captures| {
+                let like_clause = caps.get(1).unwrap().as_str().to_string();
+
+                // Find the index of '?' in the query string
+                let ends_at =
+                    temp_dyn_query.find(&like_clause).unwrap() + like_clause.chars().count();
+                let until = &temp_dyn_query[..ends_at];
+                let count = until.matches('?').count() - 1;
+                let argument_index = like_indexes
+                    .last()
+                    .map(|l| l.argument_index + 1)
+                    .unwrap_or(0)
+                    + count;
+
+                like_indexes.push(Liked {
+                    argument_index,
+                    replace_with: like_clause,
+                });
+
+                temp_dyn_query = temp_dyn_query[ends_at..].to_string();
+
+                // Replace the like_clause with 'like ?'
+                " LIKE ?".to_string()
+            })
+            .to_string();
+
+        self.add_line(format!("var query = \"\"\"\n{}\n\"\"\"", replaced,));
 
         if has_arguments {
             self.add_line("var arguments = StatementArguments()");
         }
 
-        for (is_array, swift_property) in swift_properties {
+        for (index, (is_array, swift_property)) in swift_properties.into_iter().enumerate() {
             if *is_array {
+                assert!(
+                    !like_indexes.iter().any(|l| l.argument_index == index),
+                    "Not sure how this would work"
+                );
+
                 let mut swift_property_clone = swift_property.clone();
 
                 swift_property_clone.swift_property_name = "v".to_string();
@@ -432,7 +478,24 @@ impl<'a> Parser<'a> {
                     param = swift_property.swift_property_name,
                 ));
             } else {
-                let encode = encode_swift_properties(&[swift_property]);
+                let mut encode = encode_swift_properties(&[swift_property]);
+
+                if let Some(e) = like_indexes.iter().find(|l| l.argument_index == index) {
+                    assert_eq!(swift_property.swift_type.type_name, "String");
+
+                    encode = format!("\\({encode})");
+
+                    if e.replace_with.starts_with('%') {
+                        encode = "%".to_string() + &encode;
+                    }
+
+                    if e.replace_with.ends_with('%') {
+                        encode += "%";
+                    }
+
+                    encode += "\"";
+                    encode = "\"".to_string() + &encode;
+                }
 
                 self.add_line(format!("arguments += [{}]", encode));
             }

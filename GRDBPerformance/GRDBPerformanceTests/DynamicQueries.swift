@@ -171,6 +171,23 @@ class DynamicQueryTest: XCTestCase {
                 }
     }
 
+    func testLike() throws {
+        let db = setupPool()
+        let toSearchFor = "first"
+
+        try db.write { con in
+            var user = DbUser.random()
+
+            user.firstName = toSearchFor
+
+            try user.genInsert(db: con)
+
+            let result = try DbUser.like(db: con, firstName0: toSearchFor, firstName1: toSearchFor, firstName2: toSearchFor, firstName3: toSearchFor, firstName4: toSearchFor)
+
+            XCTAssertEqual(user, result[0].gen0)
+        }
+    }
+
     func testValueObservation() throws {
         let db = setupPool()
         let toSearchFor = "first"

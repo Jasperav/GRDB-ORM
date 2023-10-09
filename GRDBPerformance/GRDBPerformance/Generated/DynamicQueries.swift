@@ -36,7 +36,11 @@ public extension DbBook {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [BooksForUserWithSpecificUuidType] = try Row.fetchAll(statement).map { row -> BooksForUserWithSpecificUuidType in
             BooksForUserWithSpecificUuidType(row: row)
         }
@@ -136,6 +140,80 @@ public extension DbBook {
 }
 
 public extension DbUser {
+    struct LikeType: Equatable {
+        public var gen0: DbUser
+        public init(row: Row) {
+            gen0 = DbUser(row: row, startingIndex: 0)
+        }
+    }
+
+    static func like(db: Database, firstName0: String, firstName1: String, firstName2: String, firstName3: String, firstName4: String) throws -> [LikeType] {
+        var query = """
+        select User.* from User where User.firstName LIKE ? or User.firstName = ? or User.firstName LIKE ? or User.firstName LIKE ? or User.firstName = ?
+        """
+        var arguments = StatementArguments()
+        arguments += ["%\(firstName0)%"]
+        arguments += [firstName1]
+        arguments += ["%\(firstName2)"]
+        arguments += ["\(firstName3)%"]
+        arguments += [firstName4]
+        Logging.log(query, statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: query)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
+        let converted: [LikeType] = try Row.fetchAll(statement).map { row -> LikeType in
+            LikeType(row: row)
+        }
+
+        return converted
+    }
+
+    // Very basic Queryable struct, create a PR if you want more customization
+    struct LikeQueryable: Queryable, Equatable {
+        public let scheduler: ValueObservationScheduler
+        public let firstName0: String
+        public let firstName1: String
+        public let firstName2: String
+        public let firstName3: String
+        public let firstName4: String
+        public init(
+            firstName0: String,
+            firstName1: String,
+            firstName2: String,
+            firstName3: String,
+            firstName4: String,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+        ) {
+            self.firstName0 = firstName0
+            self.firstName1 = firstName1
+            self.firstName2 = firstName2
+            self.firstName3 = firstName3
+            self.firstName4 = firstName4
+            self.scheduler = scheduler
+        }
+
+        public static let defaultValue: [LikeType] = []
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.firstName0 == rhs.firstName0 && lhs.firstName1 == rhs.firstName1 && lhs.firstName2 == rhs.firstName2 && lhs.firstName3 == rhs.firstName3 && lhs.firstName4 == rhs.firstName4
+        }
+
+        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LikeType], Error> {
+            ValueObservation
+                .tracking { db in
+                    try like(db: db, firstName0: firstName0, firstName1: firstName1, firstName2: firstName2, firstName3: firstName3, firstName4: firstName4)
+                }
+                .publisher(in: dbQueue, scheduling: scheduler)
+                .eraseToAnyPublisher()
+        }
+    }
+}
+
+public extension DbUser {
     struct FindByUsernameType: Equatable {
         public var gen0: DbUser
         public init(row: Row) {
@@ -152,7 +230,11 @@ public extension DbUser {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [FindByUsernameType] = try Row.fetchAll(statement).map { row -> FindByUsernameType in
             FindByUsernameType(row: row)
         }
@@ -207,7 +289,11 @@ public extension DbUser {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [FindUserUuidByUsernameType] = try Row.fetchAll(statement).map { row -> FindUserUuidByUsernameType in
             FindUserUuidByUsernameType(row: row)
         }
@@ -306,7 +392,11 @@ public extension DbBook {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         try statement.execute()
     }
 }
@@ -491,7 +581,11 @@ public extension DbUser {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         try statement.execute()
     }
 }
@@ -530,7 +624,11 @@ public extension DbUser {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [AllWithProvidedFirstNamesType] = try Row.fetchAll(statement).map { row -> AllWithProvidedFirstNamesType in
             AllWithProvidedFirstNamesType(row: row)
         }
@@ -598,7 +696,7 @@ public extension DbUser {
             query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
         }()
 
-        arguments += [try {
+        try arguments += [{
             let data = try Shared.jsonEncoder.encode(jsonStructOptional)
             return String(data: data, encoding: .utf8)!
         }()]
@@ -624,7 +722,11 @@ public extension DbUser {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [ComplexType] = try Row.fetchAll(statement).map { row -> ComplexType in
             ComplexType(row: row)
         }
@@ -705,7 +807,11 @@ public extension DbParent {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in
             RetrieveOptionalUserValuesType(row: row)
         }
@@ -777,7 +883,11 @@ public extension DbParent {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [RetrieveOptionalUserValuesMappedType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesMappedType in
             RetrieveOptionalUserValuesMappedType(row: row)
         }
@@ -794,7 +904,11 @@ public extension DbParent {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in
             RetrieveOptionalUserValuesType(row: row)
         }
@@ -848,7 +962,11 @@ public extension DbParent {
         Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        statement.setUncheckedArguments(arguments)
+        #if DEBUG
+            try statement.setArguments(arguments)
+        #else
+            statement.setUncheckedArguments(arguments)
+        #endif
         let converted: [LimitedType] = try Row.fetchAll(statement).map { row -> LimitedType in
             LimitedType(row: row)
         }

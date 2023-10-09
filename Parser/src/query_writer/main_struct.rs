@@ -1,9 +1,9 @@
 use crate::line_writer::StaticInstance;
 use crate::query_writer::primary_key::DELETE_METHOD;
 use crate::query_writer::{write_static_queries, WriteResult};
-use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
 use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::table_meta_data::TableMetaData;
+use crate::{some_kind_of_uppercase_first_letter, SET_ARGUMENTS};
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
 pub const INSERT_OR_IGNORE_QUERY: &str = "insertOrIgnoreUniqueQuery";
