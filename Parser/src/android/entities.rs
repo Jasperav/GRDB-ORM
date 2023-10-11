@@ -189,6 +189,15 @@ impl<'a> AndroidWriter<'a> {
             pk_values.push(pk.name.to_string());
         }
 
+        static_queries.push(format!("
+            fun deleteAll(database: GeneratedDatabase) {{
+                val stmt = database.compileCached(\"delete from {}\")
+                assert(database.inTransaction())
+
+                stmt.execute()
+            }}
+        ", table.table_name));
+
         for column in &table.columns {
             let name = column.name.clone();
             let upper_camel_cased = name.to_upper_camel_case();
@@ -376,6 +385,8 @@ impl<'a> AndroidWriter<'a> {
         }
 
         let bindings = bindings.join("\n");
+
+        // If more logic is added, change the calling side because sometimes a static boolean is called regardless what the query is actually doing
         let update_delete = if update_or_delete {
             "executeUpdateDelete"
         } else {

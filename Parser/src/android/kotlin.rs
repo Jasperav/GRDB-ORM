@@ -161,10 +161,13 @@ impl<'a> AndroidWriter<'a> {
                 tracked += &(untracked + &untracked_blocking)
             }
 
-            to_write_in_dao.push(DynQueryToWriteInDao {
-                query: query + "\n" + &tracked,
-                table: dyn_query.extension.clone(),
-            });
+            if !self.config.room.disallow_default_dao_methods || !dyn_query.return_types.is_empty() {
+                // Keep writing select queries, this is ok
+                to_write_in_dao.push(DynQueryToWriteInDao {
+                    query: query + "\n" + &tracked,
+                    table: dyn_query.extension.clone(),
+                });
+            }
 
             if !write_type || dyn_query.return_types.is_empty() {
                 continue;
@@ -249,7 +252,7 @@ impl<'a> AndroidWriter<'a> {
 
             let pk_in_method = pk_in_method.join(", ");
             let pk_in_query = pk_in_query.join(" and ");
-            let select_all_raw = format!("SELECT * FROM {table_name}");
+            let select_all_raw = format!("select * FROM {table_name}");
             let select_all = format!("@Query(\"{select_all_raw}\")");
             let select_unique = format!("@Query(\"{select_all_raw} where {pk_in_query}\")");
             let count_query = format!("@Query(\"select count(1) from {table_name}\")");
@@ -268,24 +271,8 @@ import androidx.lifecycle.LiveData
 
                 @Dao
                 interface {dao} {{
-                @Delete
-                suspend fun deleteUnique(entity: {type_name})
-                @Delete
-                fun deleteUniqueBlocking(entity: {type_name})
-                @Query(\"delete from {table_name}\")
-                suspend fun deleteAll()
-                @Query(\"delete from {table_name}\")
-                fun deleteAllBlocking()
-                @Insert
-                suspend fun insert(entity: {type_name})
-                @Insert
-                fun insertBlocking(entity: {type_name})
                 {count_query}
                 fun countAll(): Int
-                @Update
-                suspend fun updateUnique(entity: {type_name}): Int
-                @Update
-                fun updateUniqueBlocking(entity: {type_name}): Int
                 {select_all}
                 suspend fun selectAll(): Array<{type_name}>
                 {select_all}
@@ -304,6 +291,27 @@ import androidx.lifecycle.LiveData
                 fun selectUniqueTrack({pk_in_method}): LiveData<{type_name}?>
                 "
             )];
+
+            if !self.config.room.disallow_default_dao_methods {
+                content.push(format!("
+                    @Delete
+                    suspend fun deleteUnique(entity: {type_name})
+                    @Delete
+                    fun deleteUniqueBlocking(entity: {type_name})
+                    @Query(\"delete from {table_name}\")
+                    suspend fun deleteAll()
+                    @Query(\"delete from {table_name}\")
+                    fun deleteAllBlocking()
+                    @Insert
+                    suspend fun insert(entity: {type_name})
+                    @Insert
+                    fun insertBlocking(entity: {type_name})
+                    @Update
+                    suspend fun updateUnique(entity: {type_name}): Int
+                    @Update
+                    fun updateUniqueBlocking(entity: {type_name}): Int
+                "));
+            }
 
             for dyn_query in &dyn_queries {
                 if &dyn_query.table == table_name {
