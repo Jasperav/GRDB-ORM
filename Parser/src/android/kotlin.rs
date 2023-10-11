@@ -161,7 +161,8 @@ impl<'a> AndroidWriter<'a> {
                 tracked += &(untracked + &untracked_blocking)
             }
 
-            if !self.config.room.disallow_default_dao_methods || !dyn_query.return_types.is_empty() {
+            if !self.config.room.disallow_default_dao_methods || !dyn_query.return_types.is_empty()
+            {
                 // Keep writing select queries, this is ok
                 to_write_in_dao.push(DynQueryToWriteInDao {
                     query: query + "\n" + &tracked,
@@ -293,7 +294,8 @@ import androidx.lifecycle.LiveData
             )];
 
             if !self.config.room.disallow_default_dao_methods {
-                content.push(format!("
+                content.push(format!(
+                    "
                     @Delete
                     suspend fun deleteUnique(entity: {type_name})
                     @Delete
@@ -310,7 +312,8 @@ import androidx.lifecycle.LiveData
                     suspend fun updateUnique(entity: {type_name}): Int
                     @Update
                     fun updateUniqueBlocking(entity: {type_name}): Int
-                "));
+                "
+                ));
             }
 
             for dyn_query in &dyn_queries {

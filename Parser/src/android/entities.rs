@@ -189,14 +189,17 @@ impl<'a> AndroidWriter<'a> {
             pk_values.push(pk.name.to_string());
         }
 
-        static_queries.push(format!("
+        static_queries.push(format!(
+            "
             fun deleteAll(database: GeneratedDatabase) {{
                 val stmt = database.compileCached(\"delete from {}\")
                 assert(database.inTransaction())
 
                 stmt.execute()
             }}
-        ", table.table_name));
+        ",
+            table.table_name
+        ));
 
         for column in &table.columns {
             let name = column.name.clone();
