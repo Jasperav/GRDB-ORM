@@ -559,9 +559,7 @@ impl<'a> AndroidWriter<'a> {
         let pks = pks.join(",\n");
         let update_single_columns = update_single_column.join("\n");
         let convert = format!(
-            "fun primaryKey(): PrimaryKey{{
-            return PrimaryKey({})
-        }}",
+            "fun primaryKey() = PrimaryKey({})",
             convert_to_pk.join(", ")
         );
 
