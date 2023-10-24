@@ -639,7 +639,7 @@ impl<'a> AndroidWriter<'a> {
             } else {
                 format!(
                     "
-if ({}.BuildConfig.DEBUG) {{
+if ({}.BuildConfig.DEBUG_CONST) {{
     names.add({name_bind}?.toString() ?: \"null\")
 }}
                 ",

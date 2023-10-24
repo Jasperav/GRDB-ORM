@@ -492,7 +492,7 @@ assert(query.count { it == '?' } == arguments.size)
             };
 
             format!("
-if ({}.BuildConfig.DEBUG) {{
+if ({}.BuildConfig.DEBUG_CONST) {{
     {query_logging}
 
     logger.log(Level.INFO, \"Will execute query, cached: ${{existing != null}}, query: $queryFormatted\")
