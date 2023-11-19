@@ -413,6 +413,8 @@ impl<'a> AndroidWriter<'a> {
             {bindings}
 
         val ex = stmt.{update_delete}()
+
+            stmt.close()
         "
         )
     }
