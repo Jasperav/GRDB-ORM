@@ -196,6 +196,7 @@ impl<'a> AndroidWriter<'a> {
                 assert(database.inTransaction())
 
                 stmt.execute()
+                stmt.close()
             }}
         ",
             table.table_name
@@ -231,6 +232,7 @@ impl<'a> AndroidWriter<'a> {
                 {bind_single}
 
                 stmt.execute()
+                stmt.close()
             }}
             fun update{upper_camel_cased}AllRows(database: GeneratedDatabase, {name}: {ty}) {{
                 val stmt = database.compileCached(\"{update_query}\", {name})
@@ -239,6 +241,7 @@ impl<'a> AndroidWriter<'a> {
                 {bind_single}
 
                 stmt.execute()
+                stmt.close()
             }}"
             ));
             upserts.push(format!(
@@ -248,7 +251,6 @@ impl<'a> AndroidWriter<'a> {
             ));
         }
 
-        // TODO: if this doesn't work with updating live data, just delete it and use the DAO
         for query in &self.config.dynamic_queries {
             if (query.extension.to_lowercase() != table.table_name.to_lowercase()
                 && query.extension.to_lowercase()
@@ -529,6 +531,8 @@ impl<'a> AndroidWriter<'a> {
 
             val changed = stmt.executeUpdateDelete()
 
+            stmt.close()
+
             if (assertOneRowAffected && changed == 0) {{
                  assert(false)
             }}
@@ -678,6 +682,8 @@ if ({}.BuildConfig.DEBUG_CONST) {{
         {bindings_pk}
 
         val value = stmt.executeUpdateDelete()
+
+        stmt.close()
 
         if (assertOneRowAffected && value == 0) {{
             assert(false)
