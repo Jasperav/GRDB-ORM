@@ -196,7 +196,6 @@ impl<'a> AndroidWriter<'a> {
                 assert(database.inTransaction())
 
                 stmt.execute()
-                stmt.close()
             }}
         ",
             table.table_name
@@ -232,7 +231,6 @@ impl<'a> AndroidWriter<'a> {
                 {bind_single}
 
                 stmt.execute()
-                stmt.close()
             }}
             fun update{upper_camel_cased}AllRows(database: GeneratedDatabase, {name}: {ty}) {{
                 val stmt = database.compileCached(\"{update_query}\", {name})
@@ -241,7 +239,6 @@ impl<'a> AndroidWriter<'a> {
                 {bind_single}
 
                 stmt.execute()
-                stmt.close()
             }}"
             ));
             upserts.push(format!(
@@ -413,8 +410,6 @@ impl<'a> AndroidWriter<'a> {
             {bindings}
 
         val ex = stmt.{update_delete}()
-
-            stmt.close()
         "
         )
     }
@@ -532,8 +527,6 @@ impl<'a> AndroidWriter<'a> {
             {delete_bindings}
 
             val changed = stmt.executeUpdateDelete()
-
-            stmt.close()
 
             if (assertOneRowAffected && changed == 0) {{
                  assert(false)
@@ -684,8 +677,6 @@ if ({}.BuildConfig.DEBUG_CONST) {{
         {bindings_pk}
 
         val value = stmt.executeUpdateDelete()
-
-        stmt.close()
 
         if (assertOneRowAffected && value == 0) {{
             assert(false)
