@@ -519,7 +519,7 @@ import java.util.logging.Logger
                 val logger = Logger.getLogger(GeneratedDatabase::class.java.name)
                 private val cache = hashMapOf<String, SupportSQLiteStatement>()
 
-                fun compileCached(query: String, vararg arguments: Any?): SupportSQLiteStatement {{
+                fun compileCached(query: String, @Suppress(\"unused\") vararg arguments: Any?): SupportSQLiteStatement {{
                     assert(inTransaction())
 
                     val existing = cache[query]
