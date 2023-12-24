@@ -4,7 +4,8 @@ pub use kotlin::*;
 use std::path::Path;
 mod entities;
 
-static SUPPRESS_ALL: &str = "@file:Suppress(\"warnings\", \"ALL\", \"UNUSED_PARAMETER\", \"RedundantSuppression\")";
+static SUPPRESS_ALL: &str =
+    "@file:Suppress(\"warnings\", \"ALL\", \"UNUSED_PARAMETER\", \"RedundantSuppression\")";
 
 pub fn generate_kotlin_package(path: &Path) -> String {
     let mut package_parts = vec![];
