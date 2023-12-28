@@ -22,7 +22,7 @@ regex = "1.10.2"
 dotenv = "0.15"
 serde = { version = "1.0.193", features = ["derive"] }
 toml = "0.8.8"
-env_parser = { version = "0.1.7", features = ["to_lazy_static"] }
+env_parser = { version = "0.1.8", features = ["to_lazy_static"] }
 
 [workspace.dependencies.rusqlite]
 version = "0.30.0"
