@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -342,6 +342,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/GRDBPerformance.app/GRDBPerformance";
+				DEVELOPMENT_TEAM = N4EV3W64CV;
 				INFOPLIST_FILE = GRDBPerformanceTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -360,6 +361,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/GRDBPerformance.app/GRDBPerformance";
+				DEVELOPMENT_TEAM = N4EV3W64CV;
 				INFOPLIST_FILE = GRDBPerformanceTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -497,6 +499,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				DEVELOPMENT_TEAM = N4EV3W64CV;
 				INFOPLIST_FILE = GRDBPerformance/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -515,6 +518,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				DEVELOPMENT_TEAM = N4EV3W64CV;
 				INFOPLIST_FILE = GRDBPerformance/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -566,7 +570,7 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 6.15.0;
+				version = 6.23.0;
 			};
 		};
 		69BAF48E27ABCE0600452053 /* XCRemoteSwiftPackageReference "GRDBQuery" */ = {
@@ -574,7 +578,7 @@
 			repositoryURL = "https://github.com/groue/GRDBQuery";
 			requirement = {
 				kind = exactVersion;
-				version = 0.7.0;
+				version = 0.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

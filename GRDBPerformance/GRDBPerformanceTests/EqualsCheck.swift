@@ -12,8 +12,11 @@ class EqualsCheck: XCTestCase {
             try! dbUser.genInsert(db: con)
 
             let encoder = JSONEncoder()
+            
+            // This is only needed for testing purposes
+            encoder.outputFormatting = [.sortedKeys]
+            
             let dbUserData = try! encoder.encode(dbUser)
-
             let dbUserRetrieved = try! dbUser.primaryKey().genSelectExpect(db: con)
 
             XCTAssertEqual(dbUserData, try! encoder.encode(dbUserRetrieved))

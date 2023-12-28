@@ -41,7 +41,7 @@ public extension Data {
 // Will log in debug mode only
 import OSLog
 
-struct Logging {
+enum Logging {
     #if DEBUG
         private static let logger = Logger(subsystem: "GRDB-ORM", category: "Query logging")
     #endif
