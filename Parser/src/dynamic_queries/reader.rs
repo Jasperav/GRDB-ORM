@@ -80,6 +80,7 @@ mod tests {
             query: "select * from User where firstName = ?".to_string(),
             map_to_different_type: None,
             bypass_index_optimizer: false,
+            ignore_query_sanitizing_android: false,
         };
 
         println!("{}", x.to_toml());

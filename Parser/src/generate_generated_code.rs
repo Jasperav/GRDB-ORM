@@ -108,6 +108,7 @@ fn update_generated_code() {
                     .to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -125,6 +126,7 @@ fn update_generated_code() {
                     .to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -143,6 +145,7 @@ fn update_generated_code() {
                 query: "select User.* from User where User.firstName LIKE '%?%' or User.firstName = ? or User.firstName LIKE '%?' or User.firstName LIKE '?%' or User.firstName = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -157,6 +160,7 @@ fn update_generated_code() {
                 query: "select * from User where firstName = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -171,6 +175,7 @@ fn update_generated_code() {
                 query: "select userUuid from User where firstName = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -181,6 +186,7 @@ fn update_generated_code() {
                 query: "select count(*) from User".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -195,6 +201,7 @@ fn update_generated_code() {
                 query: "delete from Book where userUuid = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Book".to_string(),
@@ -205,6 +212,7 @@ fn update_generated_code() {
                 query: "select exists(select 1 from Book)".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -219,6 +227,7 @@ fn update_generated_code() {
                     .to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -232,6 +241,7 @@ fn update_generated_code() {
                 query: "select serializedInfo, serializedInfoNullable from user".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -246,6 +256,7 @@ fn update_generated_code() {
                 query: "update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -258,6 +269,7 @@ fn update_generated_code() {
                 query: "select * from user where firstName in %PARAM_IN%".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "User".to_string(),
@@ -273,6 +285,7 @@ fn update_generated_code() {
                 query: "select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -290,6 +303,7 @@ fn update_generated_code() {
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -307,6 +321,7 @@ fn update_generated_code() {
                 query: "select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid".to_string(),
                 map_to_different_type: Some("retrieveOptionalUserValues".to_string()),
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
             DynamicQuery {
                 extension: "Parent".to_string(),
@@ -321,6 +336,7 @@ fn update_generated_code() {
                 query: "select * from Parent limit ?".to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             },
         ],
         suffix_swift_structs: "",
@@ -397,6 +413,7 @@ mod index_optimizer_test {
                 query: query.to_string(),
                 map_to_different_type: None,
                 bypass_index_optimizer: false,
+                ignore_query_sanitizing_android: false,
             }],
             suffix_swift_structs: "",
             prefix_swift_structs: "",

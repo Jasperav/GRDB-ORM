@@ -12,6 +12,7 @@ pub struct DynamicQuery {
     /// Set this only to true when using the index optimizer and this query should be ignored
     pub bypass_index_optimizer: bool,
     /// When using subselects, the android generation sanitizing can break, set this to true to ignore and and you should provide the mapping yourself
+    #[serde(default)]
     pub ignore_query_sanitizing_android: bool,
 }
 
