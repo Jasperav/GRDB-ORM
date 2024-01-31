@@ -11,6 +11,8 @@ pub struct DynamicQuery {
     pub map_to_different_type: Option<String>,
     /// Set this only to true when using the index optimizer and this query should be ignored
     pub bypass_index_optimizer: bool,
+    /// When using subselects, the android generation sanitizing can break, set this to true to ignore and and you should provide the mapping yourself
+    pub ignore_query_sanitizing_android: bool,
 }
 
 impl DynamicQuery {

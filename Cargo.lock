@@ -152,9 +152,9 @@ checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
 name = "env_parser"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d1d372fd157591dd12566dd68a549b093692af3884ba5ee081d865d4bbe49a9"
+checksum = "88176e08014315260924bd681023308087af14ea36db0063ae6cae084e1b5b36"
 
 [[package]]
 name = "equivalent"
