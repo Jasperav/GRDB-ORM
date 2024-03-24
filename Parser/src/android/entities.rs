@@ -378,7 +378,7 @@ impl<'a> AndroidWriter<'a> {
 
         for column in columns {
             if self.config.android_verbose_sql_logging {
-                names.push(custom_names.get(0).unwrap_or(&column.name).to_owned());
+                names.push(custom_names.first().unwrap_or(&column.name).to_owned());
             }
 
             let binding = self.bind_single(column, &mut custom_names, bindings.len() + 1, true);
