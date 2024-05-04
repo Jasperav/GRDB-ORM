@@ -5,7 +5,6 @@ import GRDB
 
 import Combine
 import GRDBQuery
-
 public extension DbBook {
     struct BooksForUserWithSpecificUuidType: Equatable {
         public var gen0: DbBook
@@ -23,13 +22,6 @@ public extension DbBook {
                 }
             }()
             gen3 = row[6]
-        }
-
-        public init(gen0: DbBook, gen1: Int, gen2: [JsonType]?, gen3: Int) {
-            self.gen0 = gen0
-            self.gen1 = gen1
-            self.gen2 = gen2
-            self.gen3 = gen3
         }
     }
 
@@ -101,12 +93,6 @@ public extension DbBook {
             }()
             gen2 = row[14]
         }
-
-        public init(gen0: DbBook, gen1: DbUser?, gen2: Bool?) {
-            self.gen0 = gen0
-            self.gen1 = gen1
-            self.gen2 = gen2
-        }
     }
 
     static func booksWithOptionalUser(db: Database) throws -> [BooksWithOptionalUserType] {
@@ -158,10 +144,6 @@ public extension DbUser {
         public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
-        }
-
-        public init(gen0: DbUser) {
-            self.gen0 = gen0
         }
     }
 
@@ -237,10 +219,6 @@ public extension DbUser {
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
         }
-
-        public init(gen0: DbUser) {
-            self.gen0 = gen0
-        }
     }
 
     static func findByUsername(db: Database, firstName: String) throws -> FindByUsernameType? {
@@ -300,10 +278,6 @@ public extension DbUser {
         public init(row: Row) {
             gen0 = row[0]
         }
-
-        public init(gen0: UUID) {
-            self.gen0 = gen0
-        }
     }
 
     static func findUserUuidByUsername(db: Database, firstName: String) throws -> FindUserUuidByUsernameType? {
@@ -362,10 +336,6 @@ public extension DbUser {
         public var gen0: Int
         public init(row: Row) {
             gen0 = row[0]
-        }
-
-        public init(gen0: Int) {
-            self.gen0 = gen0
         }
     }
 
@@ -437,10 +407,6 @@ public extension DbBook {
         public init(row: Row) {
             gen0 = row[0]
         }
-
-        public init(gen0: Bool) {
-            self.gen0 = gen0
-        }
     }
 
     static func hasAtLeastOneBook(db: Database) throws -> HasAtLeastOneBookType? {
@@ -500,11 +466,6 @@ public extension DbUser {
                 }
             }()
         }
-
-        public init(gen0: SerializedInfo, gen1: SerializedInfo?) {
-            self.gen0 = gen0
-            self.gen1 = gen1
-        }
     }
 
     static func serializeInfoSingle(db: Database) throws -> SerializeInfoSingleType? {
@@ -563,11 +524,6 @@ public extension DbUser {
                     return try! SerializedInfo(serializedBytes: row[1])
                 }
             }()
-        }
-
-        public init(gen0: SerializedInfo, gen1: SerializedInfo?) {
-            self.gen0 = gen0
-            self.gen1 = gen1
         }
     }
 
@@ -639,10 +595,6 @@ public extension DbUser {
         public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
-        }
-
-        public init(gen0: DbUser) {
-            self.gen0 = gen0
         }
     }
 
@@ -718,10 +670,6 @@ public extension DbUser {
         public var gen0: DbUser
         public init(row: Row) {
             gen0 = DbUser(row: row, startingIndex: 0)
-        }
-
-        public init(gen0: DbUser) {
-            self.gen0 = gen0
         }
     }
 
@@ -848,13 +796,6 @@ public extension DbParent {
                 }
             }()
         }
-
-        public init(gen0: UUID, gen1: UUID?, gen2: [JsonType]?, gen3: [JsonType]?) {
-            self.gen0 = gen0
-            self.gen1 = gen1
-            self.gen2 = gen2
-            self.gen3 = gen3
-        }
     }
 
     static func retrieveOptionalUserValues(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
@@ -930,13 +871,6 @@ public extension DbParent {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[3])
                 }
             }()
-        }
-
-        public init(gen0: UUID, gen1: UUID?, gen2: [JsonType]?, gen3: [JsonType]?) {
-            self.gen0 = gen0
-            self.gen1 = gen1
-            self.gen2 = gen2
-            self.gen3 = gen3
         }
     }
 
@@ -1016,10 +950,6 @@ public extension DbParent {
         public var gen0: DbParent
         public init(row: Row) {
             gen0 = DbParent(row: row, startingIndex: 0)
-        }
-
-        public init(gen0: DbParent) {
-            self.gen0 = gen0
         }
     }
 
