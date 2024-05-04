@@ -175,16 +175,22 @@ impl<'a> ReturnType<'a> {
         // Create a separate struct which holds the values
         let mut struct_properties = vec![];
         let mut initializer_row = vec![];
+        let mut direct_initializer_parameters = vec![];
+        let mut direct_initializer_in_init = vec![];
 
         for (index, s) in return_types_swift_struct.iter().enumerate() {
             let property_name = format!("gen{index}");
 
             struct_properties.push(format!("{modifier}var {property_name}: {s}"));
             initializer_row.push(format!("{property_name} = {}", decoding[index]));
+            direct_initializer_parameters.push(format!("{property_name}: {s}"));
+            direct_initializer_in_init.push(format!("self.{property_name} = {property_name}"));
         }
 
         let properties = struct_properties.join("\n");
         let initializer = initializer_row.join("\n");
+        let direct_initializer_parameters = direct_initializer_parameters.join(", ");
+        let direct_initializer_in_init = direct_initializer_in_init.join("\n");
 
         if self.write_to_line_writer {
             self.line_writer.add_line(format!(
@@ -192,6 +198,10 @@ impl<'a> ReturnType<'a> {
                 {properties}
                 {modifier}init(row: Row) {{
                     {initializer}
+                }}
+
+                {modifier}init({direct_initializer_parameters}) {{
+                    {direct_initializer_in_init}
                 }}
             }}
             "
