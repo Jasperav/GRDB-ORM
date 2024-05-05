@@ -213,16 +213,16 @@ impl<'a> Parser<'a> {
                     different_type
                 );
 
-                let dyn_query = matched[0];
+                let mut dyn_query = matched[0].clone();
 
                 assert_eq!(dyn_query.return_types, dynamic_query.return_types);
-                assert_eq!(
-                    dyn_query.return_types_is_array,
-                    dynamic_query.return_types_is_array
-                );
+
+                if dyn_query.return_types_is_array != dynamic_query.return_types_is_array {
+                    dyn_query.return_types_is_array = dynamic_query.return_types_is_array;
+                }
 
                 let mapped_type = ReturnType {
-                    dynamic_query: dyn_query,
+                    dynamic_query: &dyn_query,
                     line_writer: &mut self.line_writer,
                     tables: self.tables,
                     config: self.config,

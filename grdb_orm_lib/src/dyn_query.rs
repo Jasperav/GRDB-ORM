@@ -1,5 +1,5 @@
 /// The configuration of a dynamic query
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone)]
 pub struct DynamicQuery {
     pub parameter_types: Vec<(String, String, String)>,
     pub extension: String,
