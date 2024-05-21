@@ -25,7 +25,7 @@ pub fn generate_kotlin_package(path: &Path) -> String {
     }
 
     if !start_collecting {
-        panic!("A com part is expected")
+        panic!("A com part is expected, original: {:#?}", path.components());
     }
 
     format!("package {}\n", package_parts.join("."))
