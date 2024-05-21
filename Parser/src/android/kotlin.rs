@@ -665,26 +665,33 @@ import java.util.logging.Logger
             };
 
             let table = whole_table[0];
-            let table = self.metadata.tables.get(table).expect(table);
-            let mut new_select = vec![];
 
-            for column in &table.columns {
-                if let Some(column_filter) = &column_filter {
-                    if column_filter != &column.name {
-                        continue;
+            if let Some(table) = self.metadata.tables.get(table) {
+                let mut new_select = vec![];
+
+                for column in &table.columns {
+                    if let Some(column_filter) = &column_filter {
+                        if column_filter != &column.name {
+                            continue;
+                        }
                     }
+
+                    let column_name = &column.name;
+
+                    new_select.push(format!(
+                        "{table_name_in_query}.{column_name} as arg{index}{column_name}"
+                    ));
                 }
 
-                let column_name = &column.name;
+                let select_clause = new_select.join(", ");
 
-                new_select.push(format!(
-                    "{table_name_in_query}.{column_name} as arg{index}{column_name}"
-                ));
-            }
-
-            let select_clause = new_select.join(", ");
-
-            new_select_clause.push(select_clause)
+                new_select_clause.push(select_clause);
+            } else {
+                panic!(
+                    "Did not found a matching table: {table} in query: {:#?}",
+                    dyn_query.query
+                );
+            };
         }
 
         let final_query = &dyn_query.query;
