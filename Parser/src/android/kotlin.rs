@@ -644,7 +644,7 @@ import java.util.logging.Logger
     }
 
     fn sanitize_query(&self, dyn_query: &DynamicQuery) -> String {
-        if dyn_query.return_types.len() == 0 || dyn_query.ignore_query_sanitizing_android {
+        if dyn_query.return_types.is_empty() || dyn_query.ignore_query_sanitizing_android {
             return dyn_query.query.clone();
         }
 

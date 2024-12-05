@@ -96,7 +96,10 @@ impl<'a> TableWriter<'a> {
             line_writer.add_comment(
                 "Write the primary key struct, useful for selecting or deleting a unique row",
             );
-            line_writer.add_with_modifier(format!("struct {} {{\n", primary_key_struct_name));
+            line_writer.add_with_modifier(format!(
+                "struct {}: Equatable, Hashable {{\n",
+                primary_key_struct_name
+            ));
 
             let pk = swift_properties
                 .iter()

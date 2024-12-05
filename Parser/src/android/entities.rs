@@ -437,7 +437,10 @@ impl<'a> AndroidWriter<'a> {
         } else if kotlin_ty == "Boolean" {
             (format!("if ({name}) {{ 1L }} else {{ 0L }}"), "Long")
         } else if kotlin_ty == "Boolean?" {
-            (format!("{name}?.let {{ if (it) {{ 1L }} else {{ 0L }} }}"), "Long")
+            (
+                format!("{name}?.let {{ if (it) {{ 1L }} else {{ 0L }} }}"),
+                "Long",
+            )
         } else if without_opt == "Long" {
             (name, "Long")
         } else if without_opt == "Int" {
@@ -468,7 +471,10 @@ impl<'a> AndroidWriter<'a> {
                 (format!("{name}?.let {{ it.toString() }}"), "String")
             }
         } else {
-            panic!("without optional: {:#?}, kotlin type: {:#?}, name: {:#?}", without_opt, kotlin_ty, name)
+            panic!(
+                "without optional: {:#?}, kotlin type: {:#?}, name: {:#?}",
+                without_opt, kotlin_ty, name
+            )
         };
 
         let (index, post_binding) = if use_index_as_binding {

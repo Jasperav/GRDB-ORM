@@ -358,7 +358,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     }
 
     // Write the primary key struct, useful for selecting or deleting a unique row
-    public struct PrimaryKey {
+    public struct PrimaryKey: Equatable, Hashable {
         // Static queries
         public static let selectQuery = "select * from Parent where parentUuid = ?"
         public static let selectExistsQuery = "select exists(select 1 from Parent where parentUuid = ?)"

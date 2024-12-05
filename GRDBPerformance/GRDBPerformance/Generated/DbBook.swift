@@ -526,7 +526,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
     }
 
     // Write the primary key struct, useful for selecting or deleting a unique row
-    public struct PrimaryKey {
+    public struct PrimaryKey: Equatable, Hashable {
         // Static queries
         public static let selectQuery = "select * from Book where bookUuid = ?"
         public static let selectExistsQuery = "select exists(select 1 from Book where bookUuid = ?)"
