@@ -22,7 +22,7 @@ fn write_metadata(config: &Config, metadata: &Metadata) {
     let types = tables
         .into_iter()
         .map(|t| create_swift_type_name(&t.table_name, config))
-        .map(|struct_name| format!("{}.self", struct_name))
+        .map(|struct_name| format!("{struct_name}.self"))
         .collect::<Vec<_>>()
         .join(", ");
 
@@ -67,12 +67,11 @@ fn write_protocol(config: &Config) {
     // Add more methods if needed
     line_writer.add_with_modifier(format!(
         "
-    protocol {} {{
-        static func {}(db: Database) throws -> Int
-        static func {}(db: Database) throws
+    protocol {PROTOCOL_NAME} {{
+        static func {SELECT_COUNT_METHOD}(db: Database) throws -> Int
+        static func {DELETE_ALL_METHOD}(db: Database) throws
     }}
-    ",
-        PROTOCOL_NAME, SELECT_COUNT_METHOD, DELETE_ALL_METHOD,
+    "
     ));
 
     line_writer.write_to_file(PROTOCOL_NAME);

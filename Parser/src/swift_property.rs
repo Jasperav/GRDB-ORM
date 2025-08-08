@@ -168,7 +168,7 @@ pub trait SwiftPropertyDecoder {
 }
 
 pub fn create_row_index(row_index: &str) -> String {
-    format!("row[{}]", row_index)
+    format!("row[{row_index}]")
 }
 
 pub fn wrap_null_check(nullable: bool, row_index: &str, decode: &str) -> String {
@@ -277,11 +277,10 @@ pub fn encode_swift_properties(swift_properties: &[&SwiftProperty]) -> String {
 
                     format!(
                         "try {{
-                            {}
-                                let data = try Shared.jsonEncoder.encode({})
-                                return String(data: data, encoding: .utf8)!{}
-                            }}()",
-                        head, variable_name, tail
+                            {head}
+                                let data = try Shared.jsonEncoder.encode({variable_name})
+                                return String(data: data, encoding: .utf8)!{tail}
+                            }}()"
                     )
                 }
             }

@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
                 }
 
                 let mut prepared = connection
-                    .prepare(&format!("PRAGMA index_info('{}')", name))
+                    .prepare(&format!("PRAGMA index_info('{name}')"))
                     .unwrap();
                 let mut rows = prepared.query([]).unwrap();
                 let mut names = vec![];
@@ -211,8 +211,7 @@ impl<'a> Parser<'a> {
                 assert_eq!(
                     1,
                     matched.len(),
-                    "No match for mapped type: {}",
-                    different_type
+                    "No match for mapped type: {different_type}"
                 );
 
                 let mut dyn_query = matched[0].clone();
@@ -382,7 +381,7 @@ impl<'a> Parser<'a> {
             dynamic_query.extension.to_string()
         };
 
-        self.add_with_modifier(format!("extension {} {{", extension));
+        self.add_with_modifier(format!("extension {extension} {{"));
     }
 
     /// Writes the actual body of the query processing
@@ -438,7 +437,7 @@ impl<'a> Parser<'a> {
             })
             .to_string();
 
-        self.add_line(format!("var query = \"\"\"\n{}\n\"\"\"", replaced,));
+        self.add_line(format!("var query = \"\"\"\n{replaced}\n\"\"\""));
 
         if has_arguments {
             self.add_line("var arguments = StatementArguments()");
@@ -505,7 +504,7 @@ impl<'a> Parser<'a> {
                     encode = "\"".to_string() + &encode;
                 }
 
-                self.add_line(format!("arguments += [{}]", encode));
+                self.add_line(format!("arguments += [{encode}]"));
             }
         }
 
@@ -541,7 +540,7 @@ impl<'a> Parser<'a> {
                         return_value.to_string(),
                     )
                 } else {
-                    (return_value.as_str(), format!("[{}]", return_value))
+                    (return_value.as_str(), format!("[{return_value}]"))
                 };
                 let decoding = format!("{return_value_closure}.init(row: row)");
 

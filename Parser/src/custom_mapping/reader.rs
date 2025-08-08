@@ -17,7 +17,7 @@ fn transform(content: &str) -> Vec<CustomMapping> {
     for (the_type, regexes) in tables {
         let regexes = regexes
             .as_array()
-            .unwrap_or_else(|| panic!("{} is not a table", regexes))
+            .unwrap_or_else(|| panic!("{regexes} is not a table"))
             .iter()
             .map(|v| v.as_str().unwrap())
             .map(|s| Regex::new(s).unwrap())

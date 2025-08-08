@@ -150,7 +150,7 @@ pub(crate) fn test_query(
             Error::QueryReturnedNoRows => {
                 // Fine
             }
-            _ => panic!("Invalid query: {:#?}, error: {:#?}", query, e),
+            _ => panic!("Invalid query: {query:#?}, error: {e:#?}"),
         }
     }
 
@@ -161,7 +161,7 @@ pub(crate) fn test_query(
         let mut rows = prepared.query([]).unwrap();
         let mut bypassed = false;
 
-        println!("Preparing to find query plan: {}", query);
+        println!("Preparing to find query plan: {query}");
 
         let mut details = vec![];
 
@@ -184,8 +184,7 @@ pub(crate) fn test_query(
             for skip in skippable {
                 if lowercased.starts_with(skip) {
                     println!(
-                        "Skip processing because it is a skippable detail: {}",
-                        detail
+                        "Skip processing because it is a skippable detail: {detail}"
                     );
 
                     should_continue = true;
@@ -203,14 +202,14 @@ pub(crate) fn test_query(
 
                     bypassed = true;
                 } else {
-                    panic!("Scanning tables is SLOW: {}", detail);
+                    panic!("Scanning tables is SLOW: {detail}");
                 }
             }
 
             if let Some(index) = used_index.captures(&detail) {
                 let index = index.get(1).unwrap().as_str();
 
-                println!("Found matching index: {}", index);
+                println!("Found matching index: {index}");
 
                 if is_auto_generated_index(index) {
                     // Ignore

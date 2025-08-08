@@ -77,10 +77,10 @@ impl LineWriter {
     }
 
     pub fn write_to_file(self, file_name: &str) {
-        let mut file = File::create(self.output_dir.join(format!("{}.swift", file_name))).unwrap();
+        let mut file = File::create(self.output_dir.join(format!("{file_name}.swift"))).unwrap();
 
         for line in self.lines {
-            writeln!(file, "{}", line).unwrap();
+            writeln!(file, "{line}").unwrap();
         }
     }
 }

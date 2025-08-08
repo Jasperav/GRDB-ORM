@@ -12,7 +12,7 @@ pub fn format_swift_code(config: &Config, safe_output_dir: &Path) {
             // TODO Not sure how the --swiftversion flag works, can't get it to work
             .args(["."])
             .output()
-            .unwrap_or_else(|_| panic!("Problem formatting code in: {:#?}", safe_output_dir));
+            .unwrap_or_else(|_| panic!("Problem formatting code in: {safe_output_dir:#?}"));
 
         if !output.status.success() {
             panic!(

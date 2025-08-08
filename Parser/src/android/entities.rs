@@ -208,14 +208,13 @@ impl<'a> AndroidWriter<'a> {
 
             insert_query.push(column.name.to_string());
             upsert_dyn.push(format!(
-                "UpdatableColumn.{} -> {{
+                "UpdatableColumn.{upper_camel_cased} -> {{
                 if (processedAtLeastOneColumns) {{
                     query += \", \"
                 }}
                 query += \"{name}=excluded.{name}\"\
             }}
-            ",
-                upper_camel_cased
+            "
             ));
             values.push("?");
 
@@ -286,7 +285,7 @@ impl<'a> AndroidWriter<'a> {
                     self.kotlin_column_from_table_column(table, column)
                 };
 
-                parameters.push(format!("{}: {}", arg, kotlin_type));
+                parameters.push(format!("{arg}: {kotlin_type}"));
                 binding.push(column);
                 custom_names.push(arg.to_string())
             }
@@ -472,8 +471,7 @@ impl<'a> AndroidWriter<'a> {
             }
         } else {
             panic!(
-                "without optional: {:#?}, kotlin type: {:#?}, name: {:#?}",
-                without_opt, kotlin_ty, name
+                "without optional: {without_opt:#?}, kotlin type: {kotlin_ty:#?}, name: {name:#?}"
             )
         };
 

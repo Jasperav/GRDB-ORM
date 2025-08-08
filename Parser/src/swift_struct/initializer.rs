@@ -84,11 +84,10 @@ fn write_init_starting_index(
 ) {
     line_writer.add_comment(comment);
     line_writer.add_with_modifier(format!(
-        "init({}{}) {{
-            {}
+        "init({arguments}{parameter}) {{
+            {assign}
         }}
-    ",
-        arguments, parameter, assign
+    "
     ));
 }
 

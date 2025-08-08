@@ -92,7 +92,7 @@ impl<'a> AndroidWriter<'a> {
             // https://stackoverflow.com/a/75465896/7715250
             // The query needs to be sanitezed...
             let start_query = self.sanitize_query(dyn_query);
-            let mut query = format!("@Query(\"{}\")", start_query);
+            let mut query = format!("@Query(\"{start_query}\")");
 
             macro_rules! create_ty {
                 ($t: expr) => {
@@ -191,7 +191,7 @@ impl<'a> AndroidWriter<'a> {
                         let prefix = if dyn_query.return_types.len() == 1 {
                             "".to_string()
                         } else {
-                            format!("(prefix = \"arg{}\")", index)
+                            format!("(prefix = \"arg{index}\")")
                         };
 
                         (

@@ -79,7 +79,7 @@ impl<'a> ReturnType<'a> {
             // If the type is a Swift type, it's easy, directly decode it
             // The Type is always TEXT, it doesn't matter for this case since blobs are handled in the last block
             if is_build_in_type(&without_question_mark, Type::Text) {
-                let format = format!("row[{}]", index);
+                let format = format!("row[{index}]");
 
                 // It always needs just 1 index
                 index += 1;
@@ -92,7 +92,7 @@ impl<'a> ReturnType<'a> {
                 let swift_struct_name = create_swift_type_name(&without_question_mark, self.config);
 
                 // Now the startingIndex initializer is useful
-                let format = format!("{}(row: row, startingIndex: {})", swift_struct_name, index);
+                let format = format!("{swift_struct_name}(row: row, startingIndex: {index})");
                 let decode = wrap_null_check(!suffix.is_empty(), &index.to_string(), &format);
 
                 // The index should be increased for the amount of columns

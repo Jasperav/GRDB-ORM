@@ -67,8 +67,7 @@ fn main() {
     };
 
     println!(
-        "Trying to find config dir, starting at {:#?} and moving up",
-        config_current_dir
+        "Trying to find config dir, starting at {config_current_dir:#?} and moving up"
     );
 
     loop {
@@ -99,8 +98,7 @@ fn main() {
 
     assert!(
         Path::new(sqlite_location).exists(),
-        "Didn't found a SQLite database at {}",
-        sqlite_location
+        "Didn't found a SQLite database at {sqlite_location}"
     );
 
     let tables = sqlite_parser::parse_no_parser(sqlite_location);
@@ -143,7 +141,7 @@ fn main() {
 fn read_file_log(file: &Path) {
     let file_name = file.file_name().unwrap().to_str().unwrap();
 
-    println!("Reading file: {}", file_name);
+    println!("Reading file: {file_name}");
 }
 
 fn some_kind_of_uppercase_first_letter(s: &str) -> String {

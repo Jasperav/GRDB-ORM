@@ -128,21 +128,19 @@ impl<'a> QueryWriterPrimaryKey<'a> {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "func genSelectExists(db: Database) throws -> Bool {{
             let arguments: StatementArguments = try [
-                {}
+                {values}
             ]
 
-            Logging.log(Self.{query}, statementArguments: arguments)
+            Logging.log(Self.{SELECT_EXISTS_QUERY}, statementArguments: arguments)
 
-            let statement = try db.cachedStatement(sql: Self.{query})
+            let statement = try db.cachedStatement(sql: Self.{SELECT_EXISTS_QUERY})
 
             {SET_ARGUMENTS}
 
             // This always returns a row
             return try Bool.fetchOne(statement)!
         }}
-        ",
-            values,
-            query = SELECT_EXISTS_QUERY,
+        "
         ));
     }
 
@@ -182,7 +180,7 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             DELETE_METHOD,
             &[],
             &values.iter().collect::<Vec<_>>(),
-            &format!("Self.{}", DELETE_QUERY),
+            &format!("Self.{DELETE_QUERY}"),
             true,
         )
     }
@@ -206,12 +204,12 @@ impl<'a> QueryWriterPrimaryKey<'a> {
             .table_meta_data
             .line_writer
             .add_with_modifier(format!("
-            func {}(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {{
+            func {UPDATE_METHOD}(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {{
                 switch column {{
-                    {}
+                    {switch}
                 }}
             }}
-            ", UPDATE_METHOD, switch));
+            "));
     }
 
     fn write_updatable_columns(&mut self) {

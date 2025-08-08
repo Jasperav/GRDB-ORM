@@ -477,16 +477,14 @@ impl<'a> QueryWriterMainStruct<'a> {
     fn write_select_count(&mut self) {
         self.table_meta_data.line_writer.add_with_modifier(format!(
             "
-            static func {}(db: Database) throws -> Int {{
-                Logging.log({query}, statementArguments: .init())
+            static func {SELECT_COUNT_METHOD}(db: Database) throws -> Int {{
+                Logging.log({SELECT_COUNT_QUERY}, statementArguments: .init())
 
-                let statement = try db.cachedStatement(sql: {query})
+                let statement = try db.cachedStatement(sql: {SELECT_COUNT_QUERY})
 
                 return try Int.fetchOne(statement)!
             }}
-        ",
-            SELECT_COUNT_METHOD,
-            query = SELECT_COUNT_QUERY
+        "
         ));
     }
 
@@ -586,11 +584,10 @@ impl<'a> QueryWriterMainStruct<'a> {
         } else {
             let args = format!(
                 "let arguments: StatementArguments = try [
-                    {}
+                    {values}
                 ]
 
-                {SET_ARGUMENTS}",
-                values
+                {SET_ARGUMENTS}"
             );
             let (check, argument) = if add_check {
                 (

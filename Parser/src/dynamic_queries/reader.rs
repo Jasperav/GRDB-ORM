@@ -32,8 +32,7 @@ fn validate(queries: &[DynamicQuery]) {
         for illegal in &illegal_patterns {
             assert!(
                 !dyn_query.query.contains(illegal),
-                "use ' in {}'",
-                PARAMETERIZED_IN_QUERY
+                "use ' in {PARAMETERIZED_IN_QUERY}'"
             );
         }
 

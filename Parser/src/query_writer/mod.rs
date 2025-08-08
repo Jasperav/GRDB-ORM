@@ -12,7 +12,7 @@ fn write_static_queries(line_writer: &mut LineWriter, queries: Vec<WriteResult>)
     line_writer.add_comment("Static queries");
 
     for (property, query) in queries {
-        line_writer.add_with_modifier(format!("static let {} = \"{}\"", property, query));
+        line_writer.add_with_modifier(format!("static let {property} = \"{query}\""));
     }
 
     line_writer.new_line();
