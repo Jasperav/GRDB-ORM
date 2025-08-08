@@ -1,4 +1,4 @@
-use crate::android::{generate_kotlin_package, SUPPRESS_ALL};
+use crate::android::{SUPPRESS_ALL, generate_kotlin_package};
 use crate::configuration::Config;
 use crate::custom_mapping::CustomMapping;
 use crate::primary_keys;
@@ -366,7 +366,9 @@ import androidx.lifecycle.LiveData
                     .any(|a| a[0] == kotlin_type)
                 {
                     // This is needed, else some weird END_DOCUMENT errors will appear
-                    format!("com.google.gson.stream.JsonReader(java.io.StringReader(it)), com.google.gson.reflect.TypeToken.get({kotlin_type}::class.java)")
+                    format!(
+                        "com.google.gson.stream.JsonReader(java.io.StringReader(it)), com.google.gson.reflect.TypeToken.get({kotlin_type}::class.java)"
+                    )
                 } else {
                     format!("it, {kotlin_type}::class.java")
                 };

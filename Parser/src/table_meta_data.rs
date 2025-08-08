@@ -1,6 +1,6 @@
-use crate::line_writer::{parameter_types_separated_colon, LineWriter};
-use crate::swift_property::{encode_swift_properties, SwiftProperty};
 use crate::SET_ARGUMENTS;
+use crate::line_writer::{LineWriter, parameter_types_separated_colon};
+use crate::swift_property::{SwiftProperty, encode_swift_properties};
 
 /// Holds information about the current processing table
 pub struct TableMetaData<'a> {

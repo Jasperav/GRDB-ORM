@@ -40,11 +40,7 @@ impl SwiftProperty {
     }
 
     pub fn optional_question_mark(&self) -> &'static str {
-        if self.column.nullable {
-            "?"
-        } else {
-            ""
-        }
+        if self.column.nullable { "?" } else { "" }
     }
 
     pub fn serialize_deserialize_blob(&self, assign_to_self: bool) -> Option<(String, String)> {

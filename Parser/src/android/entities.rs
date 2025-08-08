@@ -1,5 +1,5 @@
 use crate::android::kotlin::AndroidWriter;
-use crate::android::{generate_kotlin_package, SUPPRESS_ALL};
+use crate::android::{SUPPRESS_ALL, generate_kotlin_package};
 use crate::primary_keys;
 use heck::ToUpperCamelCase;
 use inflector::Inflector;

@@ -1,9 +1,9 @@
 use crate::line_writer::StaticInstance;
 use crate::query_writer::primary_key::DELETE_METHOD;
-use crate::query_writer::{write_static_queries, WriteResult};
-use crate::swift_property::{encode_swift_properties, SwiftProperty};
+use crate::query_writer::{WriteResult, write_static_queries};
+use crate::swift_property::{SwiftProperty, encode_swift_properties};
 use crate::table_meta_data::TableMetaData;
-use crate::{some_kind_of_uppercase_first_letter, SET_ARGUMENTS};
+use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
 
 pub const INSERT_UNIQUE_QUERY: &str = "insertUniqueQuery";
 pub const INSERT_OR_IGNORE_QUERY: &str = "insertOrIgnoreUniqueQuery";
@@ -593,7 +593,10 @@ impl<'a> QueryWriterMainStruct<'a> {
                 values
             );
             let (check, argument) = if add_check {
-                ("if assertOneRowAffected {\n// Only 1 row should be affected\nassert(db.changesCount == 1)}", ", assertOneRowAffected: Bool = true")
+                (
+                    "if assertOneRowAffected {\n// Only 1 row should be affected\nassert(db.changesCount == 1)}",
+                    ", assertOneRowAffected: Bool = true",
+                )
             } else {
                 ("", "")
             };

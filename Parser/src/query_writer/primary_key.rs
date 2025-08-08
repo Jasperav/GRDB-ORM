@@ -1,8 +1,8 @@
-use crate::query_writer::{write_static_queries, WriteResult};
-use crate::some_kind_of_uppercase_first_letter;
-use crate::swift_property::{encode_swift_properties, SwiftProperty};
-use crate::table_meta_data::TableMetaData;
 use crate::SET_ARGUMENTS;
+use crate::query_writer::{WriteResult, write_static_queries};
+use crate::some_kind_of_uppercase_first_letter;
+use crate::swift_property::{SwiftProperty, encode_swift_properties};
+use crate::table_meta_data::TableMetaData;
 
 pub const SELECT_QUERY: &str = "selectQuery";
 pub const SELECT_EXISTS_QUERY: &str = "selectExistsQuery";

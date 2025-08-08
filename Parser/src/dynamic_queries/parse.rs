@@ -1,11 +1,11 @@
 use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
-use crate::parse::{test_query, Index, Parser};
+use crate::parse::{Index, Parser, test_query};
 use crate::swift_property::{
-    create_swift_type_name, encode_swift_properties, is_build_in_type, SwiftProperty, SwiftType,
-    SwiftTypeWithTypeName,
+    SwiftProperty, SwiftType, SwiftTypeWithTypeName, create_swift_type_name,
+    encode_swift_properties, is_build_in_type,
 };
-use crate::{some_kind_of_uppercase_first_letter, SET_ARGUMENTS};
+use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use sqlite_parser::{Column, Type};
@@ -76,15 +76,17 @@ impl<'a> Parser<'a> {
                     .iter()
                     .any(|f| f.from_column.iter().any(|c| set.contains(&c.name)));
 
-                assert!(indexes
-                    .insert(
-                        name,
-                        Index {
-                            used: is_foreign_key,
-                            amount_of_columns: names.len() as i32,
-                        }
-                    )
-                    .is_none());
+                assert!(
+                    indexes
+                        .insert(
+                            name,
+                            Index {
+                                used: is_foreign_key,
+                                amount_of_columns: names.len() as i32,
+                            }
+                        )
+                        .is_none()
+                );
             }
 
             println!("Found the following custom indexes:");

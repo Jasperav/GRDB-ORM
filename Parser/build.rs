@@ -1,5 +1,5 @@
-use env_parser::to_lazy_static::LazyTransformDefault;
 use env_parser::EnvReader;
+use env_parser::to_lazy_static::LazyTransformDefault;
 use std::env::current_dir;
 use std::fs::File;
 

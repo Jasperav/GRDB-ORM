@@ -8,8 +8,8 @@ use crate::configuration::Config;
 use crate::line_writer::LineWriter;
 use crate::some_kind_of_uppercase_first_letter;
 use crate::swift_property::{
-    create_row_index, create_swift_property, create_swift_type_name, decode_swift_property,
-    is_build_in_type, wrap_null_check, SwiftPropertyDecoder,
+    SwiftPropertyDecoder, create_row_index, create_swift_property, create_swift_type_name,
+    decode_swift_property, is_build_in_type, wrap_null_check,
 };
 
 /// Transforms the input of the toml return values in dyn_queries to usable Swift return types

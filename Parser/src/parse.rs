@@ -1,8 +1,8 @@
 use crate::android::AndroidWriter;
 use crate::configuration::Config;
-use crate::dynamic_queries::parse::{is_auto_generated_index, PARAMETERIZED_IN_QUERY};
+use crate::dynamic_queries::parse::{PARAMETERIZED_IN_QUERY, is_auto_generated_index};
 use crate::line_writer::LineWriter;
-use crate::swift_property::{create_swift_properties, encode_swift_properties, SwiftProperty};
+use crate::swift_property::{SwiftProperty, create_swift_properties, encode_swift_properties};
 use crate::swift_struct::TableWriter;
 use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
@@ -243,7 +243,9 @@ pub(crate) fn test_query(
         }
 
         if !bypassed && dyn_query.bypass_index_optimizer {
-            panic!("Did not bypass but query should be ignored, probably set property bypass_index_optimizer to false");
+            panic!(
+                "Did not bypass but query should be ignored, probably set property bypass_index_optimizer to false"
+            );
         }
     }
 

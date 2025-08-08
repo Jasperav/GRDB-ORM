@@ -1,6 +1,6 @@
 use crate::line_writer::LineWriter;
 use crate::swift_property::{
-    decode_swift_property, swift_properties_and_types, SwiftProperty, SwiftPropertyDecoder,
+    SwiftProperty, SwiftPropertyDecoder, decode_swift_property, swift_properties_and_types,
 };
 use crate::table_meta_data::TableMetaData;
 

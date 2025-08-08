@@ -45,11 +45,7 @@ impl Config {
     }
 
     pub fn immutability(&self) -> &'static str {
-        if self.all_immutable {
-            "let"
-        } else {
-            "var"
-        }
+        if self.all_immutable { "let" } else { "var" }
     }
 
     pub fn create_type_name(&self, type_name: &str) -> String {
