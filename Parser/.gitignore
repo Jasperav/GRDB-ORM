@@ -1,5 +1,6 @@
 # Don't add the generated folder to the ignored folder, so other people can easily see what is being generated
 # /generated
+# This has to be in VC else cargo publish will fail
 # /src/properties.rs
 ./generatedfortest.sqlite3
 ./Cargo.lock

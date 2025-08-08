@@ -3,6 +3,8 @@ name = "sqlite_parser_swift_grdb"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+description = "Parse sqlite files to GRBD swift files"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [build-dependencies]
