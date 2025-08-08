@@ -16,10 +16,10 @@ jobs:
           credentials: ${{secrets.GIT_CREDENTIALS}}
       - uses: actions/checkout@v4
       - name: Select Xcode 16.1
-        run: sudo xcode-select -switch /Applications/Xcode_16.1.app
+        run: sudo xcode-select -switch /Applications/Xcode_16.1.app # Needed else tools version 6 is not available, can be removed later
       - name: Build and test
         # https://stackoverflow.com/questions/58125659/github-actions-xcodebuild-fails-due-to-server-fingerprint
         run: |
           cd ./GRDBPerformance/
           for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
-          xcodebuild test -project GRDBPerformance.xcodeproj -scheme GRDBPerformanceTests -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.0'
+          xcodebuild test -project GRDBPerformance.xcodeproj -scheme GRDBPerformanceTests -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.1'
