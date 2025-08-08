@@ -50,7 +50,6 @@ fn parse_ios(tables: &Metadata, config: &Config) {
     TableWriter {
         tables,
         config,
-        safe_output_dir: safe_output_dir.clone(),
     }
     .write();
 

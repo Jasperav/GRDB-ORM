@@ -672,7 +672,9 @@ import java.util.logging.Logger
                 let mut new_select = vec![];
 
                 for column in &table.columns {
-                    if let Some(column_filter) = &column_filter && column_filter != &column.name {
+                    if let Some(column_filter) = &column_filter
+                        && column_filter != &column.name
+                    {
                         continue;
                     }
 
