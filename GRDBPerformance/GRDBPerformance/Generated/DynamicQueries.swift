@@ -5,6 +5,7 @@ import GRDB
 
 import Combine
 import GRDBQuery
+
 public extension DbBook {
     struct BooksForUserWithSpecificUuidType: Equatable {
         public var gen0: DbBook
