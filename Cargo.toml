@@ -2,7 +2,6 @@
 members = [
     "new_version",
     "Parser",
-    "grdb_orm_lib",
 ]
 resolver = "2"
 

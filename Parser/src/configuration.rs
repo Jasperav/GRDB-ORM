@@ -1,10 +1,10 @@
-use grdb_orm_lib::dyn_query::DynamicQuery;
-use grdb_orm_lib::room::{Room, TypeInterfacesCustomCode};
 use std::path::PathBuf;
 
 use crate::custom_mapping::CustomMapping;
+use crate::dyn_query::DynamicQuery;
 use crate::line_writer::LineWriter;
 use crate::output_dir_initializer::create_safe_dir;
+use crate::room::{Room, TypeInterfacesCustomCode};
 
 /// All the configuration that can be done in one place
 pub struct Config {

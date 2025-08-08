@@ -1,7 +1,7 @@
+use crate::dyn_query::DynamicQuery;
 use crate::dynamic_queries::parse::PARAMETERIZED_IN_QUERY;
-use grdb_orm_lib::dyn_query::DynamicQuery;
-use grdb_orm_lib::serde::Deserialize;
-use grdb_orm_lib::toml::Value;
+use serde::Deserialize;
+use toml::Value;
 
 read!(Vec<DynamicQuery>);
 
@@ -12,10 +12,7 @@ fn transform(content: &str) -> Vec<DynamicQuery> {
     let queries = tables
         .iter()
         .map(|(_, table)| {
-            DynamicQuery::deserialize(grdb_orm_lib::toml::de::ValueDeserializer::new(
-                &table.to_string(),
-            ))
-            .unwrap()
+            DynamicQuery::deserialize(toml::de::ValueDeserializer::new(&table.to_string())).unwrap()
         })
         .collect::<Vec<_>>();
 
@@ -60,8 +57,8 @@ fn validate(queries: &[DynamicQuery]) {
 
 #[cfg(test)]
 mod tests {
+    use crate::dyn_query::DynamicQuery;
     use crate::dynamic_queries::reader::transform;
-    use grdb_orm_lib::dyn_query::DynamicQuery;
 
     /// Use this to check out how various configurations are presented in TOML
     #[test]

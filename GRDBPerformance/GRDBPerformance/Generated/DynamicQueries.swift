@@ -3,1003 +3,1030 @@
 import Foundation
 import GRDB
 
+
 import Combine
 import GRDBQuery
-
-public extension DbBook {
-    struct BooksForUserWithSpecificUuidType: Equatable {
-        public var gen0: DbBook
-        public var gen1: Int
-        public var gen2: [JsonType]?
-        public var gen3: Int
-        public init(row: Row) {
-            gen0 = DbBook(row: row, startingIndex: 0)
-            gen1 = row[4]
-            gen2 = {
+public  extension DbBook {
+struct BooksForUserWithSpecificUuidType: Equatable {
+                public var gen0: DbBook
+public var gen1: Int
+public var gen2: [JsonType]?
+public var gen3: Int
+                public init(row: Row) {
+                    gen0 = DbBook(row: row, startingIndex: 0)
+gen1 = row[4]
+gen2 = {
                 if row.hasNull(atIndex: 5) {
                     return nil
                 } else {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[5])
                 }
             }()
-            gen3 = row[6]
-        }
-    }
+gen3 = row[6]
+                }
+            }
+            
 
-    static func booksForUserWithSpecificUuid(db: Database, userUuid: UUID) throws -> [BooksForUserWithSpecificUuidType] {
-        var query = """
-        select Book.*, User.integer, User.jsonStructArrayOptional, 1 from Book
-                            join User on User.userUuid = Book.userUuid
-                            where User.userUuid = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [userUuid.uuidString]
-        Logging.log(query, statementArguments: arguments)
+
+public  static func booksForUserWithSpecificUuid(db: Database, userUuid: UUID) throws -> [BooksForUserWithSpecificUuidType] {
+var query = """
+select Book.*, User.integer, User.jsonStructArrayOptional, 1 from Book
+                    join User on User.userUuid = Book.userUuid
+                    where User.userUuid = ?
+"""
+var arguments = StatementArguments()
+arguments += [userUuid.uuidString]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [BooksForUserWithSpecificUuidType] = try Row.fetchAll(statement).map { row -> BooksForUserWithSpecificUuidType in
-            BooksForUserWithSpecificUuidType(row: row)
-        }
-
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct BooksForUserWithSpecificUuidQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let userUuid: UUID
-        public init(
-            userUuid: UUID,
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.userUuid = userUuid
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: [BooksForUserWithSpecificUuidType] = []
-
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.userUuid == rhs.userUuid
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksForUserWithSpecificUuidType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
-                }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [BooksForUserWithSpecificUuidType] = try Row.fetchAll(statement).map({ row -> BooksForUserWithSpecificUuidType in
+                        BooksForUserWithSpecificUuidType.init(row: row)
+                    })
+                    
+return converted
 }
 
-public extension DbBook {
-    struct BooksWithOptionalUserType: Equatable {
-        public var gen0: DbBook
-        public var gen1: DbUser?
-        public var gen2: Bool?
-        public init(row: Row) {
-            gen0 = DbBook(row: row, startingIndex: 0)
-            gen1 = {
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct BooksForUserWithSpecificUuidQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let userUuid: UUID
+            public init(
+            userUuid: UUID,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.userUuid = userUuid
+            self.scheduler = scheduler
+            }
+            public static let defaultValue: [BooksForUserWithSpecificUuidType] = []
+
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.userUuid == rhs.userUuid
+            }
+
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksForUserWithSpecificUuidType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try booksForUserWithSpecificUuid(db: db, userUuid: userUuid)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
+
+public  extension DbBook {
+struct BooksWithOptionalUserType: Equatable {
+                public var gen0: DbBook
+public var gen1: DbUser?
+public var gen2: Bool?
+                public init(row: Row) {
+                    gen0 = DbBook(row: row, startingIndex: 0)
+gen1 = {
                 if row.hasNull(atIndex: 4) {
                     return nil
                 } else {
                     return DbUser(row: row, startingIndex: 4)
                 }
             }()
-            gen2 = row[14]
-        }
-    }
+gen2 = row[14]
+                }
+            }
+            
 
-    static func booksWithOptionalUser(db: Database) throws -> [BooksWithOptionalUserType] {
-        var query = """
-        select Book.*, User.*, Book.integerOptional
-                            from Book
-                            left join User on User.userUuid = Book.userUuid
-        """
-        Logging.log(query, statementArguments: .init())
+
+public  static func booksWithOptionalUser(db: Database) throws -> [BooksWithOptionalUserType] {
+var query = """
+select Book.*, User.*, Book.integerOptional
+                    from Book
+                    left join User on User.userUuid = Book.userUuid
+"""
+Logging.log(query, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [BooksWithOptionalUserType] = try Row.fetchAll(statement).map { row -> BooksWithOptionalUserType in
-            BooksWithOptionalUserType(row: row)
-        }
-
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct BooksWithOptionalUserQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-
-        public init(
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: [BooksWithOptionalUserType] = []
-
-        public static func == (_: Self, _: Self) -> Bool {
-            // This is correct I think
-            true
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksWithOptionalUserType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try booksWithOptionalUser(db: db)
-                }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+let converted: [BooksWithOptionalUserType] = try Row.fetchAll(statement).map({ row -> BooksWithOptionalUserType in
+                        BooksWithOptionalUserType.init(row: row)
+                    })
+                    
+return converted
 }
 
-public extension DbUser {
-    struct LikeType: Equatable {
-        public var gen0: DbUser
-        public init(row: Row) {
-            gen0 = DbUser(row: row, startingIndex: 0)
-        }
-    }
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct BooksWithOptionalUserQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            
+                public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.scheduler = scheduler
+            }
+            
+            public static let defaultValue: [BooksWithOptionalUserType] = []
 
-    static func like(db: Database, firstName0: String, firstName1: String, firstName2: String, firstName3: String, firstName4: String) throws -> [LikeType] {
-        var query = """
-        select User.* from User where User.firstName LIKE ? or User.firstName = ? or User.firstName LIKE ? or User.firstName LIKE ? or User.firstName = ?
-        """
-        var arguments = StatementArguments()
-        arguments += ["%\(firstName0)%"]
-        arguments += [firstName1]
-        arguments += ["%\(firstName2)"]
-        arguments += ["\(firstName3)%"]
-        arguments += [firstName4]
-        Logging.log(query, statementArguments: arguments)
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                // This is correct I think
+true
+            }
+
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[BooksWithOptionalUserType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try booksWithOptionalUser(db: db)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
+
+public  extension DbUser {
+struct LikeType: Equatable {
+                public var gen0: DbUser
+                public init(row: Row) {
+                    gen0 = DbUser(row: row, startingIndex: 0)
+                }
+            }
+            
+
+
+public  static func like(db: Database, firstName0: String, firstName1: String, firstName2: String, firstName3: String, firstName4: String) throws -> [LikeType] {
+var query = """
+select User.* from User where User.firstName LIKE ? or User.firstName = ? or User.firstName LIKE ? or User.firstName LIKE ? or User.firstName = ?
+"""
+var arguments = StatementArguments()
+arguments += ["%\(firstName0)%"]
+arguments += [firstName1]
+arguments += ["%\(firstName2)"]
+arguments += ["\(firstName3)%"]
+arguments += [firstName4]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [LikeType] = try Row.fetchAll(statement).map { row -> LikeType in
-            LikeType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [LikeType] = try Row.fetchAll(statement).map({ row -> LikeType in
+                        LikeType.init(row: row)
+                    })
+                    
+return converted
+}
 
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct LikeQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let firstName0: String
-        public let firstName1: String
-        public let firstName2: String
-        public let firstName3: String
-        public let firstName4: String
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct LikeQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let firstName0: String
+public let firstName1: String
+public let firstName2: String
+public let firstName3: String
+public let firstName4: String
+            public init(
             firstName0: String,
-            firstName1: String,
-            firstName2: String,
-            firstName3: String,
-            firstName4: String,
+firstName1: String,
+firstName2: String,
+firstName3: String,
+firstName4: String,
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.firstName0 = firstName0
-            self.firstName1 = firstName1
-            self.firstName2 = firstName2
-            self.firstName3 = firstName3
-            self.firstName4 = firstName4
+self.firstName1 = firstName1
+self.firstName2 = firstName2
+self.firstName3 = firstName3
+self.firstName4 = firstName4
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: [LikeType] = []
 
-        public static let defaultValue: [LikeType] = []
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.firstName0 == rhs.firstName0 && lhs.firstName1 == rhs.firstName1 && lhs.firstName2 == rhs.firstName2 && lhs.firstName3 == rhs.firstName3 && lhs.firstName4 == rhs.firstName4
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.firstName0 == rhs.firstName0 && lhs.firstName1 == rhs.firstName1 && lhs.firstName2 == rhs.firstName2 && lhs.firstName3 == rhs.firstName3 && lhs.firstName4 == rhs.firstName4
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LikeType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try like(db: db, firstName0: firstName0, firstName1: firstName1, firstName2: firstName2, firstName3: firstName3, firstName4: firstName4)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LikeType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try like(db: db, firstName0: firstName0, firstName1: firstName1, firstName2: firstName2, firstName3: firstName3, firstName4: firstName4)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbUser {
-    struct FindByUsernameType: Equatable {
-        public var gen0: DbUser
-        public init(row: Row) {
-            gen0 = DbUser(row: row, startingIndex: 0)
-        }
-    }
+public  extension DbUser {
+struct FindByUsernameType: Equatable {
+                public var gen0: DbUser
+                public init(row: Row) {
+                    gen0 = DbUser(row: row, startingIndex: 0)
+                }
+            }
+            
 
-    static func findByUsername(db: Database, firstName: String) throws -> FindByUsernameType? {
-        var query = """
-        select * from User where firstName = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [firstName]
-        Logging.log(query, statementArguments: arguments)
+
+public  static func findByUsername(db: Database, firstName: String) throws -> FindByUsernameType? {
+var query = """
+select * from User where firstName = ?
+"""
+var arguments = StatementArguments()
+arguments += [firstName]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [FindByUsernameType] = try Row.fetchAll(statement).map { row -> FindByUsernameType in
-            FindByUsernameType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [FindByUsernameType] = try Row.fetchAll(statement).map({ row -> FindByUsernameType in
+                        FindByUsernameType.init(row: row)
+                    })
+                    
+assert(converted.count <= 1, "Expected 1 or zero rows")
+return converted.first
+}
 
-        assert(converted.count <= 1, "Expected 1 or zero rows")
-        return converted.first
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct FindByUsernameQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let firstName: String
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct FindByUsernameQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let firstName: String
+            public init(
             firstName: String,
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.firstName = firstName
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: FindByUsernameType? = nil
 
-        public static let defaultValue: FindByUsernameType? = nil
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.firstName == rhs.firstName
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.firstName == rhs.firstName
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindByUsernameType?, Error> {
-            ValueObservation
-                .tracking { db in
-                    try findByUsername(db: db, firstName: firstName)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindByUsernameType?, Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try findByUsername(db: db, firstName: firstName)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbUser {
-    struct FindUserUuidByUsernameType: Equatable {
-        public var gen0: UUID
-        public init(row: Row) {
-            gen0 = row[0]
-        }
-    }
+public  extension DbUser {
+struct FindUserUuidByUsernameType: Equatable {
+                public var gen0: UUID
+                public init(row: Row) {
+                    gen0 = row[0]
+                }
+            }
+            
 
-    static func findUserUuidByUsername(db: Database, firstName: String) throws -> FindUserUuidByUsernameType? {
-        var query = """
-        select userUuid from User where firstName = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [firstName]
-        Logging.log(query, statementArguments: arguments)
+
+public  static func findUserUuidByUsername(db: Database, firstName: String) throws -> FindUserUuidByUsernameType? {
+var query = """
+select userUuid from User where firstName = ?
+"""
+var arguments = StatementArguments()
+arguments += [firstName]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [FindUserUuidByUsernameType] = try Row.fetchAll(statement).map { row -> FindUserUuidByUsernameType in
-            FindUserUuidByUsernameType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [FindUserUuidByUsernameType] = try Row.fetchAll(statement).map({ row -> FindUserUuidByUsernameType in
+                        FindUserUuidByUsernameType.init(row: row)
+                    })
+                    
+assert(converted.count <= 1, "Expected 1 or zero rows")
+return converted.first
+}
 
-        assert(converted.count <= 1, "Expected 1 or zero rows")
-        return converted.first
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct FindUserUuidByUsernameQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let firstName: String
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct FindUserUuidByUsernameQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let firstName: String
+            public init(
             firstName: String,
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.firstName = firstName
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: FindUserUuidByUsernameType? = nil
 
-        public static let defaultValue: FindUserUuidByUsernameType? = nil
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.firstName == rhs.firstName
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.firstName == rhs.firstName
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindUserUuidByUsernameType?, Error> {
-            ValueObservation
-                .tracking { db in
-                    try findUserUuidByUsername(db: db, firstName: firstName)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<FindUserUuidByUsernameType?, Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try findUserUuidByUsername(db: db, firstName: firstName)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbUser {
-    struct AmountOfUsersType: Equatable {
-        public var gen0: Int
-        public init(row: Row) {
-            gen0 = row[0]
-        }
-    }
+public  extension DbUser {
+struct AmountOfUsersType: Equatable {
+                public var gen0: Int
+                public init(row: Row) {
+                    gen0 = row[0]
+                }
+            }
+            
 
-    static func amountOfUsers(db: Database) throws -> AmountOfUsersType? {
-        var query = """
-        select count(*) from User
-        """
-        Logging.log(query, statementArguments: .init())
+
+public  static func amountOfUsers(db: Database) throws -> AmountOfUsersType? {
+var query = """
+select count(*) from User
+"""
+Logging.log(query, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [AmountOfUsersType] = try Row.fetchAll(statement).map { row -> AmountOfUsersType in
-            AmountOfUsersType(row: row)
-        }
+let converted: [AmountOfUsersType] = try Row.fetchAll(statement).map({ row -> AmountOfUsersType in
+                        AmountOfUsersType.init(row: row)
+                    })
+                    
+assert(converted.count <= 1, "Expected 1 or zero rows")
+return converted.first
+}
 
-        assert(converted.count <= 1, "Expected 1 or zero rows")
-        return converted.first
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct AmountOfUsersQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct AmountOfUsersQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            
+                public init(
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.scheduler = scheduler
-        }
+            }
+            
+            public static let defaultValue: AmountOfUsersType? = nil
 
-        public static let defaultValue: AmountOfUsersType? = nil
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                // This is correct I think
+true
+            }
 
-        public static func == (_: Self, _: Self) -> Bool {
-            // This is correct I think
-            true
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<AmountOfUsersType?, Error> {
-            ValueObservation
-                .tracking { db in
-                    try amountOfUsers(db: db)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<AmountOfUsersType?, Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try amountOfUsers(db: db)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbBook {
-    static func deleteByUserUuid(db: Database, userUuid: UUID) throws {
-        var query = """
-        delete from Book where userUuid = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [userUuid.uuidString]
-        Logging.log(query, statementArguments: arguments)
+public  extension DbBook {
+
+
+public  static func deleteByUserUuid(db: Database, userUuid: UUID) throws  {
+var query = """
+delete from Book where userUuid = ?
+"""
+var arguments = StatementArguments()
+arguments += [userUuid.uuidString]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        try statement.execute()
-    }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+try statement.execute()
 }
 
-public extension DbBook {
-    struct HasAtLeastOneBookType: Equatable {
-        public var gen0: Bool
-        public init(row: Row) {
-            gen0 = row[0]
-        }
-    }
+}
 
-    static func hasAtLeastOneBook(db: Database) throws -> HasAtLeastOneBookType? {
-        var query = """
-        select exists(select 1 from Book)
-        """
-        Logging.log(query, statementArguments: .init())
+public  extension DbBook {
+struct HasAtLeastOneBookType: Equatable {
+                public var gen0: Bool
+                public init(row: Row) {
+                    gen0 = row[0]
+                }
+            }
+            
+
+
+public  static func hasAtLeastOneBook(db: Database) throws -> HasAtLeastOneBookType? {
+var query = """
+select exists(select 1 from Book)
+"""
+Logging.log(query, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [HasAtLeastOneBookType] = try Row.fetchAll(statement).map { row -> HasAtLeastOneBookType in
-            HasAtLeastOneBookType(row: row)
-        }
+let converted: [HasAtLeastOneBookType] = try Row.fetchAll(statement).map({ row -> HasAtLeastOneBookType in
+                        HasAtLeastOneBookType.init(row: row)
+                    })
+                    
+assert(converted.count <= 1, "Expected 1 or zero rows")
+return converted.first
+}
 
-        assert(converted.count <= 1, "Expected 1 or zero rows")
-        return converted.first
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct HasAtLeastOneBookQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct HasAtLeastOneBookQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            
+                public init(
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.scheduler = scheduler
-        }
+            }
+            
+            public static let defaultValue: HasAtLeastOneBookType? = nil
 
-        public static let defaultValue: HasAtLeastOneBookType? = nil
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                // This is correct I think
+true
+            }
 
-        public static func == (_: Self, _: Self) -> Bool {
-            // This is correct I think
-            true
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<HasAtLeastOneBookType?, Error> {
-            ValueObservation
-                .tracking { db in
-                    try hasAtLeastOneBook(db: db)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<HasAtLeastOneBookType?, Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try hasAtLeastOneBook(db: db)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbUser {
-    struct SerializeInfoSingleType: Equatable {
-        public var gen0: SerializedInfo
-        public var gen1: SerializedInfo?
-        public init(row: Row) {
-            gen0 = try! SerializedInfo(serializedBytes: row[0])
-            gen1 = {
+public  extension DbUser {
+struct SerializeInfoSingleType: Equatable {
+                public var gen0: SerializedInfo
+public var gen1: SerializedInfo?
+                public init(row: Row) {
+                    gen0 = try! SerializedInfo(serializedBytes: row[0])
+gen1 = {
                 if row.hasNull(atIndex: 1) {
                     return nil
                 } else {
                     return try! SerializedInfo(serializedBytes: row[1])
                 }
             }()
-        }
-    }
+                }
+            }
+            
 
-    static func serializeInfoSingle(db: Database) throws -> SerializeInfoSingleType? {
-        var query = """
-        select serializedInfo, serializedInfoNullable from user limit 1
-        """
-        Logging.log(query, statementArguments: .init())
+
+public  static func serializeInfoSingle(db: Database) throws -> SerializeInfoSingleType? {
+var query = """
+select serializedInfo, serializedInfoNullable from user limit 1
+"""
+Logging.log(query, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: query)
-        let converted: [SerializeInfoSingleType] = try Row.fetchAll(statement).map { row -> SerializeInfoSingleType in
-            SerializeInfoSingleType(row: row)
-        }
-
-        assert(converted.count <= 1, "Expected 1 or zero rows")
-        return converted.first
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct SerializeInfoSingleQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-
-        public init(
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: SerializeInfoSingleType? = nil
-
-        public static func == (_: Self, _: Self) -> Bool {
-            // This is correct I think
-            true
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<SerializeInfoSingleType?, Error> {
-            ValueObservation
-                .tracking { db in
-                    try serializeInfoSingle(db: db)
-                }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+let converted: [SerializeInfoSingleType] = try Row.fetchAll(statement).map({ row -> SerializeInfoSingleType in
+                        SerializeInfoSingleType.init(row: row)
+                    })
+                    
+assert(converted.count <= 1, "Expected 1 or zero rows")
+return converted.first
 }
 
-public extension DbUser {
-    struct SerializeInfoArrayType: Equatable {
-        public var gen0: SerializedInfo
-        public var gen1: SerializedInfo?
-        public init(row: Row) {
-            gen0 = try! SerializedInfo(serializedBytes: row[0])
-            gen1 = {
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct SerializeInfoSingleQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            
+                public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.scheduler = scheduler
+            }
+            
+            public static let defaultValue: SerializeInfoSingleType? = nil
+
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                // This is correct I think
+true
+            }
+
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<SerializeInfoSingleType?, Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try serializeInfoSingle(db: db)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
+
+public  extension DbUser {
+struct SerializeInfoArrayType: Equatable {
+                public var gen0: SerializedInfo
+public var gen1: SerializedInfo?
+                public init(row: Row) {
+                    gen0 = try! SerializedInfo(serializedBytes: row[0])
+gen1 = {
                 if row.hasNull(atIndex: 1) {
                     return nil
                 } else {
                     return try! SerializedInfo(serializedBytes: row[1])
                 }
             }()
-        }
-    }
-
-    static func serializeInfoArray(db: Database) throws -> [SerializeInfoArrayType] {
-        var query = """
-        select serializedInfo, serializedInfoNullable from user
-        """
-        Logging.log(query, statementArguments: .init())
-
-        let statement = try db.cachedStatement(sql: query)
-        let converted: [SerializeInfoArrayType] = try Row.fetchAll(statement).map { row -> SerializeInfoArrayType in
-            SerializeInfoArrayType(row: row)
-        }
-
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct SerializeInfoArrayQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-
-        public init(
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: [SerializeInfoArrayType] = []
-
-        public static func == (_: Self, _: Self) -> Bool {
-            // This is correct I think
-            true
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[SerializeInfoArrayType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try serializeInfoArray(db: db)
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
-}
+            }
+            
 
-public extension DbUser {
-    static func serializeInfoArray(db: Database, serializedInfo: SerializedInfo, serializedInfoNullable: SerializedInfo, firstName: String) throws {
-        var query = """
-        update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [try! serializedInfo.serializedData()]
-        arguments += [try! serializedInfoNullable.serializedData()]
-        arguments += [firstName]
-        Logging.log(query, statementArguments: arguments)
+
+public  static func serializeInfoArray(db: Database) throws -> [SerializeInfoArrayType] {
+var query = """
+select serializedInfo, serializedInfoNullable from user
+"""
+Logging.log(query, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        try statement.execute()
-    }
+let converted: [SerializeInfoArrayType] = try Row.fetchAll(statement).map({ row -> SerializeInfoArrayType in
+                        SerializeInfoArrayType.init(row: row)
+                    })
+                    
+return converted
 }
 
-public extension DbUser {
-    struct AllWithProvidedFirstNamesType: Equatable {
-        public var gen0: DbUser
-        public init(row: Row) {
-            gen0 = DbUser(row: row, startingIndex: 0)
-        }
-    }
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct SerializeInfoArrayQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            
+                public init(
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.scheduler = scheduler
+            }
+            
+            public static let defaultValue: [SerializeInfoArrayType] = []
 
-    static func allWithProvidedFirstNames(db: Database, firstName: [String]) throws -> [AllWithProvidedFirstNamesType] {
-        var query = """
-        select * from user where firstName in %PARAM_IN%
-        """
-        var arguments = StatementArguments()
-        if firstName.isEmpty {
-            return []
-        }
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                // This is correct I think
+true
+            }
 
-        for v in firstName {
-            arguments += [v]
-        }
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[SerializeInfoArrayType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try serializeInfoArray(db: db)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
 
-        // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
-        _ = {
-            let questionMarks = String(repeating: "?, ", count: firstName.count)
-            // Remove the trailing question mark
-            let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
-            let occurrence = query.range(of: "%PARAM_IN%")!
+public  extension DbUser {
 
-            query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
-        }()
 
-        Logging.log(query, statementArguments: arguments)
+public  static func serializeInfoArray(db: Database, serializedInfo: SerializedInfo, serializedInfoNullable: SerializedInfo, firstName: String) throws  {
+var query = """
+update user set serializedInfo = ? and serializedInfoNullable = ? where firstName = ?
+"""
+var arguments = StatementArguments()
+arguments += [try! serializedInfo.serializedData()]
+arguments += [try! serializedInfoNullable.serializedData()]
+arguments += [firstName]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [AllWithProvidedFirstNamesType] = try Row.fetchAll(statement).map { row -> AllWithProvidedFirstNamesType in
-            AllWithProvidedFirstNamesType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+try statement.execute()
+}
 
-        return converted
-    }
+}
 
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct AllWithProvidedFirstNamesQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let firstName: [String]
-        public init(
+public  extension DbUser {
+struct AllWithProvidedFirstNamesType: Equatable {
+                public var gen0: DbUser
+                public init(row: Row) {
+                    gen0 = DbUser(row: row, startingIndex: 0)
+                }
+            }
+            
+
+
+public  static func allWithProvidedFirstNames(db: Database, firstName: [String]) throws -> [AllWithProvidedFirstNamesType] {
+var query = """
+select * from user where firstName in %PARAM_IN%
+"""
+var arguments = StatementArguments()
+if firstName.isEmpty {
+                        return []
+                    }
+
+                    for v in firstName {
+                        arguments += [v]
+                    }
+
+                    // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
+                    _ = {
+                        let questionMarks = String(repeating: "?, ", count: firstName.count)
+                        // Remove the trailing question mark
+                        let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
+                        let occurrence = query.range(of: "%PARAM_IN%")!
+
+                        query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
+                    }()
+                    
+Logging.log(query, statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: query)
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [AllWithProvidedFirstNamesType] = try Row.fetchAll(statement).map({ row -> AllWithProvidedFirstNamesType in
+                        AllWithProvidedFirstNamesType.init(row: row)
+                    })
+                    
+return converted
+}
+
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct AllWithProvidedFirstNamesQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let firstName: [String]
+            public init(
             firstName: [String],
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.firstName = firstName
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: [AllWithProvidedFirstNamesType] = []
 
-        public static let defaultValue: [AllWithProvidedFirstNamesType] = []
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.firstName == rhs.firstName
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.firstName == rhs.firstName
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[AllWithProvidedFirstNamesType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try allWithProvidedFirstNames(db: db, firstName: firstName)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[AllWithProvidedFirstNamesType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try allWithProvidedFirstNames(db: db, firstName: firstName)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbUser {
-    struct ComplexType: Equatable {
-        public var gen0: DbUser
-        public init(row: Row) {
-            gen0 = DbUser(row: row, startingIndex: 0)
-        }
-    }
+public  extension DbUser {
+struct ComplexType: Equatable {
+                public var gen0: DbUser
+                public init(row: Row) {
+                    gen0 = DbUser(row: row, startingIndex: 0)
+                }
+            }
+            
 
-    static func complex(db: Database, firstNames0: [String], jsonStructOptional: JsonType, integer: [Int], serializedInfoNullable: SerializedInfo) throws -> [ComplexType] {
-        var query = """
-        select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?
-        """
-        var arguments = StatementArguments()
-        if firstNames0.isEmpty {
-            return []
-        }
 
-        for v in firstNames0 {
-            arguments += [v]
-        }
+public  static func complex(db: Database, firstNames0: [String], jsonStructOptional: JsonType, integer: [Int], serializedInfoNullable: SerializedInfo) throws -> [ComplexType] {
+var query = """
+select * from user where firstName in %PARAM_IN% and jsonStructOptional = ? and integer in %PARAM_IN% and serializedInfoNullable = ?
+"""
+var arguments = StatementArguments()
+if firstNames0.isEmpty {
+                        return []
+                    }
 
-        // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
-        _ = {
-            let questionMarks = String(repeating: "?, ", count: firstNames0.count)
-            // Remove the trailing question mark
-            let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
-            let occurrence = query.range(of: "%PARAM_IN%")!
+                    for v in firstNames0 {
+                        arguments += [v]
+                    }
 
-            query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
-        }()
+                    // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
+                    _ = {
+                        let questionMarks = String(repeating: "?, ", count: firstNames0.count)
+                        // Remove the trailing question mark
+                        let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
+                        let occurrence = query.range(of: "%PARAM_IN%")!
 
-        try arguments += [{
-            let data = try Shared.jsonEncoder.encode(jsonStructOptional)
-            return String(data: data, encoding: .utf8)!
-        }()]
-        if integer.isEmpty {
-            return []
-        }
+                        query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
+                    }()
+                    
+arguments += [try {
+                            
+                                let data = try Shared.jsonEncoder.encode(jsonStructOptional)
+                                return String(data: data, encoding: .utf8)!
+                            }()]
+if integer.isEmpty {
+                        return []
+                    }
 
-        for v in integer {
-            arguments += [v]
-        }
+                    for v in integer {
+                        arguments += [v]
+                    }
 
-        // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
-        _ = {
-            let questionMarks = String(repeating: "?, ", count: integer.count)
-            // Remove the trailing question mark
-            let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
-            let occurrence = query.range(of: "%PARAM_IN%")!
+                    // Extra identifier is needed because else swift-format will format it incorrectly causing a compile error
+                    _ = {
+                        let questionMarks = String(repeating: "?, ", count: integer.count)
+                        // Remove the trailing question mark
+                        let questionMarksCorrected = "(" + questionMarks.dropLast().dropLast() + ")"
+                        let occurrence = query.range(of: "%PARAM_IN%")!
 
-            query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
-        }()
-
-        arguments += [try! serializedInfoNullable.serializedData()]
-        Logging.log(query, statementArguments: arguments)
+                        query = query.replacingCharacters(in: occurrence, with: questionMarksCorrected)
+                    }()
+                    
+arguments += [try! serializedInfoNullable.serializedData()]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [ComplexType] = try Row.fetchAll(statement).map { row -> ComplexType in
-            ComplexType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [ComplexType] = try Row.fetchAll(statement).map({ row -> ComplexType in
+                        ComplexType.init(row: row)
+                    })
+                    
+return converted
+}
 
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct ComplexQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let firstNames0: [String]
-        public let jsonStructOptional: JsonType
-        public let integer: [Int]
-        public let serializedInfoNullable: SerializedInfo
-        public init(
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct ComplexQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let firstNames0: [String]
+public let jsonStructOptional: JsonType
+public let integer: [Int]
+public let serializedInfoNullable: SerializedInfo
+            public init(
             firstNames0: [String],
-            jsonStructOptional: JsonType,
-            integer: [Int],
-            serializedInfoNullable: SerializedInfo,
+jsonStructOptional: JsonType,
+integer: [Int],
+serializedInfoNullable: SerializedInfo,
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.firstNames0 = firstNames0
-            self.jsonStructOptional = jsonStructOptional
-            self.integer = integer
-            self.serializedInfoNullable = serializedInfoNullable
+self.jsonStructOptional = jsonStructOptional
+self.integer = integer
+self.serializedInfoNullable = serializedInfoNullable
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: [ComplexType] = []
 
-        public static let defaultValue: [ComplexType] = []
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.firstNames0 == rhs.firstNames0 && lhs.jsonStructOptional == rhs.jsonStructOptional && lhs.integer == rhs.integer && lhs.serializedInfoNullable == rhs.serializedInfoNullable
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.firstNames0 == rhs.firstNames0 && lhs.jsonStructOptional == rhs.jsonStructOptional && lhs.integer == rhs.integer && lhs.serializedInfoNullable == rhs.serializedInfoNullable
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[ComplexType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[ComplexType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try complex(db: db, firstNames0: firstNames0, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
 
-public extension DbParent {
-    struct RetrieveOptionalUserValuesType: Equatable {
-        public var gen0: UUID
-        public var gen1: UUID?
-        public var gen2: [JsonType]?
-        public var gen3: [JsonType]?
-        public init(row: Row) {
-            gen0 = row[0]
-            gen1 = row[1]
-            gen2 = {
+public  extension DbParent {
+struct RetrieveOptionalUserValuesType: Equatable {
+                public var gen0: UUID
+public var gen1: UUID?
+public var gen2: [JsonType]?
+public var gen3: [JsonType]?
+                public init(row: Row) {
+                    gen0 = row[0]
+gen1 = row[1]
+gen2 = {
                 if row.hasNull(atIndex: 2) {
                     return nil
                 } else {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[2])
                 }
             }()
-            gen3 = {
+gen3 = {
                 if row.hasNull(atIndex: 3) {
                     return nil
                 } else {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[3])
                 }
             }()
-        }
-    }
+                }
+            }
+            
 
-    static func retrieveOptionalUserValues(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
-        var query = """
-        select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?
-        """
-        var arguments = StatementArguments()
-        arguments += [parentUuid.uuidString]
-        Logging.log(query, statementArguments: arguments)
+
+public  static func retrieveOptionalUserValues(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
+var query = """
+select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ?
+"""
+var arguments = StatementArguments()
+arguments += [parentUuid.uuidString]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in
-            RetrieveOptionalUserValuesType(row: row)
-        }
-
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct RetrieveOptionalUserValuesQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let parentUuid: UUID
-        public init(
-            parentUuid: UUID,
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.parentUuid = parentUuid
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: [RetrieveOptionalUserValuesType] = []
-
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.parentUuid == rhs.parentUuid
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try retrieveOptionalUserValues(db: db, parentUuid: parentUuid)
-                }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map({ row -> RetrieveOptionalUserValuesType in
+                        RetrieveOptionalUserValuesType.init(row: row)
+                    })
+                    
+return converted
 }
 
-public extension DbParent {
-    struct RetrieveOptionalUserValuesMappedType: Equatable {
-        public var gen0: UUID
-        public var gen1: UUID?
-        public var gen2: [JsonType]?
-        public var gen3: [JsonType]?
-        public init(row: Row) {
-            gen0 = row[0]
-            gen1 = row[1]
-            gen2 = {
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct RetrieveOptionalUserValuesQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let parentUuid: UUID
+            public init(
+            parentUuid: UUID,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.parentUuid = parentUuid
+            self.scheduler = scheduler
+            }
+            public static let defaultValue: [RetrieveOptionalUserValuesType] = []
+
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.parentUuid == rhs.parentUuid
+            }
+
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try retrieveOptionalUserValues(db: db, parentUuid: parentUuid)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
+
+public  extension DbParent {
+struct RetrieveOptionalUserValuesMappedType: Equatable {
+                public var gen0: UUID
+public var gen1: UUID?
+public var gen2: [JsonType]?
+public var gen3: [JsonType]?
+                public init(row: Row) {
+                    gen0 = row[0]
+gen1 = row[1]
+gen2 = {
                 if row.hasNull(atIndex: 2) {
                     return nil
                 } else {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[2])
                 }
             }()
-            gen3 = {
+gen3 = {
                 if row.hasNull(atIndex: 3) {
                     return nil
                 } else {
                     return try! Shared.jsonDecoder.decode([JsonType].self, from: row[3])
                 }
             }()
-        }
-    }
-
-    static func retrieveOptionalUserValuesMapped(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesMappedType] {
-        var query = """
-        select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid
-        """
-        var arguments = StatementArguments()
-        arguments += [parentUuid.uuidString]
-        Logging.log(query, statementArguments: arguments)
-
-        let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [RetrieveOptionalUserValuesMappedType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesMappedType in
-            RetrieveOptionalUserValuesMappedType(row: row)
-        }
-
-        return converted
-    }
-
-    static func retrieveOptionalUserValuesMappedMapped(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
-        var query = """
-        select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid
-        """
-        var arguments = StatementArguments()
-        arguments += [parentUuid.uuidString]
-        Logging.log(query, statementArguments: arguments)
-
-        let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map { row -> RetrieveOptionalUserValuesType in
-            RetrieveOptionalUserValuesType(row: row)
-        }
-
-        return converted
-    }
-
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct RetrieveOptionalUserValuesMappedQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let parentUuid: UUID
-        public init(
-            parentUuid: UUID,
-            scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
-            self.parentUuid = parentUuid
-            self.scheduler = scheduler
-        }
-
-        public static let defaultValue: [RetrieveOptionalUserValuesMappedType] = []
-
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.parentUuid == rhs.parentUuid
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesMappedType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try retrieveOptionalUserValuesMapped(db: db, parentUuid: parentUuid)
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
+            
+
+
+public  static func retrieveOptionalUserValuesMapped(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesMappedType] {
+var query = """
+select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid
+"""
+var arguments = StatementArguments()
+arguments += [parentUuid.uuidString]
+Logging.log(query, statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: query)
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [RetrieveOptionalUserValuesMappedType] = try Row.fetchAll(statement).map({ row -> RetrieveOptionalUserValuesMappedType in
+                        RetrieveOptionalUserValuesMappedType.init(row: row)
+                    })
+                    
+return converted
 }
 
-public extension DbParent {
-    struct LimitedType: Equatable {
-        public var gen0: DbParent
-        public init(row: Row) {
-            gen0 = DbParent(row: row, startingIndex: 0)
-        }
-    }
-
-    static func limited(db: Database, limit: Int) throws -> [LimitedType] {
-        var query = """
-        select * from Parent limit ?
-        """
-        var arguments = StatementArguments()
-        arguments += [limit]
-        Logging.log(query, statementArguments: arguments)
+public  static func retrieveOptionalUserValuesMappedMapped(db: Database, parentUuid: UUID) throws -> [RetrieveOptionalUserValuesType] {
+var query = """
+select parentUuid, U.userUuid, jsonStructArray, jsonStructArrayOptional from Parent left join User U on U.userUuid = Parent.userUuid where parentUuid = ? order by Parent.userUuid
+"""
+var arguments = StatementArguments()
+arguments += [parentUuid.uuidString]
+Logging.log(query, statementArguments: arguments)
 
         let statement = try db.cachedStatement(sql: query)
-        #if DEBUG
-            try statement.setArguments(arguments)
-        #else
-            statement.setUncheckedArguments(arguments)
-        #endif
-        let converted: [LimitedType] = try Row.fetchAll(statement).map { row -> LimitedType in
-            LimitedType(row: row)
-        }
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [RetrieveOptionalUserValuesType] = try Row.fetchAll(statement).map({ row -> RetrieveOptionalUserValuesType in
+                        RetrieveOptionalUserValuesType.init(row: row)
+                    })
+                    
+return converted
+}
 
-        return converted
-    }
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct RetrieveOptionalUserValuesMappedQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let parentUuid: UUID
+            public init(
+            parentUuid: UUID,
+            scheduler: ValueObservationScheduler = .async(onQueue: .main)
+            ) {
+            self.parentUuid = parentUuid
+            self.scheduler = scheduler
+            }
+            public static let defaultValue: [RetrieveOptionalUserValuesMappedType] = []
 
-    // Very basic Queryable struct, create a PR if you want more customization
-    struct LimitedQueryable: Queryable, Equatable {
-        public let scheduler: ValueObservationScheduler
-        public let limit: Int
-        public init(
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.parentUuid == rhs.parentUuid
+            }
+
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[RetrieveOptionalUserValuesMappedType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try retrieveOptionalUserValuesMapped(db: db, parentUuid: parentUuid)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
+                }
+            }
+}
+
+public  extension DbParent {
+struct LimitedType: Equatable {
+                public var gen0: DbParent
+                public init(row: Row) {
+                    gen0 = DbParent(row: row, startingIndex: 0)
+                }
+            }
+            
+
+
+public  static func limited(db: Database, limit: Int) throws -> [LimitedType] {
+var query = """
+select * from Parent limit ?
+"""
+var arguments = StatementArguments()
+arguments += [limit]
+Logging.log(query, statementArguments: arguments)
+
+        let statement = try db.cachedStatement(sql: query)
+#if DEBUG
+try statement.setArguments(arguments)
+#else
+statement.setUncheckedArguments(arguments)
+#endif
+let converted: [LimitedType] = try Row.fetchAll(statement).map({ row -> LimitedType in
+                        LimitedType.init(row: row)
+                    })
+                    
+return converted
+}
+
+// Very basic Queryable struct, create a PR if you want more customization
+public  struct LimitedQueryable: Queryable, Equatable {
+            public let scheduler: ValueObservationScheduler
+            public let limit: Int
+            public init(
             limit: Int,
             scheduler: ValueObservationScheduler = .async(onQueue: .main)
-        ) {
+            ) {
             self.limit = limit
             self.scheduler = scheduler
-        }
+            }
+            public static let defaultValue: [LimitedType] = []
 
-        public static let defaultValue: [LimitedType] = []
+            public static func == (lhs: Self, rhs: Self) -> Bool {
+                lhs.limit == rhs.limit
+            }
 
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.limit == rhs.limit
-        }
-
-        public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LimitedType], Error> {
-            ValueObservation
-                .tracking { db in
-                    try limited(db: db, limit: limit)
+            public func publisher(in dbQueue: DatabaseWriter) -> AnyPublisher<[LimitedType], Error> {
+                    ValueObservation
+                            .tracking({ db in
+                                try limited(db: db, limit: limit)
+                            })
+                            .publisher(in: dbQueue, scheduling: scheduler)
+                            .eraseToAnyPublisher()
                 }
-                .publisher(in: dbQueue, scheduling: scheduler)
-                .eraseToAnyPublisher()
-        }
-    }
+            }
 }
+

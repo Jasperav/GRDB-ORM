@@ -1,8 +1,8 @@
 use crate::android::{SUPPRESS_ALL, generate_kotlin_package};
 use crate::configuration::Config;
 use crate::custom_mapping::CustomMapping;
+use crate::dyn_query::DynamicQuery;
 use crate::primary_keys;
-use grdb_orm_lib::dyn_query::DynamicQuery;
 use heck::{ToLowerCamelCase, ToUpperCamelCase};
 use regex::Regex;
 use sqlite_parser::{Column, Metadata, OnUpdateAndDelete, Type};

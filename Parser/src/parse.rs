@@ -1,10 +1,10 @@
 use crate::android::AndroidWriter;
 use crate::configuration::Config;
+use crate::dyn_query::DynamicQuery;
 use crate::dynamic_queries::parse::{PARAMETERIZED_IN_QUERY, is_auto_generated_index};
 use crate::line_writer::LineWriter;
 use crate::swift_property::{SwiftProperty, create_swift_properties, encode_swift_properties};
 use crate::swift_struct::TableWriter;
-use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use rusqlite::{Connection, Error};
 use sqlite_parser::Metadata;

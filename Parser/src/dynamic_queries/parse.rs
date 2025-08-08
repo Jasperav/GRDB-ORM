@@ -1,3 +1,4 @@
+use crate::dyn_query::DynamicQuery;
 use crate::dynamic_queries::return_type::{Query, ReturnType};
 use crate::line_writer::parameter_types_separated_colon;
 use crate::parse::{Index, Parser, test_query};
@@ -6,7 +7,6 @@ use crate::swift_property::{
     encode_swift_properties, is_build_in_type,
 };
 use crate::{SET_ARGUMENTS, some_kind_of_uppercase_first_letter};
-use grdb_orm_lib::dyn_query::DynamicQuery;
 use regex::Regex;
 use sqlite_parser::{Column, Type};
 use std::collections::{HashMap, HashSet};

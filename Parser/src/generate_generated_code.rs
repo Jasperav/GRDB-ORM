@@ -1,8 +1,8 @@
 use crate::configuration::{Config, Visibility};
 use crate::custom_mapping::CustomMapping;
+use crate::dyn_query::DynamicQuery;
 use crate::parse::parse;
-use grdb_orm_lib::dyn_query::DynamicQuery;
-use grdb_orm_lib::room::Room;
+use crate::room::Room;
 use regex::Regex;
 use sqlite_parser::Metadata;
 use std::env::current_dir;
@@ -378,11 +378,11 @@ pub fn delete_db(path: String) {
 }
 
 mod index_optimizer_test {
+    use crate::dyn_query::DynamicQuery;
     use crate::generate_generated_code::create_db;
     use crate::parse::parse;
+    use crate::room::Room;
     use crate::{Config, Visibility};
-    use grdb_orm_lib::dyn_query::DynamicQuery;
-    use grdb_orm_lib::room::Room;
     use std::env::current_dir;
 
     fn setup(query: &str, add_index: bool) {

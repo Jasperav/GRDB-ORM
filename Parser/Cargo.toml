@@ -17,4 +17,5 @@ regex = { workspace = true }
 dotenv = { workspace = true }
 rusqlite = { workspace = true }
 heck = { workspace = true }
-grdb_orm_lib = { path = "../grdb_orm_lib" }
+serde = { version = "1.0.219", features = ["derive"] }
+toml = { workspace = true }

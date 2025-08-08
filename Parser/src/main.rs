@@ -4,7 +4,6 @@ use sqlite_parser::{Column, Table};
 use std::env::current_exe;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::time::Duration;
 
 /// Easy way to read a file to a string and call a `transform` method
 macro_rules! read {
@@ -35,6 +34,7 @@ mod swift_struct;
 mod table_meta_data;
 
 pub mod android;
+pub mod dyn_query;
 #[cfg(test)]
 mod generate_generated_code;
 mod room;
@@ -53,8 +53,6 @@ fn main() {
     println!("Preparing to generate Swift structs and queries...");
 
     let args = Args::parse();
-
-    std::thread::sleep(Duration::from_secs(1));
 
     let mut config_current_dir = if let Some(config) = args.location_config {
         println!("Found explicit config file");
@@ -134,6 +132,12 @@ fn main() {
     parse::parse(tables, config);
 
     println!("Successfully generated Swift structs and queries!");
+}
+
+pub fn parse(config: Config) {
+    let tables = sqlite_parser::parse_no_parser(&config.sqlite_location);
+
+    parse::parse(tables, config);
 }
 
 fn read_file_log(file: &Path) {

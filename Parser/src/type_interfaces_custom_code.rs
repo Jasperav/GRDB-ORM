@@ -1,6 +1,6 @@
-use grdb_orm_lib::room::TypeInterfacesCustomCode;
-use grdb_orm_lib::serde::Deserialize;
-use grdb_orm_lib::toml::Value;
+use crate::room::TypeInterfacesCustomCode;
+use serde::Deserialize;
+use toml::Value;
 
 read!(Vec<TypeInterfacesCustomCode>);
 
@@ -10,9 +10,9 @@ fn transform(content: &str) -> Vec<TypeInterfacesCustomCode> {
     let mut types: Vec<TypeInterfacesCustomCode> = vec![];
 
     for (_, value) in tables {
-        let deserialized = TypeInterfacesCustomCode::deserialize(
-            grdb_orm_lib::toml::de::ValueDeserializer::new(&value.to_string()),
-        )
+        let deserialized = TypeInterfacesCustomCode::deserialize(toml::de::ValueDeserializer::new(
+            &value.to_string(),
+        ))
         .unwrap();
 
         assert!(!types.iter().any(|t| t.ty == deserialized.ty));
