@@ -66,9 +66,7 @@ fn main() {
         current_exe().unwrap()
     };
 
-    println!(
-        "Trying to find config dir, starting at {config_current_dir:#?} and moving up"
-    );
+    println!("Trying to find config dir, starting at {config_current_dir:#?} and moving up");
 
     loop {
         let joined_config = config_current_dir.join("config");

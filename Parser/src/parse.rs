@@ -183,9 +183,7 @@ pub(crate) fn test_query(
 
             for skip in skippable {
                 if lowercased.starts_with(skip) {
-                    println!(
-                        "Skip processing because it is a skippable detail: {detail}"
-                    );
+                    println!("Skip processing because it is a skippable detail: {detail}");
 
                     should_continue = true;
                     break;
