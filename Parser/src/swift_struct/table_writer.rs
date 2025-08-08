@@ -15,6 +15,7 @@ use crate::table_meta_data::TableMetaData;
 pub struct TableWriter<'a> {
     pub tables: &'a Metadata,
     pub config: &'a Config,
+    pub safe_output_dir: PathBuf,
 }
 
 impl<'a> TableWriter<'a> {
