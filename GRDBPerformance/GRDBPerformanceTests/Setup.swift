@@ -1,17 +1,17 @@
 import Foundation
 import GRDB
-import XCTest
 import GRDBPerformance
+import XCTest
 
-let amountToGenerate = 10_000
+let amountToGenerate = 10000
 
-struct TestRunner {
+enum TestRunner {
     static func setupDb() -> (DatabaseQueue, [UUID]) {
         let db = setupPool()
         var uuids = [UUID]()
 
         try! db.write { db in
-            for _ in 0..<amountToGenerate {
+            for _ in 0 ..< amountToGenerate {
                 let user = DbUser.random()
 
                 uuids.append(user.userUuid)
@@ -23,7 +23,7 @@ struct TestRunner {
         return (db, uuids)
     }
 
-    static func startMeasure(theTest: XCTestCase, block: (Database, UUID) -> ()) {
+    static func startMeasure(theTest: XCTestCase, block: (Database, UUID) -> Void) {
         theTest.measure {
             let (db, uuids) = setupDb()
 

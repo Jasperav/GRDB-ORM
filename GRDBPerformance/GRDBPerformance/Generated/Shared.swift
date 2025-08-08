@@ -55,7 +55,8 @@ enum Logging {
             var start = queryChanged.startIndex
 
             while start < queryChanged.endIndex,
-                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex) {
+                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex)
+            {
                 ranges.append(range)
                 start = range.upperBound
             }

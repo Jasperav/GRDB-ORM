@@ -2,7 +2,6 @@ import Foundation
 import GRDB
 
 public struct User: FetchableRecord, PersistableRecord, Codable {
-    
     public let userUuid: UUID
     public let firstName: String?
     public let jsonStruct: JsonType
@@ -14,7 +13,7 @@ public struct User: FetchableRecord, PersistableRecord, Codable {
     public let serializedInfo: Data
     public let serializedInfoNullable: Data?
 
-    public static var databaseUUIDEncodingStrategy: DatabaseUUIDEncodingStrategy { .uppercaseString }
+    public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     public init(userUuid: UUID, firstName: String?, jsonStruct: JsonType, jsonStructOptional: JsonType?, jsonStructArray: [JsonType], jsonStructArrayOptional: [JsonType]?, integer: Int, bool: Bool, serializedInfo: Data, serializedInfoNullable: Data?) {
         self.userUuid = userUuid

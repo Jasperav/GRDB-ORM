@@ -1,38 +1,42 @@
-import XCTest
-import GRDBPerformance
-import GRDB
 import Foundation
+import GRDB
+import GRDBPerformance
+import XCTest
 
 class UpdatePerformanceTest: XCTestCase {
     func testGenerated() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
-            try! DbUser(userUuid: uuid,
-                    firstName: nil,
-                    jsonStruct: .init(age: 1),
-                    jsonStructOptional: nil,
-                    jsonStructArray: [],
-                    jsonStructArrayOptional: nil,
-                    integer: 1,
-                    bool: true,
-                    serializedInfo: .data("r"),
-                    serializedInfoNullable: nil)
-                    .genUpdate(db: db)
+            try! DbUser(
+                userUuid: uuid,
+                firstName: nil,
+                jsonStruct: .init(age: 1),
+                jsonStructOptional: nil,
+                jsonStructArray: [],
+                jsonStructArrayOptional: nil,
+                integer: 1,
+                bool: true,
+                serializedInfo: .data("r"),
+                serializedInfoNullable: nil
+            )
+            .genUpdate(db: db)
         })
     }
 
     func testGRDB() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
-            try! User(userUuid: uuid,
-                    firstName: nil,
-                    jsonStruct: .init(age: 1),
-                    jsonStructOptional: nil,
-                    jsonStructArray: [],
-                    jsonStructArrayOptional: nil,
-                    integer: 1,
-                    bool: true,
-                    serializedInfo: Data(),
-                    serializedInfoNullable: nil)
-                    .update(db)
+            try! User(
+                userUuid: uuid,
+                firstName: nil,
+                jsonStruct: .init(age: 1),
+                jsonStructOptional: nil,
+                jsonStructArray: [],
+                jsonStructArrayOptional: nil,
+                integer: 1,
+                bool: true,
+                serializedInfo: Data(),
+                serializedInfoNullable: nil
+            )
+            .update(db)
         })
     }
 }
@@ -45,12 +49,12 @@ class UpdateTest: XCTestCase {
         try! db.write { con in
             try! user.genInsert(db: con)
 
-            let assertUser: () -> () = {
+            let assertUser: () -> Void = {
                 XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
             }
 
             // First check with a nullable data type
-            let changeValue: (SerializedInfo?) -> () = {
+            let changeValue: (SerializedInfo?) -> Void = {
                 user.serializedInfoNullableAutoSet(serializedInfoNullable: $0)
 
                 try! user.primaryKey().genUpdateSerializedInfoNullable(db: con, serializedInfoNullable: user.serializedInfoNullableAutoConvert())
@@ -72,7 +76,6 @@ class UpdateTest: XCTestCase {
             assertUser()
         }
     }
-
 }
 
 class UpdatePrimaryKeyTest: XCTestCase {
@@ -104,57 +107,57 @@ class UpdatePrimaryKeyTest: XCTestCase {
             XCTAssertEqual(userBook, new)
         }
     }
-    
+
     func testDynamicUpdate() throws {
         let db = setupPool()
         var user = DbUser.random()
 
         try! db.write { con in
             try! user.genInsert(db: con)
-            
-            let assertUser: () -> () = {
+
+            let assertUser: () -> Void = {
                 XCTAssertEqual(user, try! user.primaryKey().genSelectExpect(db: con))
             }
-            
+
             user.bool = !user.bool
-            
+
             try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnBool()])
-            
+
             assertUser()
-            
+
             user.serializedInfoNullableAutoSet(serializedInfoNullable: nil)
             user.serializedInfoAutoSet(serializedInfo: .data("test"))
-            
+
             try! user.primaryKey().genUpdateDynamic(db: con, columns: [user.createColumnSerializedInfo(), user.createColumnSerializedInfoNullable()])
-            
+
             assertUser()
         }
     }
-    
+
     func testAllRows() throws {
         let db = setupPool()
 
         try! db.write { con in
             let users: [DbUser] = [.random(), .random()]
-            
+
             for user in users {
                 try! user.genInsert(db: con)
             }
-            
+
             let newFirstName = "new"
-            
+
             try! DbUser.genUpdateFirstNameAllRows(db: con, firstName: newFirstName)
-            
+
             XCTAssertEqual(2, con.changesCount)
-            
+
             for user in users {
                 XCTAssertEqual(try! user.primaryKey().genSelectExpect(db: con).firstName, newFirstName)
             }
-            
+
             try! DbUser.genUpdateFirstNameAllRows(db: con, firstName: nil)
-            
+
             XCTAssertEqual(2, con.changesCount)
-            
+
             for user in users {
                 XCTAssertNil(try! user.primaryKey().genSelectExpect(db: con).firstName)
             }

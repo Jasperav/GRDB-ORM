@@ -1,19 +1,19 @@
-import XCTest
-import GRDBPerformance
-import GRDB
 import Foundation
+import GRDB
+import GRDBPerformance
+import XCTest
 
 class SelectPerformanceTest: XCTestCase {
     func testGenerated() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
             // Don't call the expect function here to mimic the testGRDB method (both return User?)
-            let _ = try! DbUser.PrimaryKey(userUuid: uuid).genSelect(db: db)!
+            _ = try! DbUser.PrimaryKey(userUuid: uuid).genSelect(db: db)!
         })
     }
 
     func testGRDB() throws {
         TestRunner.startMeasure(theTest: self, block: { db, uuid in
-            let _ = try! User.fetchOne(db, key: uuid.uuidString)!
+            _ = try! User.fetchOne(db, key: uuid.uuidString)!
         })
     }
 
@@ -42,17 +42,17 @@ class SelectPerformanceTest: XCTestCase {
             XCTAssert(try user.primaryKey().genSelectExists(db: con))
         }
     }
-    
+
     func testSelectAll() throws {
         let db = setupPool()
 
         try db.write { con in
             let user = DbUser.random()
-            
+
             try user.genInsert(db: con)
-            
+
             let users = try DbUser.genSelectAll(db: con)
-            
+
             XCTAssertEqual(1, users.count)
             XCTAssertEqual(user, users[0])
         }

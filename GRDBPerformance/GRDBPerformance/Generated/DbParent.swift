@@ -21,7 +21,8 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
     // Default initializer
     public init(parentUuid: UUID,
-                userUuid: UUID?) {
+                userUuid: UUID?)
+    {
         self.parentUuid = parentUuid
         self.userUuid = userUuid
     }
@@ -51,7 +52,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             parentUuid.uuidString,
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         #if DEBUG
@@ -75,7 +76,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             parentUuid.uuidString,
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         #if DEBUG
@@ -94,7 +95,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             parentUuid.uuidString,
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         #if DEBUG
@@ -113,7 +114,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             parentUuid.uuidString,
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         #if DEBUG
@@ -146,7 +147,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     public
     static func genDeleteByParentUuid(db: Database, parentUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            parentUuid.uuidString
+            parentUuid.uuidString,
         ]
 
         Logging.log("delete from Parent where parentUuid = ?", statementArguments: arguments)
@@ -165,7 +166,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     public
     static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            userUuid.uuidString
+            userUuid.uuidString,
         ]
 
         Logging.log("delete from Parent where userUuid = ?", statementArguments: arguments)
@@ -186,7 +187,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             userUuid?.uuidString,
-            parentUuid.uuidString
+            parentUuid.uuidString,
         ]
 
         #if DEBUG
@@ -277,7 +278,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
 
         let arguments: StatementArguments = try [
             parentUuid.uuidString,
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         Logging.log(upsertQuery, statementArguments: arguments)
@@ -304,7 +305,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     public
     static func genUpdateParentUuidAllRows(db: Database, parentUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            parentUuid.uuidString
+            parentUuid.uuidString,
         ]
 
         Logging.log("update Parent set parentUuid = ?", statementArguments: arguments)
@@ -323,7 +324,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
     public
     static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
         let arguments: StatementArguments = try [
-            userUuid?.uuidString
+            userUuid?.uuidString,
         ]
 
         Logging.log("update Parent set userUuid = ?", statementArguments: arguments)
@@ -375,7 +376,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         // Queries a unique row in the database, the row may or may not exist
         public func genSelect(db: Database) throws -> DbParent? {
             let arguments: StatementArguments = try [
-                parentUuid.uuidString
+                parentUuid.uuidString,
             ]
 
             Logging.log(Self.selectQuery, statementArguments: arguments)
@@ -403,7 +404,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         // Checks if a row exists
         public func genSelectExists(db: Database) throws -> Bool {
             let arguments: StatementArguments = try [
-                parentUuid.uuidString
+                parentUuid.uuidString,
             ]
 
             Logging.log(Self.selectExistsQuery, statementArguments: arguments)
@@ -423,7 +424,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         // Deletes a unique row, asserts that the row actually existed
         public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                parentUuid.uuidString
+                parentUuid.uuidString,
             ]
 
             let statement = try db.cachedStatement(sql: Self.deleteQuery)
@@ -446,7 +447,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         public func genUpdateParentUuid(db: Database, parentUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 parentUuid.uuidString,
-                self.parentUuid.uuidString
+                self.parentUuid.uuidString,
             ]
 
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateParentUuidQuery)
@@ -469,7 +470,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         public func genUpdateUserUuid(db: Database, userUuid: UUID?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 userUuid?.uuidString,
-                parentUuid.uuidString
+                parentUuid.uuidString,
             ]
 
             let statement = try db.cachedStatement(sql: DbParent.UpdatableColumn.updateUserUuidQuery)

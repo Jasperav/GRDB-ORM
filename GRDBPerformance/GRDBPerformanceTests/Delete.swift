@@ -1,7 +1,7 @@
-import XCTest
-import GRDBPerformance
-import GRDB
 import Foundation
+import GRDB
+import GRDBPerformance
+import XCTest
 
 class DeletePerformanceTest: XCTestCase {
     func testGenerated() throws {

@@ -1,6 +1,6 @@
-import XCTest
-import GRDBPerformance
 import GRDB
+import GRDBPerformance
+import XCTest
 
 class InsertPerformanceTest: XCTestCase {
     func testGenerated() throws {
@@ -8,19 +8,19 @@ class InsertPerformanceTest: XCTestCase {
             try! DbUser.random().genInsert(db: db)
         })
     }
-    
+
     func testGRDB() throws {
         startMeasure(block: { db in
             try! User.random().insert(db)
         })
     }
 
-    func startMeasure(block: (Database) -> ()) {
-        self.measure {
+    func startMeasure(block: (Database) -> Void) {
+        measure {
             let db = setupPool()
-            
+
             try! db.write { db in
-                for _ in 0...amountToGenerate {
+                for _ in 0 ... amountToGenerate {
                     block(db)
                 }
             }
@@ -33,7 +33,7 @@ class ReplaceTest: XCTestCase {
         let db = setupPool()
 
         try! db.write { con in
-            let checkCount: (Int) -> () = {
+            let checkCount: (Int) -> Void = {
                 let current = try! Int.fetchOne(con, sql: "select count(*) from user ")
 
                 XCTAssertEqual($0, current)
@@ -71,9 +71,9 @@ class UpdatableColumnTest: XCTestCase {
 
         try! db.write { con in
             try! user.genInsert(db: con)
-            
+
             let newFirstName = "new"
-            
+
             try! user.primaryKey().genUpdateFirstName(db: con, firstName: newFirstName)
 
             user.firstName = newFirstName

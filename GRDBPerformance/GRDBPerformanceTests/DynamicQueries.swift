@@ -1,6 +1,6 @@
+import GRDB
 import GRDBPerformance
 import XCTest
-import GRDB
 
 // Not really a performance test, but validates the output of the generated queries
 class DynamicQueryTest: XCTestCase {
@@ -90,14 +90,14 @@ class DynamicQueryTest: XCTestCase {
         let db = setupPool()
 
         try! db.write { con in
-                    let user = DbUser.random()
-                    let parentUuid = UUID()
+            let user = DbUser.random()
+            let parentUuid = UUID()
 
-                    try user.genInsert(db: con)
-                    try DbParent(parentUuid: parentUuid, userUuid: user.userUuid).genInsert(db: con)
+            try user.genInsert(db: con)
+            try DbParent(parentUuid: parentUuid, userUuid: user.userUuid).genInsert(db: con)
 
-                    XCTAssertEqual(try DbParent.retrieveOptionalUserValuesMappedMapped(db: con, parentUuid: parentUuid), try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parentUuid))
-                }
+            XCTAssertEqual(try DbParent.retrieveOptionalUserValuesMappedMapped(db: con, parentUuid: parentUuid), try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parentUuid))
+        }
     }
 
     func testMappedBlobColumn() {
@@ -113,7 +113,7 @@ class DynamicQueryTest: XCTestCase {
 
             try! dbUser.genInsert(db: con)
 
-            let check: (DbUser.SerializeInfoSingleType) -> () = {
+            let check: (DbUser.SerializeInfoSingleType) -> Void = {
                 XCTAssertEqual($0.gen0, dbUser.serializedInfoAutoConvert())
                 XCTAssertEqual($0.gen1, dbUser.serializedInfoNullableAutoConvert())
             }
@@ -145,30 +145,29 @@ class DynamicQueryTest: XCTestCase {
         let db = setupPool()
 
         try db.write { con in
-                    let book = DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: nil, tsCreated: 0)
+            let book = DbBook(bookUuid: UUID(), userUuid: nil, integerOptional: nil, tsCreated: 0)
 
-                    try book.genInsert(db: con)
+            try book.genInsert(db: con)
 
-                    let books = try DbBook.booksWithOptionalUser(db: con)
+            let books = try DbBook.booksWithOptionalUser(db: con)
 
-                    XCTAssertEqual(1, books.count)
-                    XCTAssertEqual(book, books[0].gen0)
-                    XCTAssertNil(books[0].gen1)
-                    XCTAssertNil(books[0].gen2)
+            XCTAssertEqual(1, books.count)
+            XCTAssertEqual(book, books[0].gen0)
+            XCTAssertNil(books[0].gen1)
+            XCTAssertNil(books[0].gen2)
 
-                    let parent = DbParent(parentUuid: UUID(), userUuid: nil)
+            let parent = DbParent(parentUuid: UUID(), userUuid: nil)
 
-                    try parent.genInsert(db: con)
+            try parent.genInsert(db: con)
 
-                    let parents = try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parent.parentUuid)
+            let parents = try DbParent.retrieveOptionalUserValues(db: con, parentUuid: parent.parentUuid)
 
-                    XCTAssertEqual(1, parents.count)
-                    XCTAssertEqual(parents[0].gen0, parent.parentUuid)
-                    XCTAssertNil(parents[0].gen1)
-                    XCTAssertNil(parents[0].gen2)
-                    XCTAssertNil(parents[0].gen3)
-
-                }
+            XCTAssertEqual(1, parents.count)
+            XCTAssertEqual(parents[0].gen0, parent.parentUuid)
+            XCTAssertNil(parents[0].gen1)
+            XCTAssertNil(parents[0].gen2)
+            XCTAssertNil(parents[0].gen3)
+        }
     }
 
     func testLike() throws {
@@ -188,23 +187,23 @@ class DynamicQueryTest: XCTestCase {
         }
     }
 
+    @MainActor
     func testValueObservation() throws {
         let db = setupPool()
         let toSearchFor = "first"
         let publisher = DbUser.FindByUsernameQueryable(firstName: toSearchFor).publisher(in: db)
         var count = 0
         let exp = expectation(description: "count")
-
         let cancellable = publisher
-                .sink(receiveCompletion: { _ in
-                    XCTFail("Should not complete")
-                }, receiveValue: { _ in
-                    count += 1
+            .sink(receiveCompletion: { _ in
+                XCTFail("Should not complete")
+            }, receiveValue: { _ in
+                count += 1
 
-                    if count == 2 {
-                        exp.fulfill()
-                    }
-                })
+                if count == 2 {
+                    exp.fulfill()
+                }
+            })
 
         try db.write { con in
             var user = DbUser.random()
@@ -251,7 +250,7 @@ class DynamicQueryTest: XCTestCase {
         let db = setupPool()
 
         try! db.write { con in
-            let checkCount: (Int, [String]) -> () = {
+            let checkCount: (Int, [String]) -> Void = {
                 XCTAssertEqual($0, try! DbUser.allWithProvidedFirstNames(db: con, firstName: $1).count)
             }
 
@@ -280,7 +279,7 @@ class DynamicQueryTest: XCTestCase {
 
     func testComplexInQuery() {
         let db = setupPool()
-        
+
         var user0 = DbUser.random()
 
         user0.serializedInfoNullableAutoSet(serializedInfoNullable: .data("something"))
@@ -289,14 +288,14 @@ class DynamicQueryTest: XCTestCase {
         try! db.write { con in
             try! user0.genInsert(db: con)
         }
-        
+
         try! db.write { con in
-            let checkCount: (Int, [String], JsonType, [Int], SerializedInfo) -> () = { count, firstNames, jsonStructOptional, integer, serializedInfoNullable in
+            let checkCount: (Int, [String], JsonType, [Int], SerializedInfo) -> Void = { count, firstNames, jsonStructOptional, integer, serializedInfoNullable in
                 XCTAssertEqual(count, try! DbUser.complex(db: con, firstNames0: firstNames, jsonStructOptional: jsonStructOptional, integer: integer, serializedInfoNullable: serializedInfoNullable).count)
             }
 
             checkCount(0, [], .init(age: 0), [], SerializedInfo.data("data"))
-            
+
             checkCount(0, [user0.firstName!], user0.jsonStructOptional!, [user0.integer], .data("somethingelse"))
             checkCount(0, [], user0.jsonStructOptional!, [user0.integer], .data("somethingelse"))
             checkCount(0, [], user0.jsonStructOptional!, [], .data("somethingelse"))
