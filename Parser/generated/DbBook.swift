@@ -203,8 +203,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByBookUuid(db: Database, bookUuid: UUID) throws {
+    public static func genDeleteByBookUuid(db: Database, bookUuid: UUID) throws {
         let arguments: StatementArguments = try [
             bookUuid.uuidString
         ]
@@ -222,8 +221,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+    public static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
             userUuid.uuidString
         ]
@@ -241,8 +239,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByIntegerOptional(db: Database, integerOptional: Int) throws {
+    public static func genDeleteByIntegerOptional(db: Database, integerOptional: Int) throws {
         let arguments: StatementArguments = try [
             integerOptional
         ]
@@ -260,8 +257,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByTsCreated(db: Database, tsCreated: Int64) throws {
+    public static func genDeleteByTsCreated(db: Database, tsCreated: Int64) throws {
         let arguments: StatementArguments = try [
             tsCreated
         ]
@@ -345,23 +341,19 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         }
     }
 
-    public
-    func createColumnBookUuid() -> Self.UpdatableColumnWithValue {
+    public func createColumnBookUuid() -> Self.UpdatableColumnWithValue {
         return .bookUuid(bookUuid)
     }
 
-    public
-    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+    public func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
         return .userUuid(userUuid)
     }
 
-    public
-    func createColumnIntegerOptional() -> Self.UpdatableColumnWithValue {
+    public func createColumnIntegerOptional() -> Self.UpdatableColumnWithValue {
         return .integerOptional(integerOptional)
     }
 
-    public
-    func createColumnTsCreated() -> Self.UpdatableColumnWithValue {
+    public func createColumnTsCreated() -> Self.UpdatableColumnWithValue {
         return .tsCreated(tsCreated)
     }
 
@@ -431,8 +423,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
-    public
-    static func genUpdateBookUuidAllRows(db: Database, bookUuid: UUID) throws {
+    public static func genUpdateBookUuidAllRows(db: Database, bookUuid: UUID) throws {
         let arguments: StatementArguments = try [
             bookUuid.uuidString
         ]
@@ -450,8 +441,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
+    public static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
         let arguments: StatementArguments = try [
             userUuid?.uuidString
         ]
@@ -469,8 +459,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateIntegerOptionalAllRows(db: Database, integerOptional: Int?) throws {
+    public static func genUpdateIntegerOptionalAllRows(db: Database, integerOptional: Int?) throws {
         let arguments: StatementArguments = try [
             integerOptional
         ]
@@ -488,8 +477,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateTsCreatedAllRows(db: Database, tsCreated: Int64) throws {
+    public static func genUpdateTsCreatedAllRows(db: Database, tsCreated: Int64) throws {
         let arguments: StatementArguments = try [
             tsCreated
         ]
@@ -507,8 +495,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genSelectAll(db: Database) throws -> [DbBook] {
+    public static func genSelectAll(db: Database) throws -> [DbBook] {
         Logging.log(selectAllQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectAllQuery)
@@ -516,8 +503,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         return try DbBook.fetchAll(statement)
     }
 
-    public
-    static func genSelectCount(db: Database) throws -> Int {
+    public static func genSelectCount(db: Database) throws -> Int {
         Logging.log(selectCountQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectCountQuery)
@@ -703,8 +689,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             }
         }
 
-        public
-        func genUpdateDynamic(db: Database, columns: [DbBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+        public func genUpdateDynamic(db: Database, columns: [DbBook.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
             assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
             // Check for duplicates
@@ -776,8 +761,7 @@ public struct DbBook: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             }
         }
 
-        public
-        func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
+        public func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
             switch column {
             case let .bookUuid(val): try genUpdateBookUuid(db: db, bookUuid: val, assertOneRowAffected: assertOneRowAffected)
             case let .userUuid(val): try genUpdateUserUuid(db: db, userUuid: val, assertOneRowAffected: assertOneRowAffected)

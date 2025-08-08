@@ -63,8 +63,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                 integer: Int,
                 bool: Bool,
                 serializedInfo: SerializedInfo,
-                serializedInfoNullable: SerializedInfo?)
-    {
+                serializedInfoNullable: SerializedInfo?) {
         self.userUuid = userUuid
         self.firstName = firstName
         self.jsonStruct = jsonStruct
@@ -142,7 +141,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -186,7 +185,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -225,7 +224,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -264,7 +263,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -303,7 +302,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -342,7 +341,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -381,7 +380,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -420,7 +419,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -459,7 +458,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -498,7 +497,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -537,7 +536,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -576,7 +575,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         #if DEBUG
@@ -606,10 +605,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+    public static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            userUuid.uuidString,
+            userUuid.uuidString
         ]
 
         Logging.log("delete from User where userUuid = ?", statementArguments: arguments)
@@ -625,10 +623,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByFirstName(db: Database, firstName: String) throws {
+    public static func genDeleteByFirstName(db: Database, firstName: String) throws {
         let arguments: StatementArguments = try [
-            firstName,
+            firstName
         ]
 
         Logging.log("delete from User where firstName = ?", statementArguments: arguments)
@@ -644,13 +641,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByJsonStruct(db: Database, jsonStruct: JsonType) throws {
+    public static func genDeleteByJsonStruct(db: Database, jsonStruct: JsonType) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("delete from User where jsonStruct = ?", statementArguments: arguments)
@@ -666,13 +662,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByJsonStructOptional(db: Database, jsonStructOptional: JsonType) throws {
+    public static func genDeleteByJsonStructOptional(db: Database, jsonStructOptional: JsonType) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStructOptional)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("delete from User where jsonStructOptional = ?", statementArguments: arguments)
@@ -688,13 +683,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
+    public static func genDeleteByJsonStructArray(db: Database, jsonStructArray: [JsonType]) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("delete from User where jsonStructArray = ?", statementArguments: arguments)
@@ -710,13 +704,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]) throws {
+    public static func genDeleteByJsonStructArrayOptional(db: Database, jsonStructArrayOptional: [JsonType]) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStructArrayOptional)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("delete from User where jsonStructArrayOptional = ?", statementArguments: arguments)
@@ -732,10 +725,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByInteger(db: Database, integer: Int) throws {
+    public static func genDeleteByInteger(db: Database, integer: Int) throws {
         let arguments: StatementArguments = try [
-            integer,
+            integer
         ]
 
         Logging.log("delete from User where integer = ?", statementArguments: arguments)
@@ -751,10 +743,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteByBool(db: Database, bool: Bool) throws {
+    public static func genDeleteByBool(db: Database, bool: Bool) throws {
         let arguments: StatementArguments = try [
-            bool,
+            bool
         ]
 
         Logging.log("delete from User where bool = ?", statementArguments: arguments)
@@ -770,10 +761,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteBySerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
+    public static func genDeleteBySerializedInfo(db: Database, serializedInfo: SerializedInfo) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfo.serializedData(),
+            try! serializedInfo.serializedData()
         ]
 
         Logging.log("delete from User where serializedInfo = ?", statementArguments: arguments)
@@ -789,10 +779,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genDeleteBySerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo) throws {
+    public static func genDeleteBySerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfoNullable.serializedData(),
+            try! serializedInfoNullable.serializedData()
         ]
 
         Logging.log("delete from User where serializedInfoNullable = ?", statementArguments: arguments)
@@ -833,7 +822,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             bool,
             try! serializedInfo.serializedData(),
             try! serializedInfoNullable?.serializedData(),
-            userUuid.uuidString,
+            userUuid.uuidString
         ]
 
         #if DEBUG
@@ -916,53 +905,43 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         }
     }
 
-    public
-    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+    public func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
         return .userUuid(userUuid)
     }
 
-    public
-    func createColumnFirstName() -> Self.UpdatableColumnWithValue {
+    public func createColumnFirstName() -> Self.UpdatableColumnWithValue {
         return .firstName(firstName)
     }
 
-    public
-    func createColumnJsonStruct() -> Self.UpdatableColumnWithValue {
+    public func createColumnJsonStruct() -> Self.UpdatableColumnWithValue {
         return .jsonStruct(jsonStruct)
     }
 
-    public
-    func createColumnJsonStructOptional() -> Self.UpdatableColumnWithValue {
+    public func createColumnJsonStructOptional() -> Self.UpdatableColumnWithValue {
         return .jsonStructOptional(jsonStructOptional)
     }
 
-    public
-    func createColumnJsonStructArray() -> Self.UpdatableColumnWithValue {
+    public func createColumnJsonStructArray() -> Self.UpdatableColumnWithValue {
         return .jsonStructArray(jsonStructArray)
     }
 
-    public
-    func createColumnJsonStructArrayOptional() -> Self.UpdatableColumnWithValue {
+    public func createColumnJsonStructArrayOptional() -> Self.UpdatableColumnWithValue {
         return .jsonStructArrayOptional(jsonStructArrayOptional)
     }
 
-    public
-    func createColumnInteger() -> Self.UpdatableColumnWithValue {
+    public func createColumnInteger() -> Self.UpdatableColumnWithValue {
         return .integer(integer)
     }
 
-    public
-    func createColumnBool() -> Self.UpdatableColumnWithValue {
+    public func createColumnBool() -> Self.UpdatableColumnWithValue {
         return .bool(bool)
     }
 
-    public
-    func createColumnSerializedInfo() -> Self.UpdatableColumnWithValue {
+    public func createColumnSerializedInfo() -> Self.UpdatableColumnWithValue {
         return .serializedInfo(serializedInfoAutoConvert())
     }
 
-    public
-    func createColumnSerializedInfoNullable() -> Self.UpdatableColumnWithValue {
+    public func createColumnSerializedInfoNullable() -> Self.UpdatableColumnWithValue {
         return .serializedInfoNullable(serializedInfoNullableAutoConvert())
     }
 
@@ -1056,7 +1035,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             integer,
             bool,
             try! serializedInfo.serializedData(),
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         Logging.log(upsertQuery, statementArguments: arguments)
@@ -1080,10 +1059,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
-    public
-    static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID) throws {
+    public static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
-            userUuid.uuidString,
+            userUuid.uuidString
         ]
 
         Logging.log("update User set userUuid = ?", statementArguments: arguments)
@@ -1099,10 +1077,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateFirstNameAllRows(db: Database, firstName: String?) throws {
+    public static func genUpdateFirstNameAllRows(db: Database, firstName: String?) throws {
         let arguments: StatementArguments = try [
-            firstName,
+            firstName
         ]
 
         Logging.log("update User set firstName = ?", statementArguments: arguments)
@@ -1118,13 +1095,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateJsonStructAllRows(db: Database, jsonStruct: JsonType) throws {
+    public static func genUpdateJsonStructAllRows(db: Database, jsonStruct: JsonType) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStruct)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("update User set jsonStruct = ?", statementArguments: arguments)
@@ -1140,13 +1116,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateJsonStructOptionalAllRows(db: Database, jsonStructOptional: JsonType?) throws {
+    public static func genUpdateJsonStructOptionalAllRows(db: Database, jsonStructOptional: JsonType?) throws {
         let arguments: StatementArguments = try [
             jsonStructOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
-            },
+            }
         ]
 
         Logging.log("update User set jsonStructOptional = ?", statementArguments: arguments)
@@ -1162,13 +1137,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateJsonStructArrayAllRows(db: Database, jsonStructArray: [JsonType]) throws {
+    public static func genUpdateJsonStructArrayAllRows(db: Database, jsonStructArray: [JsonType]) throws {
         let arguments: StatementArguments = try [
             {
                 let data = try Shared.jsonEncoder.encode(jsonStructArray)
                 return String(data: data, encoding: .utf8)!
-            }(),
+            }()
         ]
 
         Logging.log("update User set jsonStructArray = ?", statementArguments: arguments)
@@ -1184,13 +1158,12 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateJsonStructArrayOptionalAllRows(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
+    public static func genUpdateJsonStructArrayOptionalAllRows(db: Database, jsonStructArrayOptional: [JsonType]?) throws {
         let arguments: StatementArguments = try [
             jsonStructArrayOptional.map {
                 let data = try Shared.jsonEncoder.encode($0)
                 return String(data: data, encoding: .utf8)!
-            },
+            }
         ]
 
         Logging.log("update User set jsonStructArrayOptional = ?", statementArguments: arguments)
@@ -1206,10 +1179,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateIntegerAllRows(db: Database, integer: Int) throws {
+    public static func genUpdateIntegerAllRows(db: Database, integer: Int) throws {
         let arguments: StatementArguments = try [
-            integer,
+            integer
         ]
 
         Logging.log("update User set integer = ?", statementArguments: arguments)
@@ -1225,10 +1197,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateBoolAllRows(db: Database, bool: Bool) throws {
+    public static func genUpdateBoolAllRows(db: Database, bool: Bool) throws {
         let arguments: StatementArguments = try [
-            bool,
+            bool
         ]
 
         Logging.log("update User set bool = ?", statementArguments: arguments)
@@ -1244,10 +1215,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateSerializedInfoAllRows(db: Database, serializedInfo: SerializedInfo) throws {
+    public static func genUpdateSerializedInfoAllRows(db: Database, serializedInfo: SerializedInfo) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfo.serializedData(),
+            try! serializedInfo.serializedData()
         ]
 
         Logging.log("update User set serializedInfo = ?", statementArguments: arguments)
@@ -1263,10 +1233,9 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genUpdateSerializedInfoNullableAllRows(db: Database, serializedInfoNullable: SerializedInfo?) throws {
+    public static func genUpdateSerializedInfoNullableAllRows(db: Database, serializedInfoNullable: SerializedInfo?) throws {
         let arguments: StatementArguments = try [
-            try! serializedInfoNullable?.serializedData(),
+            try! serializedInfoNullable?.serializedData()
         ]
 
         Logging.log("update User set serializedInfoNullable = ?", statementArguments: arguments)
@@ -1282,8 +1251,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         try statement.execute()
     }
 
-    public
-    static func genSelectAll(db: Database) throws -> [DbUser] {
+    public static func genSelectAll(db: Database) throws -> [DbUser] {
         Logging.log(selectAllQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectAllQuery)
@@ -1291,8 +1259,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         return try DbUser.fetchAll(statement)
     }
 
-    public
-    static func genSelectCount(db: Database) throws -> Int {
+    public static func genSelectCount(db: Database) throws -> Int {
         Logging.log(selectCountQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectCountQuery)
@@ -1318,7 +1285,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         // Queries a unique row in the database, the row may or may not exist
         public func genSelect(db: Database) throws -> DbUser? {
             let arguments: StatementArguments = try [
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             Logging.log(Self.selectQuery, statementArguments: arguments)
@@ -1346,7 +1313,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         // Checks if a row exists
         public func genSelectExists(db: Database) throws -> Bool {
             let arguments: StatementArguments = try [
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             Logging.log(Self.selectExistsQuery, statementArguments: arguments)
@@ -1366,7 +1333,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         // Deletes a unique row, asserts that the row actually existed
         public func genDelete(db: Database, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: Self.deleteQuery)
@@ -1389,7 +1356,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateUserUuid(db: Database, userUuid: UUID, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 userUuid.uuidString,
-                self.userUuid.uuidString,
+                self.userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateUserUuidQuery)
@@ -1412,7 +1379,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateFirstName(db: Database, firstName: String?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 firstName,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateFirstNameQuery)
@@ -1438,7 +1405,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                     let data = try Shared.jsonEncoder.encode(jsonStruct)
                     return String(data: data, encoding: .utf8)!
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateJsonStructQuery)
@@ -1464,7 +1431,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 },
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateJsonStructOptionalQuery)
@@ -1490,7 +1457,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                     let data = try Shared.jsonEncoder.encode(jsonStructArray)
                     return String(data: data, encoding: .utf8)!
                 }(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayQuery)
@@ -1516,7 +1483,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
                     let data = try Shared.jsonEncoder.encode($0)
                     return String(data: data, encoding: .utf8)!
                 },
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateJsonStructArrayOptionalQuery)
@@ -1539,7 +1506,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateInteger(db: Database, integer: Int, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 integer,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateIntegerQuery)
@@ -1562,7 +1529,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateBool(db: Database, bool: Bool, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 bool,
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateBoolQuery)
@@ -1585,7 +1552,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateSerializedInfo(db: Database, serializedInfo: SerializedInfo, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try! serializedInfo.serializedData(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoQuery)
@@ -1608,7 +1575,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
         public func genUpdateSerializedInfoNullable(db: Database, serializedInfoNullable: SerializedInfo?, assertOneRowAffected: Bool = true) throws {
             let arguments: StatementArguments = try [
                 try! serializedInfoNullable?.serializedData(),
-                userUuid.uuidString,
+                userUuid.uuidString
             ]
 
             let statement = try db.cachedStatement(sql: DbUser.UpdatableColumn.updateSerializedInfoNullableQuery)
@@ -1628,8 +1595,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             }
         }
 
-        public
-        func genUpdateDynamic(db: Database, columns: [DbUser.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+        public func genUpdateDynamic(db: Database, columns: [DbUser.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
             assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
             // Check for duplicates
@@ -1761,8 +1727,7 @@ public struct DbUser: FetchableRecord, PersistableRecord, Codable, Equatable, Ha
             }
         }
 
-        public
-        func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
+        public func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
             switch column {
             case let .userUuid(val): try genUpdateUserUuid(db: db, userUuid: val, assertOneRowAffected: assertOneRowAffected)
             case let .firstName(val): try genUpdateFirstName(db: db, firstName: val, assertOneRowAffected: assertOneRowAffected)

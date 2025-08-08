@@ -143,8 +143,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try statement.execute()
     }
 
-    public
-    static func genDeleteByParentUuid(db: Database, parentUuid: UUID) throws {
+    public static func genDeleteByParentUuid(db: Database, parentUuid: UUID) throws {
         let arguments: StatementArguments = try [
             parentUuid.uuidString
         ]
@@ -162,8 +161,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try statement.execute()
     }
 
-    public
-    static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
+    public static func genDeleteByUserUuid(db: Database, userUuid: UUID) throws {
         let arguments: StatementArguments = try [
             userUuid.uuidString
         ]
@@ -237,13 +235,11 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         }
     }
 
-    public
-    func createColumnParentUuid() -> Self.UpdatableColumnWithValue {
+    public func createColumnParentUuid() -> Self.UpdatableColumnWithValue {
         return .parentUuid(parentUuid)
     }
 
-    public
-    func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
+    public func createColumnUserUuid() -> Self.UpdatableColumnWithValue {
         return .userUuid(userUuid)
     }
 
@@ -301,8 +297,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try genUpsertDynamic(db: db, columns: columns.map { $0.toUpdatableColumn() })
     }
 
-    public
-    static func genUpdateParentUuidAllRows(db: Database, parentUuid: UUID) throws {
+    public static func genUpdateParentUuidAllRows(db: Database, parentUuid: UUID) throws {
         let arguments: StatementArguments = try [
             parentUuid.uuidString
         ]
@@ -320,8 +315,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try statement.execute()
     }
 
-    public
-    static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
+    public static func genUpdateUserUuidAllRows(db: Database, userUuid: UUID?) throws {
         let arguments: StatementArguments = try [
             userUuid?.uuidString
         ]
@@ -339,8 +333,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         try statement.execute()
     }
 
-    public
-    static func genSelectAll(db: Database) throws -> [DbParent] {
+    public static func genSelectAll(db: Database) throws -> [DbParent] {
         Logging.log(selectAllQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectAllQuery)
@@ -348,8 +341,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
         return try DbParent.fetchAll(statement)
     }
 
-    public
-    static func genSelectCount(db: Database) throws -> Int {
+    public static func genSelectCount(db: Database) throws -> Int {
         Logging.log(selectCountQuery, statementArguments: .init())
 
         let statement = try db.cachedStatement(sql: selectCountQuery)
@@ -489,8 +481,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             }
         }
 
-        public
-        func genUpdateDynamic(db: Database, columns: [DbParent.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
+        public func genUpdateDynamic(db: Database, columns: [DbParent.UpdatableColumnWithValue], assertOneRowAffected: Bool = true, assertAtLeastOneUpdate: Bool = true) throws {
             assert(!assertAtLeastOneUpdate || !columns.isEmpty)
 
             // Check for duplicates
@@ -546,8 +537,7 @@ public struct DbParent: FetchableRecord, PersistableRecord, Codable, Equatable, 
             }
         }
 
-        public
-        func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
+        public func genUpdate(db: Database, column: UpdatableColumnWithValue, assertOneRowAffected: Bool = true) throws {
             switch column {
             case let .parentUuid(val): try genUpdateParentUuid(db: db, parentUuid: val, assertOneRowAffected: assertOneRowAffected)
             case let .userUuid(val): try genUpdateUserUuid(db: db, userUuid: val, assertOneRowAffected: assertOneRowAffected)

@@ -187,7 +187,7 @@ dependencies = [
 
 [[package]]
 name = "grdb_orm_lib"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "serde",
  "toml",
@@ -264,7 +264,7 @@ checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
 
 [[package]]
 name = "new_version"
-version = "0.1.6"
+version = "0.1.7"
 
 [[package]]
 name = "once_cell"
@@ -385,7 +385,7 @@ dependencies = [
 
 [[package]]
 name = "sqlite_parser_swift_grdb"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "Inflector",
  "clap",

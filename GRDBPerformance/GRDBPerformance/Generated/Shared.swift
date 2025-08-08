@@ -46,7 +46,7 @@ enum Logging {
         private static let logger = Logger(subsystem: "GRDB-ORM", category: "Query logging")
     #endif
 
-    public static func log(_ query: String, statementArguments: StatementArguments) {
+    static func log(_ query: String, statementArguments: StatementArguments) {
         #if DEBUG
             let maybeDatabaseValues = Mirror(reflecting: statementArguments.self).children.first { $0.label == "values" }?.value as? [DatabaseValue]
             var surelyDatabaseValues = maybeDatabaseValues!
@@ -55,8 +55,7 @@ enum Logging {
             var start = queryChanged.startIndex
 
             while start < queryChanged.endIndex,
-                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex)
-            {
+                  let range = queryChanged.range(of: "?", range: start ..< queryChanged.endIndex) {
                 ranges.append(range)
                 start = range.upperBound
             }

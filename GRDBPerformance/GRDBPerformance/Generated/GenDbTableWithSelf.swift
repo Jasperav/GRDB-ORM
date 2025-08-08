@@ -3,8 +3,7 @@
 import Foundation
 import GRDB
 
-public
-protocol GenDbTableWithSelf: GenDbTable {
+public protocol GenDbTableWithSelf: GenDbTable {
     associatedtype Table
 
     static func genSelectAll(db: Database) throws -> [Table]
