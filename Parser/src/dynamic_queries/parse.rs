@@ -335,7 +335,12 @@ impl<'a> Parser<'a> {
             );
             let equatable = parameters
                 .iter()
-                .map(|p| format!("lhs.{} == rhs.{}", p.swift_property_name, p.swift_property_name))
+                .map(|p| {
+                    format!(
+                        "lhs.{} == rhs.{}",
+                        p.swift_property_name, p.swift_property_name
+                    )
+                })
                 .collect::<Vec<_>>()
                 .join(" && ");
 
