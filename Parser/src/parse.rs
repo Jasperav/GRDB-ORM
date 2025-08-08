@@ -178,6 +178,8 @@ pub(crate) fn test_query(
 
         println!("Got {} rows, inner details: {:#?}", details.len(), details);
 
+        let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
+
         for detail in details {
             let lowercased = detail.to_lowercase();
             let skippable = ["scalar subquery", "correlated scalar", "list subquery"];
@@ -209,8 +211,6 @@ pub(crate) fn test_query(
                     panic!("Scanning tables is SLOW: {}", detail);
                 }
             }
-
-            let used_index = Regex::new(r"USING .*INDEX\s(\w+)").unwrap();
 
             if let Some(index) = used_index.captures(&detail) {
                 let index = index.get(1).unwrap().as_str();
