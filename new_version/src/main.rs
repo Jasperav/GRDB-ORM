@@ -42,18 +42,20 @@ fn main() {
     run!("cargo", ["clippy", "--all", "--", "-D", "warnings"]);
 
     // Run the swift tests
-    assert!(Command::new("xcodebuild")
-        .args([
-            "test",
-            "-project",
-            "GRDBPerformance.xcodeproj",
-            "-scheme",
-            "GRDBPerformanceTests",
-            "-destination",
-            "platform=iOS Simulator,name=iPhone 16,OS=18.0"
-        ])
-        .current_dir(root!().join("GRDBPerformance"))
-        .status()
-        .unwrap()
-        .success());
+    assert!(
+        Command::new("xcodebuild")
+            .args([
+                "test",
+                "-project",
+                "GRDBPerformance.xcodeproj",
+                "-scheme",
+                "GRDBPerformanceTests",
+                "-destination",
+                "platform=iOS Simulator,name=iPhone 16,OS=18.0"
+            ])
+            .current_dir(root!().join("GRDBPerformance"))
+            .status()
+            .unwrap()
+            .success()
+    );
 }

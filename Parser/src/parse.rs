@@ -47,11 +47,7 @@ fn parse_ios(tables: &Metadata, config: &Config) {
     crate::metadata::write(config, tables);
 
     // Write the tables
-    TableWriter {
-        tables,
-        config,
-    }
-    .write();
+    TableWriter { tables, config }.write();
 
     // Write the dynamic queries
     Parser::new(config, tables).parse_dyn_queries();
