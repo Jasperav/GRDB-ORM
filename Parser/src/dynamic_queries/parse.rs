@@ -309,7 +309,7 @@ impl<'a> Parser<'a> {
             let init = property_type.join(",\n");
             let assign = parameters
                 .iter()
-                .map(|p| format!("self.{t} = {t}", t = p.swift_property_name))
+                .map(|p| format!("self.{} = {}", p.swift_property_name, p.swift_property_name))
                 .collect::<Vec<_>>()
                 .join("\n");
             let properties = property_type
@@ -320,7 +320,7 @@ impl<'a> Parser<'a> {
             let call_method = "db: db, ".to_string()
                 + &parameters
                     .iter()
-                    .map(|p| format!("{n}: {n}", n = p.swift_property_name))
+                    .map(|p| format!("{}: {}", p.swift_property_name, p.swift_property_name))
                     .collect::<Vec<_>>()
                     .join(", ");
             let extra_init = format!(
@@ -335,7 +335,7 @@ impl<'a> Parser<'a> {
             );
             let equatable = parameters
                 .iter()
-                .map(|p| format!("lhs.{a} == rhs.{a}", a = p.swift_property_name))
+                .map(|p| format!("lhs.{} == rhs.{}", p.swift_property_name, p.swift_property_name))
                 .collect::<Vec<_>>()
                 .join(" && ");
 

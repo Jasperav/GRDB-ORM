@@ -108,7 +108,7 @@ fn main() {
     let packages = packages
         .split('|')
         .filter(|s| s != &"|")
-        .map(|i| format!("import {}", i))
+        .map(|i| format!("import {i}"))
         .collect::<Vec<_>>()
         .join("\n");
     let config = Config {

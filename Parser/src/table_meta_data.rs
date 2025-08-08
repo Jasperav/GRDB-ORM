@@ -39,7 +39,7 @@ impl<'a> TableMetaData<'a> {
         }}
         ",
             if is_auto_generated {
-                format!("gen{}", fn_name)
+                format!("gen{fn_name}")
             } else {
                 fn_name.to_string()
             },

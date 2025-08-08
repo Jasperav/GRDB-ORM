@@ -3,7 +3,10 @@
 import Foundation
 import GRDB
 
-public protocol GenDbTable {
-    static func genSelectCount(db: Database) throws -> Int
-    static func genDeleteAll(db: Database) throws
-}
+
+public  
+    protocol GenDbTable {
+        static func genSelectCount(db: Database) throws -> Int
+        static func genDeleteAll(db: Database) throws
+    }
+    

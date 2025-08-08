@@ -292,7 +292,7 @@ impl<'a> QueryWriterMainStruct<'a> {
                 let pn = t.swift_property_name.clone();
                 let value = t.swift_type.type_name.clone();
 
-                format!("{}({})", pn, value)
+                format!("{pn}({value})")
             })
             .collect::<Vec<_>>()
             .join(", ");

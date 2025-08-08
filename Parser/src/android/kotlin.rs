@@ -247,7 +247,7 @@ impl<'a> AndroidWriter<'a> {
             let mut pk_in_method = vec![];
 
             for pk in primary_keys(table) {
-                pk_in_query.push(format!("{p} = :{p}", p = pk.name));
+                pk_in_query.push(format!("{} = :{}", pk.name, pk.name));
                 pk_in_method.push(format!("{}: {}", pk.name, self.kotlin_type(pk)));
             }
 
@@ -392,7 +392,7 @@ import androidx.lifecycle.LiveData
                 )
             };
 
-            let name = format!("Converter{}", kotlin_type);
+            let name = format!("Converter{kotlin_type}");
 
             mappers.push(TypeConverter {
                 name: name.to_string(),

@@ -64,7 +64,7 @@ impl LineWriter {
     }
 
     pub fn add_comment(&mut self, comment: &str) {
-        self.lines.push(format!("// {}", comment));
+        self.lines.push(format!("// {comment}"));
     }
 
     pub fn add_closing_brackets(&mut self) {

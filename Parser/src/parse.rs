@@ -143,7 +143,7 @@ pub(crate) fn test_query(
         assert!(return_types_is_empty)
     }
 
-    let query = format!("explain {}", query_for_validation);
+    let query = format!("explain {query_for_validation}");
 
     if let Err(e) = connection.query_row(&query, [], |_| Ok(())) {
         match e {
@@ -156,7 +156,7 @@ pub(crate) fn test_query(
 
     if config.index_optimizer {
         // Find used indexes
-        let query = format!("explain query plan {}", query_for_validation);
+        let query = format!("explain query plan {query_for_validation}");
         let mut prepared = connection.prepare(&query).unwrap();
         let mut rows = prepared.query([]).unwrap();
         let mut bypassed = false;

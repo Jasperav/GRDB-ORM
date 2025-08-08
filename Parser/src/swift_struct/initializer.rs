@@ -27,7 +27,7 @@ pub fn write_default_initializer(
             if let Some((serialize, _)) = p.serialize_deserialize_blob(true) {
                 serialize
             } else {
-                format!("self.{a} = {a}", a = &p.swift_property_name)
+                format!("self.{} = {}", p.swift_property_name, p.swift_property_name)
             }
         })
         .collect::<Vec<_>>()
@@ -105,6 +105,6 @@ impl SwiftPropertyDecoder for RowInitializerSwiftPropertyDecoder {
 
     /// Assigning is straightforward
     fn assign(&self, property_name: &str, decoded: &str) -> String {
-        format!("{} = {}", property_name, decoded)
+        format!("{property_name} = {decoded}")
     }
 }
