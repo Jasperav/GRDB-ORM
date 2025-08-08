@@ -14,14 +14,14 @@ license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 sqlite_parser = "0.1.20"
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 Inflector = "0.11.4"
-heck = "0.4.1"
-clap = { version = "4.4.1", features = ["derive"] }
-regex = "1.10.2"
-dotenv = "0.15"
-serde = { version = "1.0.193", features = ["derive"] }
-toml = "0.8.8"
+heck = "0.5.0"
+clap = { version = "4.5.20", features = ["derive"] }
+regex = "1.11.0"
+dotenv = "0.15.0"
+serde = { version = "1.0.210", features = ["derive"] }
+toml = "0.8.19"
 env_parser = { version = "0.1.8", features = ["to_lazy_static"] }
 
 [workspace.dependencies.rusqlite]
