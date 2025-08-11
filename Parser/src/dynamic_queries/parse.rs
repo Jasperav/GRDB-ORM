@@ -29,8 +29,7 @@ impl<'a> Parser<'a> {
 
         println!("Processing dynamic queries");
 
-        self.add_line("import Combine".to_string());
-        self.add_line("import GRDBQuery".to_string());
+        self.add_line("import Combine\nimport GRDBQuery\nimport Foundation".to_string());
 
         let mut indexes = HashMap::default();
         let connection = rusqlite::Connection::open(&self.config.sqlite_location).unwrap();
