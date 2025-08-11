@@ -40,7 +40,7 @@ impl<'a> TableWriter<'a> {
             // Start the actual writing
             line_writer.add_comment("Mapped table to struct");
             line_writer.add_with_modifier(format!(
-                "struct {struct_name}: FetchableRecord, PersistableRecord, Codable, Equatable, Hashable, {PROTOCOL_NAME}, {PROTOCOL_WITH_SELF_NAME} {{\n"
+                "struct {struct_name}: FetchableRecord, PersistableRecord, Codable, Equatable, Hashable, Sendable, {PROTOCOL_NAME}, {PROTOCOL_WITH_SELF_NAME} {{\n"
             ));
 
             // Pretty complicated macro, but ensures no duplicate code is written
@@ -93,7 +93,7 @@ impl<'a> TableWriter<'a> {
                 "Write the primary key struct, useful for selecting or deleting a unique row",
             );
             line_writer.add_with_modifier(format!(
-                "struct {primary_key_struct_name}: Equatable, Hashable {{\n"
+                "struct {primary_key_struct_name}: Equatable, Sendable, Hashable {{\n"
             ));
 
             let pk = swift_properties

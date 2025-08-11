@@ -188,7 +188,7 @@ impl<'a> ReturnType<'a> {
 
         if self.write_to_line_writer {
             self.line_writer.add_line(format!(
-                "struct {struct_name}: Equatable {{
+                "struct {struct_name}: Sendable, Equatable {{
                 {properties}
                 {modifier}init(row: Row) {{
                     {initializer}
