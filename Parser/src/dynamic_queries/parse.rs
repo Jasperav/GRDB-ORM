@@ -348,7 +348,7 @@ impl<'a> Parser<'a> {
         self.add_comment("Very basic Queryable struct, create a PR if you want more customization");
         // Write the Queryable type
         self.add_with_modifier(format!(
-            "struct {}Queryable: Queryable, Equatable {{
+            "struct {}Queryable: Queryable, Equatable, Sendable {{
             {modifier}let scheduler: ValueObservationScheduler
             {to_add}
             {modifier}static let defaultValue: {the_type} = {default_value}
